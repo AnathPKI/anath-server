@@ -1,5 +1,5 @@
 CREATE TABLE secure (
-  id             SERIAL8,
+  id             BIGSERIAL,
   "key"          VARCHAR(512) NOT NULL UNIQUE,
   encrypted_data BYTEA        NOT NULL,
   iv             BYTEA,

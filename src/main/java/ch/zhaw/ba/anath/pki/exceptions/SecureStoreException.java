@@ -27,33 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core.tools;
+package ch.zhaw.ba.anath.pki.exceptions;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Provider;
-import java.security.Security;
-import java.util.stream.Collectors;
+import ch.zhaw.ba.anath.AnathException;
 
 /**
  * @author Rafael Ostertag
  */
-public class ListSecurityProviders {
-    public static void main(String[] args) {
-        int result = Security.insertProviderAt(new BouncyCastleProvider(), 1);
-        System.out.println("Insert BC: " + result);//NOSONAR
+public class SecureStoreException extends AnathException {
+    public SecureStoreException(String message) {
+        super(message);
+    }
 
-        System.out.println("Security providers:");//NOSONAR
-        for (Provider provider : Security.getProviders()) {
-            System.out.println(provider.getName() + ": " + provider.getInfo()); //NOSONAR
-        }
-        System.out.println();//NOSONAR
-
-        System.out.println("Ciphers:");//NOSONAR
-
-        for (String name : Security.getAlgorithms("cipher").stream().sorted().collect(Collectors.toList())) {
-            System.out.println(name);//NOSONAR
-        }
-        System.out.println();//NOSONAR
+    public SecureStoreException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

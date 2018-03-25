@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.config.spring;
 
+import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import ch.zhaw.ba.anath.pki.entities.PKIEntitiesMarkerInterface;
 import ch.zhaw.ba.anath.pki.repositories.PKIRepositoriesMarkerInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -51,10 +52,12 @@ import javax.sql.DataSource;
  * @author Rafael Ostertag
  */
 @Configuration
-@EnableJpaRepositories(basePackageClasses = PKIRepositoriesMarkerInterface.class,
-        entityManagerFactoryRef = "pkiEntityManagerFactory")
+@EnableJpaRepositories(
+        basePackageClasses = PKIRepositoriesMarkerInterface.class,
+        entityManagerFactoryRef = "pkiEntityManagerFactory",
+        transactionManagerRef = "pkiTransactionManager")
 @Slf4j
-public class ConfigurePKIDatasource {
+public class PKIDatasourceConfiguration {
 
     @Bean
     @Primary
@@ -65,7 +68,7 @@ public class ConfigurePKIDatasource {
 
     @Bean
     @Primary
-    @ConfigurationProperties(prefix = "ch.zhaw.ba.anath.pki.datasource")
+    @ConfigurationProperties(prefix = AnathProperties.CONFIGURATION_PREFIX + ".pki.datasource")
     public DataSource pkiDataSource() {
         DataSource pkiDS = pkiDataSourceProperties().initializeDataSourceBuilder().build();
 

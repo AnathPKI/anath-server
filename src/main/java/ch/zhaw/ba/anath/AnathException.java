@@ -27,33 +27,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core.tools;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Provider;
-import java.security.Security;
-import java.util.stream.Collectors;
+package ch.zhaw.ba.anath;
 
 /**
  * @author Rafael Ostertag
  */
-public class ListSecurityProviders {
-    public static void main(String[] args) {
-        int result = Security.insertProviderAt(new BouncyCastleProvider(), 1);
-        System.out.println("Insert BC: " + result);//NOSONAR
+public class AnathException extends RuntimeException {
+    public AnathException() {
+    }
 
-        System.out.println("Security providers:");//NOSONAR
-        for (Provider provider : Security.getProviders()) {
-            System.out.println(provider.getName() + ": " + provider.getInfo()); //NOSONAR
-        }
-        System.out.println();//NOSONAR
+    public AnathException(String message) {
+        super(message);
+    }
 
-        System.out.println("Ciphers:");//NOSONAR
+    public AnathException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-        for (String name : Security.getAlgorithms("cipher").stream().sorted().collect(Collectors.toList())) {
-            System.out.println(name);//NOSONAR
-        }
-        System.out.println();//NOSONAR
+    public AnathException(Throwable cause) {
+        super(cause);
+    }
+
+    public AnathException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

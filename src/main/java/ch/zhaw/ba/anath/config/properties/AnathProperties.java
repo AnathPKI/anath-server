@@ -27,33 +27,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core.tools;
+package ch.zhaw.ba.anath.config.properties;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Provider;
-import java.security.Security;
-import java.util.stream.Collectors;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Rafael Ostertag
  */
-public class ListSecurityProviders {
-    public static void main(String[] args) {
-        int result = Security.insertProviderAt(new BouncyCastleProvider(), 1);
-        System.out.println("Insert BC: " + result);//NOSONAR
+@Component
+@ConfigurationProperties(AnathProperties.CONFIGURATION_PREFIX)
+@Data
+public class AnathProperties {
+    public static final String CONFIGURATION_PREFIX = "ch.zhaw.ba.anath";
 
-        System.out.println("Security providers:");//NOSONAR
-        for (Provider provider : Security.getProviders()) {
-            System.out.println(provider.getName() + ": " + provider.getInfo()); //NOSONAR
-        }
-        System.out.println();//NOSONAR
-
-        System.out.println("Ciphers:");//NOSONAR
-
-        for (String name : Security.getAlgorithms("cipher").stream().sorted().collect(Collectors.toList())) {
-            System.out.println(name);//NOSONAR
-        }
-        System.out.println();//NOSONAR
-    }
+    /**
+     * The secret key used to encrypt data in the {@link ch.zhaw.ba.anath.pki.services.SecureStoreService}.
+     */
+    private String secretKey;
 }

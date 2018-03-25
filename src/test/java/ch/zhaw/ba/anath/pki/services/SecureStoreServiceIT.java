@@ -27,33 +27,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core.tools;
+package ch.zhaw.ba.anath.pki.services;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Provider;
-import java.security.Security;
-import java.util.stream.Collectors;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Rafael Ostertag
  */
-public class ListSecurityProviders {
-    public static void main(String[] args) {
-        int result = Security.insertProviderAt(new BouncyCastleProvider(), 1);
-        System.out.println("Insert BC: " + result);//NOSONAR
+@RunWith(SpringRunner.class)
+@SpringBootTest
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+        "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
+})
+@Transactional(transactionManager = "pkiTransactionManager")
+public class SecureStoreServiceIT {
 
-        System.out.println("Security providers:");//NOSONAR
-        for (Provider provider : Security.getProviders()) {
-            System.out.println(provider.getName() + ": " + provider.getInfo()); //NOSONAR
-        }
-        System.out.println();//NOSONAR
+    @Autowired
+    private SecureStoreService secureStoreService;
 
-        System.out.println("Ciphers:");//NOSONAR
+    @Test
+    public void put() {
+        secureStoreService.put("test.key", new byte[]{'a', 'b', 'c'});
+    }
 
-        for (String name : Security.getAlgorithms("cipher").stream().sorted().collect(Collectors.toList())) {
-            System.out.println(name);//NOSONAR
-        }
-        System.out.println();//NOSONAR
+    @Test
+    public void get() {
     }
 }
