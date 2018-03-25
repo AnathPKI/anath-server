@@ -60,8 +60,7 @@ public class ConfigurePKIDatasource {
     @Primary
     @ConfigurationProperties(prefix = "ch.zhaw.ba.anath.pki.datasource")
     public DataSourceProperties pkiDataSourceProperties() {
-        final DataSourceProperties dataSourceProperties = new DataSourceProperties();
-        return dataSourceProperties;
+        return new DataSourceProperties();
     }
 
     @Bean
