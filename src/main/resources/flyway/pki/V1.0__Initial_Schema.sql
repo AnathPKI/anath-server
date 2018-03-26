@@ -15,6 +15,6 @@ CREATE TABLE certificates (
   status           VARCHAR(32)   NOT NULL,
   -- The id from a foreign system identifying the user the certificate belongs to
   user_id          VARCHAR(128)  NOT NULL,
-  x509_cert_pem    BYTEA         NOT NULL,
+  x509_cert_pem    BYTEA         NOT NULL
 );
 
