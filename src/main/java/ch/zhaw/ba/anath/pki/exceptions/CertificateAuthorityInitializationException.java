@@ -27,39 +27,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core;
+package ch.zhaw.ba.anath.pki.exceptions;
 
-import ch.zhaw.ba.anath.pki.core.exceptions.CSRSignatureException;
-import org.junit.Test;
-
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
-import static org.junit.Assert.assertNotNull;
+import ch.zhaw.ba.anath.AnathException;
 
 /**
  * @author Rafael Ostertag
  */
-public class PEMCertificateSigningRequestReaderTest {
-
-    @Test
-    public void getCertificationRequest() throws Exception {
-        try (
-                InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))
-        ) {
-            final PEMCertificateSigningRequestReader certificateRequest = new PEMCertificateSigningRequestReader(csr);
-
-            assertNotNull(certificateRequest.certificationRequest());
-        }
-    }
-
-    @Test(expected = CSRSignatureException.class)
-    public void signInvalidSignatureCSR() throws Exception {
-        try (
-                InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants
-                        .CLIENT_INVALID_CSR_FILE_NAME))
-        ) {
-            new PEMCertificateSigningRequestReader(csr);
-        }
+public class CertificateAuthorityInitializationException extends AnathException {
+    public CertificateAuthorityInitializationException(String message) {
+        super(message);
     }
 }

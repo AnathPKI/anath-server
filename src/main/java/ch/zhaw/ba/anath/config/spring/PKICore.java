@@ -27,39 +27,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core;
+package ch.zhaw.ba.anath.config.spring;
 
-import ch.zhaw.ba.anath.pki.core.exceptions.CSRSignatureException;
-import org.junit.Test;
-
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
-import static org.junit.Assert.assertNotNull;
+import ch.zhaw.ba.anath.pki.core.*;
+import ch.zhaw.ba.anath.pki.core.interfaces.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Rafael Ostertag
  */
-public class PEMCertificateSigningRequestReaderTest {
-
-    @Test
-    public void getCertificationRequest() throws Exception {
-        try (
-                InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))
-        ) {
-            final PEMCertificateSigningRequestReader certificateRequest = new PEMCertificateSigningRequestReader(csr);
-
-            assertNotNull(certificateRequest.certificationRequest());
-        }
+@Configuration
+public class PKICore {
+    @Bean
+    public CertificateSerialProvider certificateSerialProvider() {
+        return new UuidCertificateSerialProvider();
     }
 
-    @Test(expected = CSRSignatureException.class)
-    public void signInvalidSignatureCSR() throws Exception {
-        try (
-                InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants
-                        .CLIENT_INVALID_CSR_FILE_NAME))
-        ) {
-            new PEMCertificateSigningRequestReader(csr);
-        }
+    @Bean
+    public SecureRandomProvider secureRandomProvider() {
+        return new SecureRandomProviderImpl();
+    }
+
+    @Bean
+    public SignatureNameProvider signatureNameProvider() {
+        return new Sha512WithRsa();
+    }
+
+    @Bean
+    public CertificateValidityProvider certificateValidityProvider() {
+        return new OneYearValidity();
+    }
+
+    @Bean
+    public CertificateConstraintProvider certificateConstraintProvider() {
+        return new OrganizationCertificateConstraint();
     }
 }

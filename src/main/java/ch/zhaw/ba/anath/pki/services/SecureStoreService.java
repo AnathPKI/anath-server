@@ -118,9 +118,8 @@ public class SecureStoreService {
     }
 
     private byte[] encryptWithCipher(Cipher cipher, byte[] data) {
-        cipher.update(data);
         try {
-            return cipher.doFinal();
+            return cipher.doFinal(data);
         } catch (IllegalBlockSizeException e) {
             return wrapIllegalBlockSizeException(e);
         } catch (BadPaddingException e) {
@@ -129,7 +128,7 @@ public class SecureStoreService {
     }
 
     private byte[] wrapBadPaddingException(BadPaddingException e) {
-        log.error("Bad padding while encrypting data for secure store: {}", e.getMessage());
+        log.error("Bad padding while encrypting/decrypting data for secure store: {}", e.getMessage());
         throw new SecureStoreException("Bad padding", e);
     }
 
@@ -269,8 +268,7 @@ public class SecureStoreService {
 
     private byte[] decryptData(Cipher cipher, byte[] data) {
         try {
-            cipher.update(data);
-            return cipher.doFinal();
+            return cipher.doFinal(data);
         } catch (BadPaddingException e) {
             return wrapBadPaddingException(e);
         } catch (IllegalBlockSizeException e) {

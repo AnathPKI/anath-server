@@ -29,7 +29,11 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
-import org.apache.commons.lang3.ArrayUtils;
+import ch.zhaw.ba.anath.pki.core.Certificate;
+import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
+import ch.zhaw.ba.anath.pki.core.TestConstants;
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +42,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.Optional;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Rafael Ostertag
@@ -54,57 +59,34 @@ import static org.hamcrest.Matchers.is;
         "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
 })
 @Transactional(transactionManager = "pkiTransactionManager")
-public class SecureStoreServiceIT {
-    private static final String TEST_KEY = "test.key";
-    @PersistenceContext
-    EntityManager entityManager;
+public class SigningServiceIT {
+    @Autowired
+    private SigningService signingService;
 
     @Autowired
     private SecureStoreService secureStoreService;
 
-    @Test
-    public void putNewKey() {
-        final byte[] testData = new byte[]{'a', 'b', 'c'};
-        secureStoreService.put(TEST_KEY, testData);
+    @Before
+    public void setUp() throws Exception {
+        try (
+                InputStream certificateInputStream = new FileInputStream(TestConstants.CA_CERT_FILE_NAME);
+                InputStream privateKeyInputStream = new FileInputStream(TestConstants.CA_KEY_FILE_NAME)
+        ) {
+            final byte[] certificate = IOUtils.toByteArray(certificateInputStream);
+            secureStoreService.put(SigningService.SECURE_STORE_CA_CERTIFICATE, certificate);
 
-        final Optional<Byte[]> optionalData = secureStoreService.get(TEST_KEY);
-        assertThat(optionalData.isPresent(), is(true));
-
-        final Byte[] bytes = optionalData.get();
-        final byte[] actual = ArrayUtils.toPrimitive(bytes);
-
-        assertThat(actual, is(testData));
+            final byte[] privateKey = IOUtils.toByteArray(privateKeyInputStream);
+            secureStoreService.put(SigningService.SECURE_STORE_CA_PRIVATE_KEY, privateKey);
+        }
     }
 
     @Test
-    public void putExistingKey() {
-        secureStoreService.put(TEST_KEY, new byte[]{'a', 'b', 'c'});
-        entityManager.flush();
-        entityManager.clear();
-
-        final byte[] testData = new byte[]{'d', 'e', 'f'};
-        secureStoreService.put(TEST_KEY, testData);
-
-        final Optional<Byte[]> optionalData = secureStoreService.get(TEST_KEY);
-        assertThat(optionalData.isPresent(), is(true));
-
-        final Byte[] bytes = optionalData.get();
-        final byte[] actual = ArrayUtils.toPrimitive(bytes);
-
-        assertThat(actual, is(testData));
-    }
-
-    @Test
-    public void multipleBlockSize() {
-        final byte[] testData = "Data exceeding block size".getBytes();
-        secureStoreService.put(TEST_KEY, testData);
-
-        final Optional<Byte[]> optionalData = secureStoreService.get(TEST_KEY);
-        assertThat(optionalData.isPresent(), is(true));
-
-        final Byte[] bytes = optionalData.get();
-        final byte[] actual = ArrayUtils.toPrimitive(bytes);
-
-        assertThat(actual, is(testData));
+    public void sign() throws Exception {
+        try (
+                InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))
+        ) {
+            final Certificate certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr));
+            assertThat(certificate, is(notNullValue()));
+        }
     }
 }

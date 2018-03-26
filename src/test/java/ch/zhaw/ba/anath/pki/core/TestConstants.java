@@ -46,6 +46,7 @@ public final class TestConstants {
     public static final String CA_KEY_FILE_NAME = "src/test/resources/cakey.pem";
     public static final String CA_CERT_FILE_NAME = "src/test/resources/cacert.pem";
     public static final String CLIENT_CSR_FILE_NAME = "src/test/resources/client.csr";
+    public static final String CLIENT_INVALID_CSR_FILE_NAME = "src/test/resources/client_invalid.csr";
     public static final String CLIENT_CSR_NON_MATCHING_ORG_FILE_NAME = "src/test/resources/client_non_matching_org.csr";
 
     // The content of cacert.pem with a random line removed
