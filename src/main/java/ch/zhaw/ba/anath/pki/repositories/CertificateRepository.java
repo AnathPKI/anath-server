@@ -27,48 +27,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.entities;
+package ch.zhaw.ba.anath.pki.repositories;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
+import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import org.springframework.data.repository.Repository;
 
-import javax.persistence.*;
 import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * X.509 Certificate Entity.
- *
  * @author Rafael Ostertag
  */
-@Entity
-@Table(name = "certificates")
-@Data
-@EqualsAndHashCode(of = "id")
-public class CertificateEntity {
-    @Id
-    @GeneratedValue
-    private Long id;
+public interface CertificateRepository extends Repository<CertificateEntity, Long> {
+    Optional<CertificateEntity> findOne(Long id);
 
-    @Column(name = "serial_number", unique = true, nullable = false, precision = 48, scale = 0)
-    private BigInteger serial;
+    Optional<CertificateEntity> findOneBySerial(BigInteger serial);
 
-    @Column(name = "not_valid_before", nullable = false)
-    private Timestamp notValidBefore;
+    List<CertificateEntity> findAll();
 
-    @Column(name = "not_valid_after", nullable = false)
-    private Timestamp notValidAfter;
+    List<CertificateEntity> findAllByUserId(String userId);
 
-    @Column(name = "subject", nullable = false, unique = true)
-    private String subject;
+    List<CertificateEntity> findAllByUserIdAndStatus(String userId, CertificateStatus status);
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CertificateStatus status;
-
-    @Column(name = "user_id", nullable = false)
-    private String userId;
-
-    @Column(name = "x509_cert_pem", nullable = false)
-    private byte[] x509PEMCertificate;
+    void save(CertificateEntity certificateEntity);
 }

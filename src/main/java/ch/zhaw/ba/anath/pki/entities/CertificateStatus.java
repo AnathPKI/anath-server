@@ -29,46 +29,10 @@
 
 package ch.zhaw.ba.anath.pki.entities;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
-import java.math.BigInteger;
-import java.sql.Timestamp;
-
 /**
- * X.509 Certificate Entity.
- *
  * @author Rafael Ostertag
  */
-@Entity
-@Table(name = "certificates")
-@Data
-@EqualsAndHashCode(of = "id")
-public class CertificateEntity {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(name = "serial_number", unique = true, nullable = false, precision = 48, scale = 0)
-    private BigInteger serial;
-
-    @Column(name = "not_valid_before", nullable = false)
-    private Timestamp notValidBefore;
-
-    @Column(name = "not_valid_after", nullable = false)
-    private Timestamp notValidAfter;
-
-    @Column(name = "subject", nullable = false, unique = true)
-    private String subject;
-
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CertificateStatus status;
-
-    @Column(name = "user_id", nullable = false)
-    private String userId;
-
-    @Column(name = "x509_cert_pem", nullable = false)
-    private byte[] x509PEMCertificate;
+public enum CertificateStatus {
+    VALID,
+    REVOKED
 }
