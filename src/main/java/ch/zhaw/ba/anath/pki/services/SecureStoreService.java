@@ -35,6 +35,7 @@ import ch.zhaw.ba.anath.pki.exceptions.SecureStoreException;
 import ch.zhaw.ba.anath.pki.repositories.SecureRepository;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,11 +107,11 @@ public class SecureStoreService {
      * The {@link EncryptedData#iv} field contains the IV.
      */
     private EncryptedData encryptData(byte[] data) {
-        final Cipher cipher = instantiateDefaultCipher();
-        final SecretKeySpec secretKeySpec = initializeSecretKeySpec();
+        final Cipher cipher = instantiateCipher();
+        final SecretKeySpec secretKeySpec = initializeSecretKeySpec(CIPHER);
         final IvParameterSpec ivParameterSpec = initializeRandomIV(cipher.getBlockSize());
 
-        initializeCipher(cipher, secretKeySpec, ivParameterSpec);
+        initializeCipherForEncryption(cipher, secretKeySpec, ivParameterSpec);
         final byte[] encryptedData = encryptWithCipher(cipher, data);
 
         return new EncryptedData(encryptedData, cipher.getIV());
@@ -121,29 +122,57 @@ public class SecureStoreService {
         try {
             return cipher.doFinal();
         } catch (IllegalBlockSizeException e) {
-            log.error("Illegal block size while encrypting data for secure store: {}", e.getMessage());
-            throw new SecureStoreException("Illegal block size", e);
+            return wrapIllegalBlockSizeException(e);
         } catch (BadPaddingException e) {
-            log.error("Bad padding while encrypting data for secure store: {}", e.getMessage());
-            throw new SecureStoreException("Bad padding", e);
+            return wrapBadPaddingException(e);
         }
     }
 
-    private void initializeCipher(Cipher cipher, SecretKeySpec secretKeySpec, IvParameterSpec ivParameterSpec) {
+    private byte[] wrapBadPaddingException(BadPaddingException e) {
+        log.error("Bad padding while encrypting data for secure store: {}", e.getMessage());
+        throw new SecureStoreException("Bad padding", e);
+    }
+
+    private byte[] wrapIllegalBlockSizeException(IllegalBlockSizeException e) {
+        log.error("Illegal block size while encrypting data for secure store: {}", e.getMessage());
+        throw new SecureStoreException("Illegal block size", e);
+    }
+
+    private void initializeCipherForEncryption(Cipher cipher, SecretKeySpec secretKeySpec, IvParameterSpec
+            ivParameterSpec) {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
         } catch (InvalidKeyException e) {
-            log.error("Invalid key for cipher '{}': {}", cipher, e.getMessage());
-            throw new SecureStoreException("Invalid key", e);
+            wrapInvalidKeyException(cipher, e);
         } catch (InvalidAlgorithmParameterException e) {
-            log.error("Invalid algorithm parameters for cipher '{}': {}", CIPHER, e.getMessage());
-            throw new SecureStoreException("Invalid algorithm parameters", e);
+            wrapInvalidAlgorithmParameterException(cipher, e);
         }
     }
 
-    private SecretKeySpec initializeSecretKeySpec() {
+    private void initializeCipherForDecryption(Cipher cipher, SecretKeySpec secretKeySpec, IvParameterSpec
+            ivParameterSpec) {
+        try {
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+        } catch (InvalidKeyException e) {
+            wrapInvalidKeyException(cipher, e);
+        } catch (InvalidAlgorithmParameterException e) {
+            wrapInvalidAlgorithmParameterException(cipher, e);
+        }
+    }
+
+    private void wrapInvalidAlgorithmParameterException(Cipher cipher, InvalidAlgorithmParameterException e) {
+        log.error("Invalid algorithm parameters for cipher '{}': {}", cipher, e.getMessage());
+        throw new SecureStoreException("Invalid algorithm parameters", e);
+    }
+
+    private void wrapInvalidKeyException(Cipher cipher, InvalidKeyException e) {
+        log.error("Invalid key for cipher '{}': {}", cipher, e.getMessage());
+        throw new SecureStoreException("Invalid key", e);
+    }
+
+    private SecretKeySpec initializeSecretKeySpec(String cipher) {
         byte[] hashedPassword = hashPassword();
-        return new SecretKeySpec(hashedPassword, CIPHER);
+        return new SecretKeySpec(hashedPassword, cipher);
     }
 
     private byte[] hashPassword() {
@@ -153,9 +182,9 @@ public class SecureStoreService {
             return messageDigest.digest();
         } catch (NoSuchAlgorithmException e) {
             wrapNoSuchAlgorithmExceptionAndThrow(DIGEST_ALGORITHM, e);
+            // Won't be reached
+            return new byte[0];
         }
-        // Won't be reached
-        return new byte[0];
     }
 
     private IvParameterSpec initializeRandomIV(int blockSize) {
@@ -171,27 +200,46 @@ public class SecureStoreService {
         }
     }
 
-    private Cipher instantiateDefaultCipher() {
+    private IvParameterSpec initializeIV(byte[] iv) {
+        return new IvParameterSpec(iv);
+    }
+
+    /**
+     * Instantiate default cipher using {@value #CIPHER} and provider {@value #SECURITY_PROVIDER},
+     *
+     * @return {@link Cipher} instance.
+     */
+    private Cipher instantiateCipher() {
+        return instantiateCipher(CIPHER, SECURITY_PROVIDER);
+    }
+
+    /**
+     * Instantiate cipher.
+     *
+     * @param cipherSpec cipher specfification
+     * @param provider   provider
+     *
+     * @return {@link Cipher} instance.
+     */
+    private Cipher instantiateCipher(String cipherSpec, String provider) {
         try {
-            return Cipher.getInstance(CIPHER, SECURITY_PROVIDER);
+            return Cipher.getInstance(cipherSpec, provider);
         } catch (NoSuchAlgorithmException e) {
-            wrapNoSuchAlgorithmExceptionAndThrow(CIPHER, e);
+            return wrapNoSuchAlgorithmExceptionAndThrow(cipherSpec, e);
         } catch (NoSuchProviderException e) {
-            wrapNoSuchProviderExceptionAndThrow(e);
+            return wrapNoSuchProviderExceptionAndThrow(provider,e);
         } catch (NoSuchPaddingException e) {
-            log.error("Unsupported padding in cipher '%s': ", CIPHER, e.getMessage());
+            log.error("Unsupported padding in cipher '%s': ", cipherSpec, e.getMessage());
             throw new SecureStoreException("Unsupported padding", e);
         }
-        // this code won't be reached
-        return null;
     }
 
-    private void wrapNoSuchProviderExceptionAndThrow(NoSuchProviderException e) {
-        log.error("Security provider '{}' not found: {}", SECURITY_PROVIDER, e.getMessage());
-        throw new SecureStoreException(String.format("Security provider not found '%s'", SECURITY_PROVIDER), e);
+    private Cipher wrapNoSuchProviderExceptionAndThrow(String provider, NoSuchProviderException e) {
+        log.error("Security provider '{}' not found: {}", provider, e.getMessage());
+        throw new SecureStoreException(String.format("Security provider not found '%s'", provider), e);
     }
 
-    private void wrapNoSuchAlgorithmExceptionAndThrow(String cipher, NoSuchAlgorithmException e) {
+    private Cipher wrapNoSuchAlgorithmExceptionAndThrow(String cipher, NoSuchAlgorithmException e) {
         log.error("Cannot initialize cipher '{}': {}", cipher, e.getMessage());
         throw new SecureStoreException(String.format("Unable to initialize cipher '%s'", cipher), e);
     }
@@ -204,7 +252,30 @@ public class SecureStoreService {
      * @return non-empty {@link Optional} if the key has been found, otherwise empty {@link Optional}.
      */
     public Optional<Byte[]> get(String key) {
-        throw new UnsupportedOperationException();
+        final Optional<SecureEntity> secureEntityOptional = secureRepository.findOneByKey(key);
+        if (!secureEntityOptional.isPresent()) {
+            return Optional.empty();
+        }
+
+        final SecureEntity secureEntity = secureEntityOptional.get();
+
+        final Cipher cipher = instantiateCipher(secureEntity.getAlgorithm(), SECURITY_PROVIDER);
+        final SecretKeySpec secretKeySpec = initializeSecretKeySpec(secureEntity.getAlgorithm());
+        final IvParameterSpec ivParameterSpec = initializeIV(secureEntity.getIV());
+        initializeCipherForDecryption(cipher, secretKeySpec, ivParameterSpec);
+
+        return Optional.of(ArrayUtils.toObject(decryptData(cipher, secureEntity.getData())));
+    }
+
+    private byte[] decryptData(Cipher cipher, byte[] data) {
+        try {
+            cipher.update(data);
+            return cipher.doFinal();
+        } catch (BadPaddingException e) {
+            return wrapBadPaddingException(e);
+        } catch (IllegalBlockSizeException e) {
+            return wrapIllegalBlockSizeException(e);
+        }
     }
 
     @Value

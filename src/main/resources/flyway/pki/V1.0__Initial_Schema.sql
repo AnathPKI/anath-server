@@ -1,6 +1,6 @@
 CREATE TABLE secure (
   id             BIGSERIAL,
-  "key"          VARCHAR(512) NOT NULL UNIQUE,
+  key            VARCHAR(512) NOT NULL UNIQUE,
   encrypted_data BYTEA        NOT NULL,
   iv             BYTEA,
   algo           VARCHAR(128) NOT NULL

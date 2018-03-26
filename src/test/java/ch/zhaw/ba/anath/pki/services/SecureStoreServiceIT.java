@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,27 +38,59 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 /**
  * @author Rafael Ostertag
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(properties = {
         "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
 })
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SecureStoreServiceIT {
+    private static final String TEST_KEY = "test.key";
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Autowired
     private SecureStoreService secureStoreService;
 
     @Test
-    public void put() {
-        secureStoreService.put("test.key", new byte[]{'a', 'b', 'c'});
+    public void putNewKey() {
+        final byte[] testData = new byte[]{'a', 'b', 'c'};
+        secureStoreService.put(TEST_KEY, testData);
+
+        final Optional<Byte[]> optionalData = secureStoreService.get(TEST_KEY);
+        assertThat(optionalData.isPresent(), is(true));
+
+        final Byte[] bytes = optionalData.get();
+        final byte[] actual = ArrayUtils.toPrimitive(bytes);
+
+        assertThat(actual, is(testData));
     }
 
     @Test
-    public void get() {
+    public void putExistingKey() {
+        secureStoreService.put(TEST_KEY, new byte[]{'a', 'b', 'c'});
+        entityManager.flush();
+        entityManager.clear();
+
+        final byte[] testData = new byte[]{'d', 'e', 'f'};
+        secureStoreService.put(TEST_KEY, testData);
+
+        final Optional<Byte[]> optionalData = secureStoreService.get(TEST_KEY);
+        assertThat(optionalData.isPresent(), is(true));
+
+        final Byte[] bytes = optionalData.get();
+        final byte[] actual = ArrayUtils.toPrimitive(bytes);
+
+        assertThat(actual, is(testData));
     }
 }
