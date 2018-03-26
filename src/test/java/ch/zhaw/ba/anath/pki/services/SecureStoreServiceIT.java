@@ -49,7 +49,7 @@ import static org.hamcrest.Matchers.is;
  * @author Rafael Ostertag
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(properties = {
         "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
 })

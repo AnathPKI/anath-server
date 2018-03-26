@@ -214,4 +214,18 @@ public class CertificateRepositoryTest {
         final Optional<CertificateEntity> notFound = certificateRepository.findOneBySerial(BigInteger.ZERO);
         assertThat(notFound.isPresent(), is(false));
     }
+
+    @Test
+    public void findOneBySubject() {
+        final CertificateEntity certificateEntity = makeCertificateEntity();
+        testEntityManager.persistAndFlush(certificateEntity);
+        testEntityManager.clear();
+
+        final Optional<CertificateEntity> found = certificateRepository.findOneBySubject(certificateEntity
+                .getSubject());
+        assertThat(found.isPresent(), is(true));
+
+        final Optional<CertificateEntity> notFound = certificateRepository.findOneBySubject("should not exist");
+        assertThat(notFound.isPresent(), is(false));
+    }
 }

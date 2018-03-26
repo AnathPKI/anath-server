@@ -29,12 +29,14 @@
 
 package ch.zhaw.ba.anath.pki.core.exceptions;
 
+import ch.zhaw.ba.anath.AnathException;
+
 /**
  * Base class for all exceptions.
  *
  * @author Rafael Ostertag
  */
-public class PKIException extends RuntimeException {
+public class PKIException extends AnathException {
     public PKIException() {
         super();
     }

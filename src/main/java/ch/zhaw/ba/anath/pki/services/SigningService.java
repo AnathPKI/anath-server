@@ -29,12 +29,13 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
-import ch.zhaw.ba.anath.pki.core.Certificate;
-import ch.zhaw.ba.anath.pki.core.CertificateAuthority;
-import ch.zhaw.ba.anath.pki.core.CertificateSigner;
-import ch.zhaw.ba.anath.pki.core.PEMCertificateAuthorityReader;
+import ch.zhaw.ba.anath.pki.core.*;
 import ch.zhaw.ba.anath.pki.core.interfaces.*;
+import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
+import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
+import ch.zhaw.ba.anath.pki.exceptions.SigningServiceException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,12 +43,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+import javax.validation.ConstraintViolationException;
+import java.io.*;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Optional;
 
 /**
- * Sign and store CSR.
+ * Sign a CSR and store the certificate.
  *
  * @author Rafael Ostertag
  */
@@ -154,8 +157,52 @@ public class SigningService {
         });
     }
 
-    public Certificate signCertificate(CertificateSigningRequestReader certificateSigningRequestReader) {
+    public Certificate signCertificate(CertificateSigningRequestReader certificateSigningRequestReader, String
+            userId) {
         initializeCertificateSigner();
-        return certificateSigner.signCertificate(certificateSigningRequestReader);
+        log.info("Sign certificate signing request");
+        final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequestReader);
+
+        log.info("Store signed certificate");
+        storeCertificate(certificate, userId);
+
+        return certificate;
+    }
+
+    private void storeCertificate(Certificate certificate, String userId) {
+        final CertificateEntity certificateEntity = new CertificateEntity();
+        certificateEntity.setStatus(CertificateStatus.VALID);
+        certificateEntity.setUserId(userId);
+        certificateEntity.setSubject(certificate.getSubject().toString());
+        certificateEntity.setSerial(certificate.getSerial());
+        certificateEntity.setNotValidBefore(dateToTimestamp(certificate.getValidFrom()));
+        certificateEntity.setNotValidAfter(dateToTimestamp(certificate.getValidTo()));
+        certificateEntity.setX509PEMCertificate(certificateToByteArray(certificate));
+
+        try {
+            certificateRepository.save(certificateEntity);
+        } catch (ConstraintViolationException e) {
+            final String subjectString = certificate.getSubject().toString();
+            log.error("Error persisting certificate '{}' with serial '{}': {}", subjectString,
+                    certificate.getSerial().toString(), e.getMessage());
+            throw new CertificateAlreadyExistsException(String.format("Certificate already exists: %s", subjectString));
+        }
+    }
+
+    private Timestamp dateToTimestamp(Date date) {
+        return new Timestamp(date.getTime());
+    }
+
+    private byte[] certificateToByteArray(Certificate certificate) {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(byteArrayOutputStream)) {
+            final PEMCertificateWriter pemCertificateWriter = new PEMCertificateWriter(outputStreamWriter);
+            pemCertificateWriter.writeCertificate(certificate);
+
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            log.error("Cannot write certificate to byte array: {}", e.getMessage());
+            throw new SigningServiceException("Cannot store certificate");
+        }
     }
 }

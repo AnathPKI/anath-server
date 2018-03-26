@@ -27,31 +27,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.repositories;
+package ch.zhaw.ba.anath.pki.exceptions;
 
-import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
-import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
-import org.springframework.data.repository.Repository;
-
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Optional;
+import ch.zhaw.ba.anath.AnathException;
 
 /**
  * @author Rafael Ostertag
  */
-public interface CertificateRepository extends Repository<CertificateEntity, Long> {
-    Optional<CertificateEntity> findOne(Long id);
+public class CertificateAlreadyExistsException extends AnathException {
 
-    Optional<CertificateEntity> findOneBySerial(BigInteger serial);
-
-    Optional<CertificateEntity> findOneBySubject(String subject);
-
-    List<CertificateEntity> findAll();
-
-    List<CertificateEntity> findAllByUserId(String userId);
-
-    List<CertificateEntity> findAllByUserIdAndStatus(String userId, CertificateStatus status);
-
-    void save(CertificateEntity certificateEntity);
+    public CertificateAlreadyExistsException(String message) {
+        super(message);
+    }
 }
