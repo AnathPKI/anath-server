@@ -47,6 +47,7 @@ import javax.validation.ConstraintViolationException;
 import java.io.*;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -163,10 +164,43 @@ public class SigningService {
         log.info("Sign certificate signing request");
         final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequestReader);
 
+        log.info("Test uniqueness of certificate");
+        testCertificateUniquenessInCertificateRepositoryOrThrow(certificate);
+
         log.info("Store signed certificate");
         storeCertificate(certificate, userId);
 
         return certificate;
+    }
+
+    private void testCertificateUniquenessInCertificateRepositoryOrThrow(Certificate certificate) {
+        final List<CertificateEntity> allBySubject = certificateRepository.findAllBySubject(certificate.getSubject()
+                .toString());
+        if (allBySubject.isEmpty()) {
+            return;
+        }
+
+        final boolean hasValidCertificate = allBySubject.stream().anyMatch(this::isCertificateValid);
+        if (hasValidCertificate) {
+            // Since we found a certificate with the given subject which is valid, this certificate is not considered
+            // to be unique.
+
+            final String subjectString = certificate.getSubject().toString();
+            log.error("There is already a valid certificate with subject '{}'", subjectString);
+            throw new CertificateAlreadyExistsException(String.format("Valid certificate for '%s' already exists",
+                    subjectString));
+        }
+    }
+
+    private boolean isCertificateValid(CertificateEntity certificateEntity) {
+        final Timestamp timestampNow = new Timestamp(System.currentTimeMillis());
+
+        // We use compareTo for the not valid before/after, since the certificate is valid if notValidBefore <=
+        // timestampNow and notValidAfter <= timestampNow holds. The before() and after() methods do not cover these
+        // cases.
+        return certificateEntity.getNotValidBefore().compareTo(timestampNow) <= 0 &&
+                certificateEntity.getNotValidAfter().compareTo(timestampNow) >= 0 &&
+                certificateEntity.getStatus() == CertificateStatus.VALID;
     }
 
     private void storeCertificate(Certificate certificate, String userId) {

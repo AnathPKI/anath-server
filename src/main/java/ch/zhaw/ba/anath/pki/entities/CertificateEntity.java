@@ -59,7 +59,9 @@ public class CertificateEntity {
     @Column(name = "not_valid_after", nullable = false)
     private Timestamp notValidAfter;
 
-    @Column(name = "subject", nullable = false, unique = true)
+    // The subject must only be unique for non-expired, non-revoked certificates. We handle this logic in the
+    // business logic.
+    @Column(name = "subject", nullable = false, unique = false)
     private String subject;
 
     @Column(name = "status", nullable = false)

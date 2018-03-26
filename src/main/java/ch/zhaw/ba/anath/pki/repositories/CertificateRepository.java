@@ -45,7 +45,7 @@ public interface CertificateRepository extends Repository<CertificateEntity, Lon
 
     Optional<CertificateEntity> findOneBySerial(BigInteger serial);
 
-    Optional<CertificateEntity> findOneBySubject(String subject);
+    List<CertificateEntity> findAllBySubject(String subject);
 
     List<CertificateEntity> findAll();
 

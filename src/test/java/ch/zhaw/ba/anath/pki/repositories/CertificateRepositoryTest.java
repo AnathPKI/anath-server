@@ -167,24 +167,6 @@ public class CertificateRepositoryTest {
         testEntityManager.clear();
     }
 
-    @Test(expected = DataIntegrityViolationException.class)
-    public void saveDuplicateSubject() {
-        final CertificateEntity certificateEntity = makeCertificateEntity();
-
-        certificateRepository.save(certificateEntity);
-
-        testEntityManager.flush();
-        testEntityManager.clear();
-
-        certificateEntity.setId(null);
-        certificateEntity.setSerial(uuidCertificateSerialProvider.serial());
-
-        certificateRepository.save(certificateEntity);
-
-        testEntityManager.flush();
-        testEntityManager.clear();
-    }
-
     private CertificateEntity makeCertificateEntity() {
         final CertificateEntity certificateEntity = new CertificateEntity();
         certificateEntity.setSerial(uuidCertificateSerialProvider.serial());
@@ -216,16 +198,16 @@ public class CertificateRepositoryTest {
     }
 
     @Test
-    public void findOneBySubject() {
+    public void findAllBySubject() {
         final CertificateEntity certificateEntity = makeCertificateEntity();
         testEntityManager.persistAndFlush(certificateEntity);
         testEntityManager.clear();
 
-        final Optional<CertificateEntity> found = certificateRepository.findOneBySubject(certificateEntity
+        List<CertificateEntity> allBySubject = certificateRepository.findAllBySubject(certificateEntity
                 .getSubject());
-        assertThat(found.isPresent(), is(true));
+        assertThat(allBySubject, hasSize(1));
 
-        final Optional<CertificateEntity> notFound = certificateRepository.findOneBySubject("should not exist");
-        assertThat(notFound.isPresent(), is(false));
+        allBySubject = certificateRepository.findAllBySubject("should not exist");
+        assertThat(allBySubject, hasSize(0));
     }
 }

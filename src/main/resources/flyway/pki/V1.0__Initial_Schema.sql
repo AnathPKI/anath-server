@@ -11,7 +11,8 @@ CREATE TABLE certificates (
   serial_number    NUMERIC(48)   NOT NULL UNIQUE,
   not_valid_before TIMESTAMP     NOT NULL,
   not_valid_after  TIMESTAMP     NOT NULL,
-  subject          VARCHAR(2048) NOT NULL UNIQUE,
+  -- The subject may not be UNIQUE, since uniqueness is only required for non-expired, non-revoked certificates
+  subject          VARCHAR(2048) NOT NULL,
   status           VARCHAR(32)   NOT NULL,
   -- The id from a foreign system identifying the user the certificate belongs to
   user_id          VARCHAR(128)  NOT NULL,

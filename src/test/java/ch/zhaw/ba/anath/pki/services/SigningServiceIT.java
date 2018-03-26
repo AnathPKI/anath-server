@@ -34,6 +34,7 @@ import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -47,7 +48,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -115,7 +115,7 @@ public class SigningServiceIT {
         assertThat(certificateEntity.getSubject(), is(equalTo(certificate.getSubject().toString())));
     }
 
-    @Test(expected = PersistenceException.class)
+    @Test(expected = CertificateAlreadyExistsException.class)
     public void signSameCSRTwice() throws Exception {
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
             signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id");
