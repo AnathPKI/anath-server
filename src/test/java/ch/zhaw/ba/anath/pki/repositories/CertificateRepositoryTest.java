@@ -32,12 +32,14 @@ package ch.zhaw.ba.anath.pki.repositories;
 import ch.zhaw.ba.anath.pki.core.UuidCertificateSerialProvider;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +60,9 @@ import static org.hamcrest.core.Is.is;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@TestPropertySource(properties = {
+        "spring.datasource.platform=h2"
+})
 @Transactional
 public class CertificateRepositoryTest {
     private final UuidCertificateSerialProvider uuidCertificateSerialProvider = new UuidCertificateSerialProvider();
@@ -176,6 +181,11 @@ public class CertificateRepositoryTest {
         certificateEntity.setX509PEMCertificate(new byte[]{'a'});
         certificateEntity.setStatus(CertificateStatus.VALID);
         certificateEntity.setUserId("user_id");
+
+        final UseEntity useEntity = new UseEntity();
+        useEntity.setUse(UseEntity.DEFAULT_USE);
+        useEntity.setConfig(null);
+        certificateEntity.setUse(useEntity);
         return certificateEntity;
     }
 

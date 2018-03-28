@@ -73,4 +73,8 @@ public class CertificateEntity {
 
     @Column(name = "x509_cert_pem", nullable = false)
     private byte[] x509PEMCertificate;
+
+    @OneToOne
+    @JoinColumn(name = "certificate_use", nullable = false)
+    private UseEntity use;
 }

@@ -33,13 +33,14 @@ import ch.zhaw.ba.anath.pki.core.*;
 import ch.zhaw.ba.anath.pki.core.interfaces.*;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
 import ch.zhaw.ba.anath.pki.exceptions.SigningServiceException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
+import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,36 +64,25 @@ public class SigningService {
     public static final String SECURE_STORE_CA_CERTIFICATE = "ca.cert";
     private final SecureStoreService secureStoreService;
     private final CertificateRepository certificateRepository;
+    private final UseRepository useRepository;
+    private final CertificateConstraintProvider certificateConstraintProvider;
+    private final SignatureNameProvider signatureNameProvider;
+    private final CertificateValidityProvider certificateValidityProvider;
+    private final CertificateSerialProvider certificateSerialProvider;
     private CertificateAuthority certificateAuthority = null;
     private CertificateSigner certificateSigner = null;
-    private CertificateConstraintProvider certificateConstraintProvider;
-    private SignatureNameProvider signatureNameProvider;
-    private CertificateValidityProvider certificateValidityProvider;
-    private CertificateSerialProvider certificateSerialProvider;
 
-    public SigningService(SecureStoreService secureStoreService, CertificateRepository certificateRepository) {
+    public SigningService(SecureStoreService secureStoreService, CertificateRepository certificateRepository,
+                          UseRepository useRepository, CertificateConstraintProvider certificateConstraintProvider,
+                          SignatureNameProvider signatureNameProvider, CertificateValidityProvider
+                                  certificateValidityProvider, CertificateSerialProvider certificateSerialProvider) {
         this.secureStoreService = secureStoreService;
         this.certificateRepository = certificateRepository;
-    }
-
-    @Autowired
-    public void setCertificateValidityProvider(CertificateValidityProvider certificateValidityProvider) {
-        this.certificateValidityProvider = certificateValidityProvider;
-    }
-
-    @Autowired
-    public void setCertificateSerialProvider(CertificateSerialProvider certificateSerialProvider) {
-        this.certificateSerialProvider = certificateSerialProvider;
-    }
-
-    @Autowired
-    public void setCertificateConstraintProvider(CertificateConstraintProvider certificateConstraintProvider) {
+        this.useRepository = useRepository;
         this.certificateConstraintProvider = certificateConstraintProvider;
-    }
-
-    @Autowired
-    public void setSignatureNameProvider(SignatureNameProvider signatureNameProvider) {
         this.signatureNameProvider = signatureNameProvider;
+        this.certificateValidityProvider = certificateValidityProvider;
+        this.certificateSerialProvider = certificateSerialProvider;
     }
 
     /**
@@ -158,8 +148,26 @@ public class SigningService {
         });
     }
 
-    public Certificate signCertificate(CertificateSigningRequestReader certificateSigningRequestReader, String
-            userId) {
+    /**
+     * Sign a CSR.
+     * <p>
+     * The CSR will be signed and added to the database. If the subject of the CSR already exists and the certificate
+     * is non-revoked and non-expired, the signing process will be aborted and an exception thrown.
+     * <p>
+     * Besides exception mentioned below,  {@link ch.zhaw.ba.anath.pki.core.exceptions.PKIException} may be thrown.
+     *
+     * @param certificateSigningRequestReader the {@link Reader} providing the CSR.
+     * @param userId                          the user id of the user the certificate belongs to.
+     * @param use                             the use. If the use cannot be found in the database, the {@value
+     *                                        UseEntity#DEFAULT_USE} is used.
+     *
+     * @throws CertificateAlreadyExistsException when a non-revoked, non-expired for the given subject already
+     *                                           exists, or the serial number is taken.
+     * @throws SigningServiceException           if no default certificate use can be found.
+     */
+
+    public Certificate signCertificate(CertificateSigningRequestReader certificateSigningRequestReader,
+                                       String userId, String use) {
         initializeCertificateSigner();
         log.info("Sign certificate signing request");
         final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequestReader);
@@ -168,7 +176,7 @@ public class SigningService {
         testCertificateUniquenessInCertificateRepositoryOrThrow(certificate);
 
         log.info("Store signed certificate");
-        storeCertificate(certificate, userId);
+        storeCertificate(certificate, userId, use);
 
         return certificate;
     }
@@ -203,7 +211,9 @@ public class SigningService {
                 certificateEntity.getStatus() == CertificateStatus.VALID;
     }
 
-    private void storeCertificate(Certificate certificate, String userId) {
+    private void storeCertificate(Certificate certificate, String userId, String use) {
+        final UseEntity useEntity = fetchUseEntity(use);
+
         final CertificateEntity certificateEntity = new CertificateEntity();
         certificateEntity.setStatus(CertificateStatus.VALID);
         certificateEntity.setUserId(userId);
@@ -212,6 +222,7 @@ public class SigningService {
         certificateEntity.setNotValidBefore(dateToTimestamp(certificate.getValidFrom()));
         certificateEntity.setNotValidAfter(dateToTimestamp(certificate.getValidTo()));
         certificateEntity.setX509PEMCertificate(certificateToByteArray(certificate));
+        certificateEntity.setUse(useEntity);
 
         try {
             certificateRepository.save(certificateEntity);
@@ -221,6 +232,17 @@ public class SigningService {
                     certificate.getSerial().toString(), e.getMessage());
             throw new CertificateAlreadyExistsException(String.format("Certificate already exists: %s", subjectString));
         }
+    }
+
+    private UseEntity fetchUseEntity(String use) {
+        final Optional<UseEntity> useOptional = useRepository.findOne(use);
+        return useOptional.orElseGet(() -> {
+            final Optional<UseEntity> defaultUseOptional = useRepository.findOne(UseEntity.DEFAULT_USE);
+            return defaultUseOptional.orElseThrow(() -> {
+                log.error("Default use '{}' not found", UseEntity.DEFAULT_USE);
+                return new SigningServiceException("Default use not found");
+            });
+        });
     }
 
     private Timestamp dateToTimestamp(Date date) {

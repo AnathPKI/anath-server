@@ -1,0 +1,1 @@
+INSERT INTO certificate_uses (certificate_use, config) VALUES ('plain', null);

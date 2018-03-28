@@ -32,29 +32,23 @@ package ch.zhaw.ba.anath.pki.entities;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
- * Secure Entity. SecureEntities have their data encrypted when persisted. Upon reading, the data will be decrypted.
- * The source of the encryption key and algorithm is not a concern of the entity.
- *
  * @author Rafael Ostertag
  */
 @Entity
-@Table(name = "secure")
+@Table(name = "certificate_uses")
 @Data
-@EqualsAndHashCode(of = {"id"})
-public class SecureEntity {
+@EqualsAndHashCode(of = {"use"})
+public class UseEntity {
+    public static final String DEFAULT_USE = "plain";
     @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(name = "key", nullable = false, unique = true)
-    private String key;
-    @Column(name = "encrypted_data", nullable = false)
-    private byte[] data;
-    @Column(name = "iv")
-    private byte[] iV;
-    @Column(name = "algo", nullable = false)
-    private String algorithm;
+    @Column(name = "certificate_use")
+    private String use;
+    @Column(name = "config", nullable = true)
+    private Byte[] config;
 }

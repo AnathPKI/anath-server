@@ -34,8 +34,10 @@ import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
+import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,11 +68,15 @@ import static org.junit.Assert.assertThat;
 })
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningServiceIT {
+    public static final String TEST_CERTIFIACTE_USE_NAME = "test use";
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
     private SigningService signingService;
+
+    @Autowired
+    private UseRepository useRepository;
 
     @Autowired
     private CertificateRepository certificateRepository;
@@ -96,7 +102,8 @@ public class SigningServiceIT {
     public void sign() throws Exception {
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id");
+            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id",
+                    UseEntity.DEFAULT_USE);
         }
         assertThat(certificate, is(notNullValue()));
 
@@ -113,12 +120,71 @@ public class SigningServiceIT {
         assertThat(certificateEntity.getNotValidAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
         assertThat(certificateEntity.getNotValidBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
         assertThat(certificateEntity.getSubject(), is(equalTo(certificate.getSubject().toString())));
+
+        final UseEntity useEntity = certificateEntity.getUse();
+        assertThat(useEntity, is(not(nullValue())));
+        assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
+    }
+
+    @Test
+    public void signWithNonExistingUse() throws Exception {
+        final Certificate certificate;
+        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
+            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id",
+                    "does not exist");
+        }
+        assertThat(certificate, is(notNullValue()));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Optional<CertificateEntity> optionalCertificateEntity = certificateRepository.findOneBySerial(certificate
+                .getSerial());
+        assertThat(optionalCertificateEntity.isPresent(), is(true));
+
+        final CertificateEntity certificateEntity = optionalCertificateEntity.get();
+        final UseEntity useEntity = certificateEntity.getUse();
+        assertThat(useEntity, is(not(nullValue())));
+        assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
+    }
+
+    @Test
+    public void signWithNonDefaultUse() throws Exception {
+
+        final UseEntity testUseEntity = new UseEntity();
+        testUseEntity.setUse(TEST_CERTIFIACTE_USE_NAME);
+        testUseEntity.setConfig(null);
+
+        useRepository.save(testUseEntity);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        final Certificate certificate;
+        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
+            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id",
+                    TEST_CERTIFIACTE_USE_NAME);
+        }
+        assertThat(certificate, is(notNullValue()));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Optional<CertificateEntity> optionalCertificateEntity = certificateRepository.findOneBySerial(certificate
+                .getSerial());
+        assertThat(optionalCertificateEntity.isPresent(), is(true));
+
+        final CertificateEntity certificateEntity = optionalCertificateEntity.get();
+        final UseEntity useEntity = certificateEntity.getUse();
+        assertThat(useEntity, is(not(nullValue())));
+        assertThat(useEntity.getUse(), is(TEST_CERTIFIACTE_USE_NAME));
     }
 
     @Test(expected = CertificateAlreadyExistsException.class)
     public void signSameCSRTwice() throws Exception {
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id");
+            signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id", UseEntity
+                    .DEFAULT_USE);
 
         }
 
@@ -126,7 +192,8 @@ public class SigningServiceIT {
         entityManager.clear();
 
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id");
+            signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id", UseEntity
+                    .DEFAULT_USE);
         }
 
         entityManager.flush();

@@ -27,34 +27,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.entities;
+package ch.zhaw.ba.anath.pki.repositories;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import ch.zhaw.ba.anath.pki.entities.UseEntity;
+import org.springframework.data.repository.Repository;
 
-import javax.persistence.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Secure Entity. SecureEntities have their data encrypted when persisted. Upon reading, the data will be decrypted.
- * The source of the encryption key and algorithm is not a concern of the entity.
+ * Repository for certificate uses.
  *
  * @author Rafael Ostertag
  */
-@Entity
-@Table(name = "secure")
-@Data
-@EqualsAndHashCode(of = {"id"})
-public class SecureEntity {
-    @Id
-    @GeneratedValue
-    private Long id;
+public interface UseRepository extends Repository<UseEntity, String> {
+    Optional<UseEntity> findOne(String use);
 
-    @Column(name = "key", nullable = false, unique = true)
-    private String key;
-    @Column(name = "encrypted_data", nullable = false)
-    private byte[] data;
-    @Column(name = "iv")
-    private byte[] iV;
-    @Column(name = "algo", nullable = false)
-    private String algorithm;
+    List<UseEntity> findAll();
+
+    void save(UseEntity useEntity);
 }
