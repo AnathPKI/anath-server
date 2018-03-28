@@ -35,25 +35,19 @@ import de.mkammerer.argon2.Argon2Factory;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Argon password encoder. Implementation taken from OWASP Password Storage Cheat Sheet.
- * <p>
- * See https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet (2018-03-27).
+ * Argon password encoder. Implementation taken from <a href="https://www.owasp.org/index
+ * .php/Password_Storage_Cheat_Sheet">OWASP Password Storage Cheat Sheet</a> (2018-03-27).
  *
  * @author Rafael Ostertag
  */
 @Component
 public class Argon2PasswordEncoder {
-    private static final String ITERATIONS_KEY = "ITERATIONS";
-    private static final String MEMORY_KEY = "MEMORY";
-    private static final String PARALLELISM_KEY = "PARALLELISM";
-    private final AnathProperties anathProperties;
+    private final AnathProperties.Authentication.Argon2 argon2Properies;
 
     public Argon2PasswordEncoder(AnathProperties anathProperties) {
-        this.anathProperties = anathProperties;
+        this.argon2Properies = anathProperties.getAuthentication().getArgon2();
     }
 
     /**
@@ -70,13 +64,10 @@ public class Argon2PasswordEncoder {
         String hash;
         Argon2 argon2Hasher = null;
         try {
-            // Create instance
             argon2Hasher = createInstance();
-            //Create options
-            Map<String, String> options = loadParameters();
-            int iterationsCount = Integer.parseInt(options.get(ITERATIONS_KEY));
-            int memoryAmountToUse = Integer.parseInt(options.get(MEMORY_KEY));
-            int threadToUse = Integer.parseInt(options.get(PARALLELISM_KEY));
+            int iterationsCount = argon2Properies.getIterations();
+            int memoryAmountToUse = argon2Properies.getMemory();
+            int threadToUse = argon2Properies.getParallelism();
             //Compute and return the hash
             hash = argon2Hasher.hash(iterationsCount, memoryAmountToUse, threadToUse, password, charset);
         } finally {
@@ -123,20 +114,5 @@ public class Argon2PasswordEncoder {
     private Argon2 createInstance() {
         // Create and return the instance
         return Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2i);
-    }
-
-    /**
-     * Load Argon2 options to use for hashing.
-     *
-     * @return A map with the options
-     */
-    private Map<String, String> loadParameters() {
-        final AnathProperties.Authentication.Argon2 argon2Properties = anathProperties.getAuthentication()
-                .getArgon2();
-        Map<String, String> options = new HashMap<>();
-        options.put(ITERATIONS_KEY, Integer.toString(argon2Properties.getIterations()));
-        options.put(MEMORY_KEY, Integer.toString(argon2Properties.getMemory()));
-        options.put(PARALLELISM_KEY, Integer.toString(argon2Properties.getParallelism()));
-        return options;
     }
 }

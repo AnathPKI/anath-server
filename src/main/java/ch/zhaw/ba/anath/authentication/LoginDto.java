@@ -29,33 +29,13 @@
 
 package ch.zhaw.ba.anath.authentication;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
-import java.nio.charset.Charset;
+import lombok.Data;
 
 /**
- * Adapter for {@link Argon2PasswordEncoder}.
- *
  * @author Rafael Ostertag
  */
-@Component("passwordEncoder")
-public class Argon2PasswordEncoderAdapter implements PasswordEncoder {
-    private final Argon2PasswordEncoder argon2PasswordEncoder;
-    private final Charset utf8Charset;
-
-    public Argon2PasswordEncoderAdapter(Argon2PasswordEncoder argon2PasswordEncoder) {
-        this.argon2PasswordEncoder = argon2PasswordEncoder;
-        this.utf8Charset = Charset.forName("UTF-8");
-    }
-
-    @Override
-    public String encode(CharSequence rawPassword) {
-        return argon2PasswordEncoder.hash(rawPassword.toString().toCharArray(), utf8Charset);
-    }
-
-    @Override
-    public boolean matches(CharSequence rawPassword, String encodedPassword) {
-        return argon2PasswordEncoder.verify(encodedPassword, rawPassword.toString().toCharArray(), utf8Charset);
-    }
+@Data
+public class LoginDto {
+    private String username;
+    private String password;
 }

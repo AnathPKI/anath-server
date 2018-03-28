@@ -27,35 +27,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.authentication;
+package ch.zhaw.ba.anath.authentication.spring;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import java.nio.charset.Charset;
+import java.util.Collections;
 
 /**
- * Adapter for {@link Argon2PasswordEncoder}.
- *
  * @author Rafael Ostertag
  */
-@Component("passwordEncoder")
-public class Argon2PasswordEncoderAdapter implements PasswordEncoder {
-    private final Argon2PasswordEncoder argon2PasswordEncoder;
-    private final Charset utf8Charset;
-
-    public Argon2PasswordEncoderAdapter(Argon2PasswordEncoder argon2PasswordEncoder) {
-        this.argon2PasswordEncoder = argon2PasswordEncoder;
-        this.utf8Charset = Charset.forName("UTF-8");
-    }
-
+@Service
+public class AnathUserDetailService implements UserDetailsService {
     @Override
-    public String encode(CharSequence rawPassword) {
-        return argon2PasswordEncoder.hash(rawPassword.toString().toCharArray(), utf8Charset);
-    }
-
-    @Override
-    public boolean matches(CharSequence rawPassword, String encodedPassword) {
-        return argon2PasswordEncoder.verify(encodedPassword, rawPassword.toString().toCharArray(), utf8Charset);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return new User("rafi", "$argon2i$v=19$m=128000,t=40," +
+                "p=4$cMtaX0OSd4G0rfeAItgQ9w$XvgV1jZ6cHH3FBZwM8KutOHwExZbkO7LMCpjikA2Xg4", Collections.emptyList());
     }
 }

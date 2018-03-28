@@ -46,4 +46,73 @@ public class AnathProperties {
      * The secret key used to encrypt data in the {@link ch.zhaw.ba.anath.pki.services.SecureStoreService}.
      */
     private String secretKey;
+    private Authentication authentication = new Authentication();
+
+    @Data
+    public static class Authentication {
+        private JWT jwt = new JWT();
+        private Argon2 argon2 = new Argon2();
+
+        @Data
+        public static class JWT {
+            /**
+             * The JWT Secret.
+             */
+            private String secret;
+            /**
+             * Expiration time in minutes.
+             */
+            private int expirationTime = 480;
+        }
+
+        /**
+         * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+         *
+         * <pre>
+         *     Configuration to define Argon2 options
+         *     See https://github.com/P-H-C/phc-winner-argon2#command-line-utility
+         *     See https://github.com/phxql/argon2-jvm/blob/master/src/main/java/de/mkammerer/argon2/Argon2.java
+         *     See https://github.com/P-H-C/phc-winner-argon2/issues/59
+         * </pre>
+         */
+        @Data
+        public static class Argon2 {
+
+            /**
+             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+             *
+             * <pre>
+             *     Number of iterations, here adapted to take at least 2 seconds
+             *     Tested on the following environments:
+             *       ENV NUMBER 1: LAPTOP - 15 Iterations is enough to reach 2 seconds processing time
+             *           CPU: Intel Core i7-2670QM 2.20 GHz with 8 logical processors and 4 cores
+             *           RAM: 24GB but no customization on JVM (Java8 32 bits)
+             *           OS: Windows 10 Pro 64 bits
+             *       ENV NUMBER 2: TRAVIS CI LINUX VM - 15 Iterations is NOT enough to reach 2 seconds processing
+             *       time (processing time take 1 second)
+             *           See details on https://docs.travis-ci
+             *           .com/user/reference/overview/#Virtualisation-Environment-vs-Operating-System
+             *           "Ubuntu Precise" and "Ubuntu Trusty" using infrastructure "Virtual machine on GCE" were used
+             *           (GCE = Google Compute Engine)
+             * </pre>
+             */
+            private int iterations = 40;
+            /**
+             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+             *
+             * <pre>
+             *     The memory usage of 2^N KiB, here set to recommended value from Issue n°9 of PHC project (128 MB)
+             * </pre>
+             */
+            private int memory = 128000;
+            /**
+             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+             *
+             * <pre>
+             *     Parallelism to N threads here set to recommended value from Issue n°9 of PHC project
+             * </pre>
+             */
+            private int parallelism = 4;
+        }
+    }
 }
