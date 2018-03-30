@@ -30,6 +30,8 @@
 package ch.zhaw.ba.anath.pki.entities;
 
 /**
+ * Marker interface for JPA.
+ *
  * @author Rafael Ostertag
  */
 public interface PKIEntitiesMarkerInterface {
