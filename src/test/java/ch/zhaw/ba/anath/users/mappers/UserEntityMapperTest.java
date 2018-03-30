@@ -56,9 +56,11 @@ public class UserEntityMapperTest {
     public void asUserLinkDto() {
         final UserEntity userEntity = new UserEntity();
         userEntity.setId(ID);
+        userEntity.setEmail(EMAIL);
 
         final UserLinkDto userLinkDto = MAPPER.asUserLinkDto(userEntity);
         assertThat(userLinkDto.getUserId(), is(ID));
+        assertThat(userLinkDto.getEmail(), is(EMAIL));
     }
 
     @Test

@@ -42,4 +42,5 @@ import org.springframework.hateoas.ResourceSupport;
 public class UserLinkDto extends ResourceSupport {
     @JsonProperty("id")
     private long userId;
+    private String email;
 }
