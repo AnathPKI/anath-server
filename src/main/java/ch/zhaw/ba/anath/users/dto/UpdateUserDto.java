@@ -44,4 +44,5 @@ public class UpdateUserDto {
     private String firstname;
     @Size(min = 2, max = 512, message = "Minimum 2, maximum 512 characters")
     private String lastname;
+    private boolean admin;
 }

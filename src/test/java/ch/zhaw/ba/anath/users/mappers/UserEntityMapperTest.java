@@ -88,12 +88,13 @@ public class UserEntityMapperTest {
         final UpdateUserDto updateUserDto = new UpdateUserDto();
         updateUserDto.setFirstname("another " + FIRSTNAME);
         updateUserDto.setLastname("another " + LASTNAME);
+        updateUserDto.setAdmin(!ADMIN);
 
         final UserEntity actual = MAPPER.updateEntity(updateUserDto, userEntity);
         assertThat(actual, is(sameInstance(userEntity)));
 
         assertThat(actual.getId(), is(ID));
-        assertThat(actual.getAdmin(), is(ADMIN));
+        assertThat(actual.getAdmin(), is(!ADMIN));
         assertThat(actual.getEmail(), is(EMAIL));
         assertThat(actual.getPassword(), is(PASSWORD));
         assertThat(actual.getFirstname(), is("another " + FIRSTNAME));
