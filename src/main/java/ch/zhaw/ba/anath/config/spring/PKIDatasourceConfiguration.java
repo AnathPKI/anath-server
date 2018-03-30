@@ -61,16 +61,20 @@ import javax.sql.DataSource;
 @Slf4j
 public class PKIDatasourceConfiguration {
 
+    private static final String PKI_DATASOURCE_CONFIGURATION_PROPERTIES_PREFIX = AnathProperties.CONFIGURATION_PREFIX
+            + ".pki.datasource";
+
+
     @Bean
     @Primary
-    @ConfigurationProperties(prefix = "ch.zhaw.ba.anath.pki.datasource")
+    @ConfigurationProperties(prefix = PKI_DATASOURCE_CONFIGURATION_PROPERTIES_PREFIX)
     public DataSourceProperties pkiDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @Primary
-    @ConfigurationProperties(prefix = AnathProperties.CONFIGURATION_PREFIX + ".pki.datasource")
+    @ConfigurationProperties(prefix = PKI_DATASOURCE_CONFIGURATION_PROPERTIES_PREFIX)
     public DataSource pkiDataSource() {
         DataSource pkiDS = pkiDataSourceProperties().initializeDataSourceBuilder().build();
 
