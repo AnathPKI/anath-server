@@ -54,6 +54,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <java.version>1.8</java.version>
+        <!-- We need a plugin newer than 3.1 to use selma sucessfuly -->
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     </properties>
 
     <dependencies>
@@ -200,9 +202,112 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <annotationProcessors>
+                        <!-- Lombok is required to run before selma -->
+                        <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor
+                        </annotationProcessor>
+                        <annotationProcessor>fr.xebia.extras.selma.codegen.MapperProcessor</annotationProcessor>
+                    </annotationProcessors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.9</version>
+
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>*Exception</exclude>
+                                <exclude>*Dto</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>*Exception</exclude>
+                                <exclude>*Dto</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*Exception.class</exclude>
+                                <exclude>**/*Dto.class</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-report-integration</id>
+                        <goals>
+                            <goal>report-integration</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*Exception.class</exclude>
+                                <exclude>**/*Dto.class</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- Do not specify a </version>. Spring boot is taking care of that -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+
+            <!--
+            Integration Testing
+            -->
+            <plugin>
+                <!-- Do not specify a </version>. Spring boot is taking care of that. If you use the wrong version, you'll most likely f*** up things -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+              JavaDoc
+             -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
             </plugin>
         </plugins>
     </build>
