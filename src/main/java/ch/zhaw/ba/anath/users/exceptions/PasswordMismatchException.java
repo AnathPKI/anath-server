@@ -27,19 +27,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.users.dto;
+package ch.zhaw.ba.anath.users.exceptions;
 
-import lombok.Data;
-
-import javax.validation.constraints.Size;
+import ch.zhaw.ba.anath.AnathException;
 
 /**
  * @author Rafael Ostertag
  */
-@Data
-public class ChangePasswordDto {
-    @Size(min = 8, max = 1024, message = "Minimum 8, maximum 1024 characters")
-    private String oldPassword;
-    @Size(min = 8, max = 1024, message = "Minimum 8, maximum 1024 characters")
-    private String newPassword;
+public class PasswordMismatchException extends AnathException {
+
+    public PasswordMismatchException(String message) {
+        super(message);
+    }
 }
