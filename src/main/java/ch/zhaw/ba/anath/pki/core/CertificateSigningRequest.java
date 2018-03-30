@@ -47,7 +47,7 @@ import org.bouncycastle.pkcs.bc.BcPKCS10CertificationRequest;
  * @author Rafael Ostertag
  */
 @Value
-public final class CertificateSigningRequest {
+public class CertificateSigningRequest {
     private final PKCS10CertificationRequest pkcs10CertificationRequest;
 
     public CertificateSigningRequest(PKCS10CertificationRequest pkcs10CertificationRequest) {
