@@ -90,6 +90,7 @@ public class PKIDatasourceConfiguration {
         return pkiDS;
     }
 
+    @Primary
     @Bean
     public LocalContainerEntityManagerFactoryBean pkiEntityManagerFactory(
             EntityManagerFactoryBuilder builder) {
