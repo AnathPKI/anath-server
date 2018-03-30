@@ -70,7 +70,7 @@ import static org.junit.Assert.assertThat;
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningServiceIT {
     public static final String TEST_CERTIFIACTE_USE_NAME = "test use";
-    @PersistenceContext
+    @PersistenceContext(unitName = "pki")
     private EntityManager entityManager;
 
     @Autowired

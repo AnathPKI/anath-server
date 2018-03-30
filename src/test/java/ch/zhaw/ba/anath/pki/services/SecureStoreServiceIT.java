@@ -56,7 +56,7 @@ import static org.hamcrest.Matchers.is;
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SecureStoreServiceIT {
     private static final String TEST_KEY = "test.key";
-    @PersistenceContext
+    @PersistenceContext(unitName = "pki")
     EntityManager entityManager;
 
     @Autowired
