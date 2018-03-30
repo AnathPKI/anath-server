@@ -41,7 +41,7 @@ import org.springframework.hateoas.ResourceSupport;
 @EqualsAndHashCode(callSuper = false)
 public class UserDto extends ResourceSupport {
     @JsonProperty("id")
-    long userId;
+    private long userId;
     private String firstname;
     private String lastname;
     private String email;
