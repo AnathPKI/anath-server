@@ -27,20 +27,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.dto;
+package ch.zhaw.ba.anath.dto.pki;
 
-import ch.zhaw.ba.anath.dto.bits.CertificateSigningRequestPemBit;
-import ch.zhaw.ba.anath.dto.bits.PemBit;
+import ch.zhaw.ba.anath.dto.pki.bits.CertificateSigningRequestPemBit;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
  * @author Rafael Ostertag
  */
 @Data
-public class SigningRequest {
+public class SigningRequestDto {
     private String use;
-    @NotNull
+    @NotNull(message = "Certificate Signing Request must not be null")
+    @Valid
     private CertificateSigningRequestPemBit csr;
 }

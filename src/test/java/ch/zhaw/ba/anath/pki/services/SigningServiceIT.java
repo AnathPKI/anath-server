@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.pki.services;
 
 import ch.zhaw.ba.anath.pki.core.Certificate;
+import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
 import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
@@ -102,7 +103,11 @@ public class SigningServiceIT {
     public void sign() throws Exception {
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id",
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
                     UseEntity.DEFAULT_USE);
         }
         assertThat(certificate, is(notNullValue()));
@@ -130,7 +135,11 @@ public class SigningServiceIT {
     public void signWithNonExistingUse() throws Exception {
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id",
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
                     "does not exist");
         }
         assertThat(certificate, is(notNullValue()));
@@ -162,7 +171,11 @@ public class SigningServiceIT {
 
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            certificate = signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id",
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
                     TEST_CERTIFIACTE_USE_NAME);
         }
         assertThat(certificate, is(notNullValue()));
@@ -183,7 +196,11 @@ public class SigningServiceIT {
     @Test(expected = CertificateAlreadyExistsException.class)
     public void signSameCSRTwice() throws Exception {
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id", UseEntity
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            signingService.signCertificate(certificateSigningRequest, "test id", UseEntity
                     .DEFAULT_USE);
 
         }
@@ -192,7 +209,11 @@ public class SigningServiceIT {
         entityManager.clear();
 
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            signingService.signCertificate(new PEMCertificateSigningRequestReader(csr), "test id", UseEntity
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            signingService.signCertificate(certificateSigningRequest, "test id", UseEntity
                     .DEFAULT_USE);
         }
 
