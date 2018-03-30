@@ -145,6 +145,19 @@ public class UserRepositoryTest {
         compareWithTestEntity(actualEntity, testEntity);
     }
 
+    @Test
+    public void delete() {
+        final UserEntity testEntity = makeTestEntity();
+        testEntityManager.persistAndFlush(testEntity);
+
+        userRepository.deleteById(testEntity.getId());
+    }
+
+    @Test
+    public void deleteNonExistingUser() {
+        userRepository.deleteById(42L);
+    }
+
     @Test(expected = DataIntegrityViolationException.class)
     public void saveDuplicateEmail() {
         final UserEntity testEntity1 = makeTestEntity();

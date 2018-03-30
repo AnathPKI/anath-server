@@ -46,4 +46,6 @@ public interface UserRepository extends Repository<UserEntity, Long> {
     List<UserEntity> findAll();
 
     void save(UserEntity userEntity);
+
+    void deleteById(Long id);
 }
