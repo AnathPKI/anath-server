@@ -49,6 +49,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 /**
+ * Spring Datasource configuration for the PKI datasource.
+ *
  * @author Rafael Ostertag
  */
 @Configuration
