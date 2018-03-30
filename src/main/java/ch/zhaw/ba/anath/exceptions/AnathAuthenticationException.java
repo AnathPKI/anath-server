@@ -27,21 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core.exceptions;
+package ch.zhaw.ba.anath.exceptions;
+
+import org.springframework.security.core.AuthenticationException;
 
 /**
  * @author Rafael Ostertag
  */
-public class PrivateKeyWriterException extends PKIException { //NOSONAR
-    public PrivateKeyWriterException() {
-        super();
+public class AnathAuthenticationException extends AuthenticationException {
+    public AnathAuthenticationException(String msg, Throwable t) {
+        super(msg, t);
     }
 
-    public PrivateKeyWriterException(String message) {
-        super(message);
-    }
-
-    public PrivateKeyWriterException(String message, Throwable cause) {
-        super(message, cause);
+    public AnathAuthenticationException(String msg) {
+        super(msg);
     }
 }

@@ -32,7 +32,7 @@ package ch.zhaw.ba.anath.pki.core.exceptions;
 /**
  * @author Rafael Ostertag
  */
-public class PrivateKeyReaderException extends PKIException {
+public class PrivateKeyReaderException extends PKIException { //NOSONAR
     public PrivateKeyReaderException(String message) {
         super(message);
     }

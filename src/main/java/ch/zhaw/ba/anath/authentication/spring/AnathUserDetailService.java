@@ -46,7 +46,7 @@ import java.util.Collections;
 @Slf4j
 public class AnathUserDetailService implements UserDetailsService {
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         if (username.equals("test")) {
             return new User("test", "$argon2i$v=19$m=128000,t=40," +
                     "p=4$cMtaX0OSd4G0rfeAItgQ9w$XvgV1jZ6cHH3FBZwM8KutOHwExZbkO7LMCpjikA2Xg4", Collections

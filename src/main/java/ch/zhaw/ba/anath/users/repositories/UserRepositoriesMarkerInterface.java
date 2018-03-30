@@ -34,5 +34,5 @@ package ch.zhaw.ba.anath.users.repositories;
  *
  * @author Rafael Ostertag
  */
-public class UserRepositoriesMarkerInterface {
+public interface UserRepositoriesMarkerInterface {
 }
