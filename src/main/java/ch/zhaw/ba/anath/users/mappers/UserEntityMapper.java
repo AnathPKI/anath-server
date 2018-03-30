@@ -34,28 +34,25 @@ import ch.zhaw.ba.anath.users.dto.UpdateUserDto;
 import ch.zhaw.ba.anath.users.dto.UserDto;
 import ch.zhaw.ba.anath.users.dto.UserLinkDto;
 import ch.zhaw.ba.anath.users.entities.UserEntity;
-import fr.xebia.extras.selma.*;
+import fr.xebia.extras.selma.Field;
+import fr.xebia.extras.selma.IgnoreMissing;
+import fr.xebia.extras.selma.IoC;
+import fr.xebia.extras.selma.Mapper;
 
 /**
  * @author Rafael Ostertag
  */
 @Mapper(
         withIoC = IoC.SPRING,
-        withIgnoreMissing = IgnoreMissing.ALL
+        withIgnoreMissing = IgnoreMissing.ALL,
+        withCustomFields = {
+                @Field({"id", "userId"})
+        }
+
 )
 public interface UserEntityMapper {
-    @Maps(
-            withCustomFields = {
-                    @Field({"id", "userId"})
-            }
-    )
     UserLinkDto asUserLinkDto(UserEntity userEntity);
 
-    @Maps(
-            withCustomFields = {
-                    @Field({"id", "userId"})
-            }
-    )
     UserEntity asEntity(CreateUserDto createUserDto);
 
     UserEntity updateEntity(UpdateUserDto updateUserDto, UserEntity entity);
