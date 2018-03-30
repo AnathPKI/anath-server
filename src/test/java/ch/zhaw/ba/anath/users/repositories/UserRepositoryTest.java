@@ -45,6 +45,7 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -151,11 +152,9 @@ public class UserRepositoryTest {
         testEntityManager.persistAndFlush(testEntity);
 
         userRepository.deleteById(testEntity.getId());
-    }
 
-    @Test
-    public void deleteNonExistingUser() {
-        userRepository.deleteById(42L);
+        final UserEntity userEntity = testEntityManager.find(UserEntity.class, testEntity.getId());
+        assertThat(userEntity, is(nullValue()));
     }
 
     @Test(expected = DataIntegrityViolationException.class)
