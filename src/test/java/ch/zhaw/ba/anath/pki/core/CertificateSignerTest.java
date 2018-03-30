@@ -63,8 +63,10 @@ public class CertificateSignerTest {
 
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader =
                     new PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
             final Certificate certificate = certificateSigner.signCertificate
-                    (pemCertificateSigningRequestReader);
+                    (certificateSigningRequest);
 
             assertThat(certificate, is(not(nullValue())));
             assertThat(certificate.getCertificateHolder(), is(notNullValue()));
@@ -91,7 +93,10 @@ public class CertificateSignerTest {
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
                     PEMCertificateSigningRequestReader(csr);
 
-            certificateSigner.signCertificate(pemCertificateSigningRequestReader);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+
+            certificateSigner.signCertificate(certificateSigningRequest);
         }
     }
 
@@ -111,8 +116,10 @@ public class CertificateSignerTest {
 
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
                     PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
             final Certificate certificate = certificateSigner.signCertificate
-                    (pemCertificateSigningRequestReader);
+                    (certificateSigningRequest);
 
             final PEMCertificateWriter pemCertificateWriter = new PEMCertificateWriter(signedCert);
             pemCertificateWriter.writeCertificate(certificate);

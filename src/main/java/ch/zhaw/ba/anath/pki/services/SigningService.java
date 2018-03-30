@@ -30,7 +30,10 @@
 package ch.zhaw.ba.anath.pki.services;
 
 import ch.zhaw.ba.anath.pki.core.*;
-import ch.zhaw.ba.anath.pki.core.interfaces.*;
+import ch.zhaw.ba.anath.pki.core.interfaces.CertificateConstraintProvider;
+import ch.zhaw.ba.anath.pki.core.interfaces.CertificateSerialProvider;
+import ch.zhaw.ba.anath.pki.core.interfaces.CertificateValidityProvider;
+import ch.zhaw.ba.anath.pki.core.interfaces.SignatureNameProvider;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
@@ -156,7 +159,7 @@ public class SigningService {
      * <p>
      * Besides exception mentioned below,  {@link ch.zhaw.ba.anath.pki.core.exceptions.PKIException} may be thrown.
      *
-     * @param certificateSigningRequestReader the {@link Reader} providing the CSR.
+     * @param certificateSigningRequest the {@link Reader} providing the CSR.
      * @param userId                          the user id of the user the certificate belongs to.
      * @param use                             the use. If the use cannot be found in the database, the {@value
      *                                        UseEntity#DEFAULT_USE} is used.
@@ -166,11 +169,12 @@ public class SigningService {
      * @throws SigningServiceException           if no default certificate use can be found.
      */
 
-    public Certificate signCertificate(CertificateSigningRequestReader certificateSigningRequestReader,
+    public Certificate signCertificate(CertificateSigningRequest certificateSigningRequest,
                                        String userId, String use) {
         initializeCertificateSigner();
+
         log.info("Sign certificate signing request");
-        final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequestReader);
+        final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequest);
 
         log.info("Test uniqueness of certificate");
         testCertificateUniquenessInCertificateRepositoryOrThrow(certificate);
