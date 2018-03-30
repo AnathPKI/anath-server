@@ -27,9 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.dto.pki;
+package ch.zhaw.ba.anath.pki.dto;
 
-import ch.zhaw.ba.anath.dto.pki.bits.CertificateSigningRequestPemBit;
+import ch.zhaw.ba.anath.pki.dto.bits.CertificateSigningRequestPemBit;
 import lombok.Data;
 
 import javax.validation.Valid;

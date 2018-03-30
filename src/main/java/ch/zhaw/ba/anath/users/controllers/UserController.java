@@ -27,18 +27,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.controllers;
-
-import org.springframework.http.MediaType;
+package ch.zhaw.ba.anath.users.controllers;
 
 /**
  * @author Rafael Ostertag
  */
-public final class AnathMediaType {
-    private AnathMediaType() {
-        // intentionally empty
-    }
-    public static final String APPLICATION_VND_ANATH_V1_JSON_VALUE = "application/vnd.anath.v1+json";
-    public static final MediaType APPLICATION_VND_ANATH_V1_JSON = MediaType.valueOf
-            (APPLICATION_VND_ANATH_V1_JSON_VALUE);
+public class UserController {
 }

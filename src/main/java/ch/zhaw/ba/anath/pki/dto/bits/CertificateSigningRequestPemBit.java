@@ -27,20 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.dto.pki.bits;
+package ch.zhaw.ba.anath.pki.dto.bits;
 
 import lombok.Data;
 
-import java.util.Date;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Rafael Ostertag
  */
 @Data
-public class CertificateValidityBit {
-    private boolean revoked;
-    private String revokeReason;
-    private Date notBefore;
-    private Date notAfter;
-    private boolean expired;
+public class CertificateSigningRequestPemBit {
+    @NotNull(message = "PEM Encoded Certificate Signing Request required")
+    @Valid
+    private PemBit pem;
 }

@@ -27,19 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.dto.pki.bits;
+package ch.zhaw.ba.anath.pki.dto.bits;
 
 import lombok.Data;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * @author Rafael Ostertag
  */
 @Data
-public class CertificateSigningRequestPemBit {
-    @NotNull(message = "PEM Encoded Certificate Signing Request required")
-    @Valid
-    private PemBit pem;
+public class PemBit {
+    /**
+     * PEM encoded object.
+     */
+    @NotEmpty
+    private final String pem;
 }

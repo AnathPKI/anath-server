@@ -27,15 +27,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.controllers.pki;
+package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.AnathException;
 import ch.zhaw.ba.anath.authentication.spring.AnathSecurityHelper;
-import ch.zhaw.ba.anath.controllers.AnathMediaType;
-import ch.zhaw.ba.anath.dto.pki.SigningRequestDto;
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
 import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
+import ch.zhaw.ba.anath.pki.dto.SigningRequestDto;
 import ch.zhaw.ba.anath.pki.services.SigningService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;

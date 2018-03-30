@@ -27,9 +27,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.controllers.pki;
+package ch.zhaw.ba.anath.pki.controllers;
 
-import ch.zhaw.ba.anath.controllers.AnathMediaType;
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.services.SigningService;
 import org.bouncycastle.cert.X509CertificateHolder;
