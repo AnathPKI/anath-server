@@ -29,10 +29,14 @@
 
 package ch.zhaw.ba.anath.users.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 
 /**
  * @author Rafael Ostertag
@@ -40,15 +44,36 @@ import javax.persistence.*;
 @Entity
 @Table(name = "users")
 @Data
-@EqualsAndHashCode(of = {"id"})
-public class UserEntity {
+@EqualsAndHashCode(of = {"id"}, callSuper = false)
+public class UserEntity extends ResourceSupport {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(name = "firstname", nullable = false, unique = false)
+    @NotEmpty
+    @Max(value = 512, message = "Maximum 512 characters")
+    private String firstname;
+    @Column(name = "lasttname", nullable = false, unique = false)
+    @NotEmpty
+    @Max(value = 512, message = "Maximum 512 characters")
+    private String lastname;
     @Column(name = "email", nullable = false, unique = true)
+    @NotEmpty
+    @Max(value = 1024, message = "Maximum 1024 characters")
     private String email;
     @Column(name = "password", nullable = false, unique = false)
+    @NotEmpty
+    @Max(value = 1024, message = "Maximum 1024 characters")
     private String password;
     @Column(name = "admin", nullable = false, unique = false)
     private Boolean admin;
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
