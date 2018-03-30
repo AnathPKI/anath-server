@@ -93,10 +93,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication auth) {
 
         final long expirationTime = convertMinutesToMillis(jwtProperties.getExpirationTime());
-        if (jwtProperties.getSecret() == null) {
-            throw new AnathException("JWT Secret not set");
-        }
-        final byte[] secret = jwtProperties.getSecret().getBytes();
+
+        final byte[] secret = AnathSecurityHelper.getJwtSecretAsByteArrayOrThrow(jwtProperties);
         String token = Jwts.builder()
                 .setSubject(((User) auth.getPrincipal()).getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))

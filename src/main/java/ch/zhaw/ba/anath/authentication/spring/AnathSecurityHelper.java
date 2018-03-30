@@ -30,21 +30,19 @@
 package ch.zhaw.ba.anath.authentication.spring;
 
 import ch.zhaw.ba.anath.AnathException;
+import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-
-import java.security.Principal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * Helper functions.
+ * Helper functions for spring security.
  * @author Rafael Ostertag
  */
 @Slf4j
-public final class AnathAuthentication {
-    private AnathAuthentication() {
+public final class AnathSecurityHelper {
+    private AnathSecurityHelper() {
         // intentionally empty
     }
 
@@ -52,17 +50,26 @@ public final class AnathAuthentication {
         final Authentication authentication = getAuthenticationObject();
         final Object principal = authentication.getPrincipal();
 
-        if (principal instanceof UsernamePasswordAuthenticationToken) {
-            final UsernamePasswordAuthenticationToken user = (UsernamePasswordAuthenticationToken)principal;
-            return (String)user.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
         }
-        log.error("Authentication missconfigured. Expected UsernamePasswordAuthenticationToken in security context, " +
+        log.error("Authentication misconfigured. Expected String in security context, " +
                 "but got {}", principal.getClass().getName());
         throw new AnathException("Authentication missconfigured");
     }
 
     private static Authentication getAuthenticationObject() {
         return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    public static byte[] getJwtSecretAsByteArrayOrThrow(AnathProperties.Authentication.JWT jwtProperties) {
+        final String jwtSecret = jwtProperties.getSecret();
+        if (jwtSecret == null) {
+            log.error("Please set '{}.{}'", AnathProperties.CONFIGURATION_PREFIX, "authentication.jwt.secret");
+            throw new AnathException("JWT Secret not set");
+        }
+
+        return jwtSecret.getBytes();
     }
 
 

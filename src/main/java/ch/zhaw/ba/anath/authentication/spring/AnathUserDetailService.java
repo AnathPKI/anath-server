@@ -29,6 +29,8 @@
 
 package ch.zhaw.ba.anath.authentication.spring;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,10 +43,22 @@ import java.util.Collections;
  * @author Rafael Ostertag
  */
 @Service
+@Slf4j
 public class AnathUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new User("rafi", "$argon2i$v=19$m=128000,t=40," +
-                "p=4$cMtaX0OSd4G0rfeAItgQ9w$XvgV1jZ6cHH3FBZwM8KutOHwExZbkO7LMCpjikA2Xg4", Collections.emptyList());
+        if (username.equals("test")) {
+            return new User("test", "$argon2i$v=19$m=128000,t=40," +
+                    "p=4$cMtaX0OSd4G0rfeAItgQ9w$XvgV1jZ6cHH3FBZwM8KutOHwExZbkO7LMCpjikA2Xg4", Collections
+                    .singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        }
+        if (username.equals("admin")) {
+            return new User("admin", "$argon2i$v=19$m=128000,t=40," +
+                    "p=4$cMtaX0OSd4G0rfeAItgQ9w$XvgV1jZ6cHH3FBZwM8KutOHwExZbkO7LMCpjikA2Xg4", Collections
+                    .singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        }
+
+        log.error("User '{}' not found", username);
+        throw new UsernameNotFoundException("Not found");
     }
 }
