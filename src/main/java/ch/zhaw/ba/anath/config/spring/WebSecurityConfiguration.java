@@ -34,6 +34,7 @@ import ch.zhaw.ba.anath.authentication.spring.JWTAuthorizationFilter;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -77,6 +78,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login/jwt").anonymous()
+                // Allow retrieval of CA certificate
+                .antMatchers(HttpMethod.GET, "/ca").permitAll()
+                // Allow preflight checks
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(), anathProperties))

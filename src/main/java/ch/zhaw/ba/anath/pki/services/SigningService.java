@@ -38,7 +38,7 @@ import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
-import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.exceptions.SigningServiceException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
@@ -63,8 +63,6 @@ import java.util.Optional;
 @Slf4j
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningService {
-    public static final String SECURE_STORE_CA_PRIVATE_KEY = "ca.key";
-    public static final String SECURE_STORE_CA_CERTIFICATE = "ca.cert";
     private final SecureStoreService secureStoreService;
     private final CertificateRepository certificateRepository;
     private final UseRepository useRepository;
@@ -136,18 +134,20 @@ public class SigningService {
     }
 
     private Byte[] retrieveCaPrivateKeyFromSecureStoreOrThrow() {
-        final Optional<Byte[]> caPrivateKeyOptional = secureStoreService.get(SECURE_STORE_CA_PRIVATE_KEY);
+        final Optional<Byte[]> caPrivateKeyOptional = secureStoreService.get(CertificateAuthorityService
+                .SECURE_STORE_CA_PRIVATE_KEY);
         return caPrivateKeyOptional.orElseThrow(() -> {
             log.error("Unable to retrieve certificate authority private key from secure storage");
-            return new CertificateAuthorityInitializationException("No CA private key found");
+            return new CertificateAuthorityNotInitializedException("No CA private key found");
         });
     }
 
     private Byte[] retrieveCaCertificateFromSecureStoreOrThrow() {
-        final Optional<Byte[]> caCertificateOptional = secureStoreService.get(SECURE_STORE_CA_CERTIFICATE);
+        final Optional<Byte[]> caCertificateOptional = secureStoreService.get(CertificateAuthorityService
+                .SECURE_STORE_CA_CERTIFICATE);
         return caCertificateOptional.orElseThrow(() -> {
             log.error("Unable to retrieve certificate authority certificate from secure storage");
-            return new CertificateAuthorityInitializationException("No CA certificate found");
+            return new CertificateAuthorityNotInitializedException("No CA certificate found");
         });
     }
 

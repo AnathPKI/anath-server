@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath;
 
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,6 +54,10 @@ public class TestWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login/jwt").anonymous()
+                // Allow retrieval of CA certificate
+                .antMatchers(HttpMethod.GET, "/ca").permitAll()
+                // Allow preflight checks
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 // this disables session creation on Spring Security

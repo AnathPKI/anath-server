@@ -37,7 +37,6 @@ import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
-import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import org.apache.commons.io.IOUtils;
@@ -228,30 +227,6 @@ public class SigningServiceIT {
         }
 
         flushAndClear();
-    }
-
-    @Test(expected = CertificateAuthorityNotInitializedException.class)
-    public void signWithUninitializedCAPrivateKey() throws Exception {
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            signingService.signCertificate(certificateSigningRequest, "test id",
-                    UseEntity.DEFAULT_USE);
-        }
-    }
-
-    @Test(expected = CertificateAuthorityNotInitializedException.class)
-    public void signWithUninitializedCACertificate() throws Exception {
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            signingService.signCertificate(certificateSigningRequest, "test id",
-                    UseEntity.DEFAULT_USE);
-        }
     }
 
     private void flushAndClear() {

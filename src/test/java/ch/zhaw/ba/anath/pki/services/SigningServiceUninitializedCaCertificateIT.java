@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -62,9 +63,9 @@ import java.io.InputStreamReader;
 @TestPropertySource(properties = {
         "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
 })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningServiceUninitializedCaCertificateIT {
-    public static final String TEST_CERTIFIACTE_USE_NAME = "test use";
     @PersistenceContext(unitName = "pki")
     private EntityManager entityManager;
 
