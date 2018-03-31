@@ -43,7 +43,7 @@ import javax.persistence.*;
 @EqualsAndHashCode(of = {"id"})
 public class UserEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "firstname", nullable = false, unique = false)
     private String firstname;

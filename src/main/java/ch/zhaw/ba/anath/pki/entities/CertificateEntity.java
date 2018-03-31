@@ -47,7 +47,7 @@ import java.sql.Timestamp;
 @EqualsAndHashCode(of = "id")
 public class CertificateEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "serial_number", unique = true, nullable = false, precision = 48, scale = 0)
