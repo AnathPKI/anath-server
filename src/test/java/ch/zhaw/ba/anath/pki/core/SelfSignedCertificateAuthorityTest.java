@@ -116,10 +116,11 @@ public class SelfSignedCertificateAuthorityTest {
                         (caCertificateFile))
         ) {
             selfSignedCertificateAuthority.create();
-            final PEMCaWriter pemCaWriter = new PEMCaWriter(new PEMCertificateWriter(caCertificateWriter), new
+            final PEMCertificateAuthorityWriter pemCertificateAuthorityWriter = new PEMCertificateAuthorityWriter(new
+                    PEMCertificateWriter(caCertificateWriter), new
                     PEMPrivateKeyWriter(caKeyWriter));
 
-            pemCaWriter.writeCA(selfSignedCertificateAuthority.getCertificateAuthority());
+            pemCertificateAuthorityWriter.writeCA(selfSignedCertificateAuthority.getCertificateAuthority());
 
             final Process exec = Runtime.getRuntime().exec(
                     new String[]{

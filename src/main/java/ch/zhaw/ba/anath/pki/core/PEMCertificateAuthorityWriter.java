@@ -38,11 +38,11 @@ import ch.zhaw.ba.anath.pki.core.interfaces.PrivateKeyWriter;
  *
  * @author Rafael Ostertag
  */
-public final class PEMCaWriter implements CAWriter {
+public final class PEMCertificateAuthorityWriter implements CAWriter {
     private final CertificateWriter certificateWriter;
     private final PrivateKeyWriter privateKeyWriter;
 
-    public PEMCaWriter(CertificateWriter certificateWriter, PrivateKeyWriter privateKeyWriter) {
+    public PEMCertificateAuthorityWriter(CertificateWriter certificateWriter, PrivateKeyWriter privateKeyWriter) {
         this.certificateWriter = certificateWriter;
         this.privateKeyWriter = privateKeyWriter;
     }
