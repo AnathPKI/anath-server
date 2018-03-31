@@ -30,7 +30,7 @@
 package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.AnathException;
-import ch.zhaw.ba.anath.authentication.spring.AnathSecurityHelper;
+import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
 import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
@@ -57,7 +57,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * @author Rafael Ostertag
  */
 @RestController
-@RequestMapping(value = "/sign",
+@RequestMapping(path = "/sign",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 @Slf4j

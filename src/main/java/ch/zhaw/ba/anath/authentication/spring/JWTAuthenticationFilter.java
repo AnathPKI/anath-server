@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.authentication.spring;
 
+import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
 import ch.zhaw.ba.anath.authentication.LoginDto;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import ch.zhaw.ba.anath.exceptions.AnathAuthenticationException;

@@ -29,8 +29,10 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
+import ch.zhaw.ba.anath.TestSecuritySetup;
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.services.SigningService;
+import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +62,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(SigningController.class)
-public class SigningControllerTest {
+@TestSecuritySetup
+public class SigningControllerIT {
     private static final String validCsrRequestBody = "{ \n" +
             "\"use\" : \"plain\",\n" +
             "\"csr\": { \n" +
@@ -85,6 +88,10 @@ public class SigningControllerTest {
 
     @MockBean
     private SigningService signingService;
+
+    @MockBean
+    private UserRepository userRepository;
+
     private Certificate certificate;
 
     @Before
@@ -127,7 +134,7 @@ public class SigningControllerTest {
     }
 
     @Test
-    public void signCertificateRequestUnathenticated() throws Exception {
+    public void signCertificateRequestUnauthenticated() throws Exception {
         mvc.perform(
                 post("/sign")
                         .content(validCsrRequestBody)

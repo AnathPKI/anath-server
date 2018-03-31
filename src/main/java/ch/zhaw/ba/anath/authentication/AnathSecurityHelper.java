@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.authentication.spring;
+package ch.zhaw.ba.anath.authentication;
 
 import ch.zhaw.ba.anath.AnathException;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
@@ -46,8 +46,24 @@ public final class AnathSecurityHelper {
         // intentionally empty
     }
 
+    /**
+     * Get the user name from the current security context.
+     *
+     * @return current user name of the principal.
+     */
     public static String getUsername() {
         final Authentication authentication = getAuthenticationObject();
+        return getUsername(authentication);
+    }
+
+    /**
+     * Get the user name from a privoded {@link Authentication} instance.
+     *
+     * @param authentication {@link Authentication} instance.
+     *
+     * @return user name of the principal.
+     */
+    public static String getUsername(Authentication authentication) {
         final Object principal = authentication.getPrincipal();
 
         if (principal instanceof UserDetails) {

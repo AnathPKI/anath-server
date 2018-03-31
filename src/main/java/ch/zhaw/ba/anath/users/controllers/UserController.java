@@ -29,8 +29,89 @@
 
 package ch.zhaw.ba.anath.users.controllers;
 
+import ch.zhaw.ba.anath.users.dto.*;
+import ch.zhaw.ba.anath.users.services.UserService;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 /**
  * @author Rafael Ostertag
  */
+@RestController
+@RequestMapping(path = "/users",
+        consumes = AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON_VALUE,
+        produces = AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)
 public class UserController {
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public Resources<UserLinkDto> getAll() {
+        final List<UserLinkDto> all = userService.getAll();
+        all.stream().forEach(x -> x.add(linkTo(UserController.class).slash(x.getUserId()).withSelfRel()));
+        return new Resources<>(all);
+    }
+
+    @GetMapping(path = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#id,'user','get'))")
+    public UserDto getUser(@PathVariable long id) {
+        final UserDto user = userService.getUser(id);
+        user.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
+        return user;
+    }
+
+    @PutMapping(path = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserLinkDto updateUser(@PathVariable long id, @RequestBody @Validated UpdateUserDto updateUserDto) {
+        final UserLinkDto userLinkDto = userService.updateUser(id, updateUserDto);
+        userLinkDto.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
+        return userLinkDto;
+    }
+
+    @DeleteMapping(path = "/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteUser(@PathVariable long id) {
+        userService.deleteUser(id);
+    }
+
+    @PutMapping(path = "/{id}/password")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('USER') and hasPermission(#id,'user','changePassword')")
+    public UserLinkDto changePassword(@PathVariable long id, @RequestBody @Validated ChangePasswordDto
+            changePasswordDto) {
+        final UserLinkDto userLinkDto = userService.changePassword(id, changePasswordDto);
+        userLinkDto.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
+        return userLinkDto;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
+    public HttpEntity<Void> createUser(@RequestBody @Validated CreateUserDto createUserDto) {
+        final UserLinkDto user = userService.createUser(createUserDto);
+        final Link link = linkTo(methodOn(UserController.class).getUser(user.getUserId())).withSelfRel();
+        return ResponseEntity.created(URI.create(link.getHref())).build();
+    }
+
+
 }

@@ -57,7 +57,7 @@ import static org.junit.Assert.assertThat;
         "spring.datasource.platform=h2"
 })
 @Transactional
-public class UserRepositoryTest {
+public class UserRepositoryIT {
     private static final String EMAIL = "email";
     private static final String PASSWORD = "password";
     private static final String FIRSTNAME = "firstname";

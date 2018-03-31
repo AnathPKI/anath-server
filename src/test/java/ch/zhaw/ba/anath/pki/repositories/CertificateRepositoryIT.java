@@ -64,7 +64,7 @@ import static org.hamcrest.core.Is.is;
         "spring.datasource.platform=h2"
 })
 @Transactional
-public class CertificateRepositoryTest {
+public class CertificateRepositoryIT {
     private final UuidCertificateSerialProvider uuidCertificateSerialProvider = new UuidCertificateSerialProvider();
     @Autowired
     private TestEntityManager testEntityManager;

@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.authentication.spring;
 
+import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
