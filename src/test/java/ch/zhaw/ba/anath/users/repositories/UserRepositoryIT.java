@@ -173,4 +173,27 @@ public class UserRepositoryIT {
         testEntityManager.flush();
         testEntityManager.clear();
     }
+
+    @Test
+    public void findAllByAdmin() {
+        final UserEntity userEntity = makeTestEntity();
+        userEntity.setAdmin(false);
+
+        testEntityManager.persistAndFlush(userEntity);
+
+        List<UserEntity> allByAdmin = userRepository.findAllByAdmin(false);
+        assertThat(allByAdmin, hasSize(1));
+
+        allByAdmin = userRepository.findAllByAdmin(true);
+        assertThat(allByAdmin, hasSize(0));
+
+        final UserEntity adminEntity = makeTestEntity();
+        adminEntity.setEmail("another email");
+        adminEntity.setAdmin(true);
+
+        testEntityManager.persistAndFlush(adminEntity);
+
+        allByAdmin = userRepository.findAllByAdmin(true);
+        assertThat(allByAdmin, hasSize(1));
+    }
 }

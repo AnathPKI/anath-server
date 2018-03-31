@@ -45,6 +45,9 @@ public interface UserRepository extends Repository<UserEntity, Long> {
 
     List<UserEntity> findAll();
 
+    // Initially used to determine whether or not an admin entity needs to be created upon application startup
+    List<UserEntity> findAllByAdmin(Boolean admin);
+
     void save(UserEntity userEntity);
 
     void deleteById(Long id);
