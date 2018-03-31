@@ -49,6 +49,26 @@
         <version>1.5.10.RELEASE</version>
     </parent>
 
+    <scm>
+        <connection>scm:ssh://git@bitbucket.datonus.ch:7999/bapki/anath-server.git</connection>
+        <developerConnection>scm:git:ssh://git@bitbucket.datonus.ch:7999/bapki/anath-server.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://bitbucket.datonus.ch/projects/BAPKI/repos/anath-server/browse</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshot.anath-server.nexus.datonus.ch</id>
+            <name>Datonus Nexus</name>
+            <url>http://10.255.2.69:30824/repository/anath-server-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>release.anath-server.nexus.datonus.ch</id>
+            <name>Datonus Nexus</name>
+            <url>http://10.255.2.69:30824/repository/anath-server/</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
