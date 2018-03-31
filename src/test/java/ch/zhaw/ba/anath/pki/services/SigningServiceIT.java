@@ -37,6 +37,7 @@ import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import org.apache.commons.io.IOUtils;
@@ -53,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
@@ -61,6 +63,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
+ * {@link SigningService} caches the CA. Tests requiring a non-initialized CA cannot be run in here.
  * @author Rafael Ostertag
  */
 @RunWith(SpringRunner.class)
@@ -88,16 +91,28 @@ public class SigningServiceIT {
     private SecureStoreService secureStoreService;
 
     @Before
-    public void setUp() throws Exception {
-        try (
-                InputStream certificateInputStream = new FileInputStream(TestConstants.CA_CERT_FILE_NAME);
-                InputStream privateKeyInputStream = new FileInputStream(TestConstants.CA_KEY_FILE_NAME)
-        ) {
-            final byte[] certificate = IOUtils.toByteArray(certificateInputStream);
-            secureStoreService.put(SigningService.SECURE_STORE_CA_CERTIFICATE, certificate);
+    public void setUp() throws IOException {
+        initializeCa();
+    }
 
+    private void initializeCa() throws IOException {
+        initializeCaCertificate();
+        initializeCaPrivateKey();
+    }
+
+    private void initializeCaPrivateKey() throws IOException {
+        try (InputStream privateKeyInputStream = new FileInputStream(TestConstants.CA_KEY_FILE_NAME)) {
             final byte[] privateKey = IOUtils.toByteArray(privateKeyInputStream);
-            secureStoreService.put(SigningService.SECURE_STORE_CA_PRIVATE_KEY, privateKey);
+            secureStoreService.put(CertificateAuthorityService.SECURE_STORE_CA_PRIVATE_KEY, privateKey);
+            flushAndClear();
+        }
+    }
+
+    private void initializeCaCertificate() throws IOException {
+        try (InputStream certificateInputStream = new FileInputStream(TestConstants.CA_CERT_FILE_NAME)) {
+            final byte[] certificate = IOUtils.toByteArray(certificateInputStream);
+            secureStoreService.put(CertificateAuthorityService.SECURE_STORE_CA_CERTIFICATE, certificate);
+            flushAndClear();
         }
     }
 
@@ -114,8 +129,7 @@ public class SigningServiceIT {
         }
         assertThat(certificate, is(notNullValue()));
 
-        entityManager.flush();
-        entityManager.clear();
+        flushAndClear();
 
         Optional<CertificateEntity> optionalCertificateEntity = certificateRepository.findOneBySerial(certificate
                 .getSerial());
@@ -146,8 +160,7 @@ public class SigningServiceIT {
         }
         assertThat(certificate, is(notNullValue()));
 
-        entityManager.flush();
-        entityManager.clear();
+        flushAndClear();
 
         Optional<CertificateEntity> optionalCertificateEntity = certificateRepository.findOneBySerial(certificate
                 .getSerial());
@@ -161,15 +174,13 @@ public class SigningServiceIT {
 
     @Test
     public void signWithNonDefaultUse() throws Exception {
-
         final UseEntity testUseEntity = new UseEntity();
         testUseEntity.setUse(TEST_CERTIFIACTE_USE_NAME);
         testUseEntity.setConfig(null);
 
         useRepository.save(testUseEntity);
 
-        entityManager.flush();
-        entityManager.clear();
+        flushAndClear();
 
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
@@ -182,8 +193,7 @@ public class SigningServiceIT {
         }
         assertThat(certificate, is(notNullValue()));
 
-        entityManager.flush();
-        entityManager.clear();
+        flushAndClear();
 
         Optional<CertificateEntity> optionalCertificateEntity = certificateRepository.findOneBySerial(certificate
                 .getSerial());
@@ -204,11 +214,9 @@ public class SigningServiceIT {
                     .certificationRequest();
             signingService.signCertificate(certificateSigningRequest, "test id", UseEntity
                     .DEFAULT_USE);
-
         }
 
-        entityManager.flush();
-        entityManager.clear();
+        flushAndClear();
 
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
@@ -219,6 +227,34 @@ public class SigningServiceIT {
                     .DEFAULT_USE);
         }
 
+        flushAndClear();
+    }
+
+    @Test(expected = CertificateAuthorityNotInitializedException.class)
+    public void signWithUninitializedCAPrivateKey() throws Exception {
+        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            signingService.signCertificate(certificateSigningRequest, "test id",
+                    UseEntity.DEFAULT_USE);
+        }
+    }
+
+    @Test(expected = CertificateAuthorityNotInitializedException.class)
+    public void signWithUninitializedCACertificate() throws Exception {
+        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            signingService.signCertificate(certificateSigningRequest, "test id",
+                    UseEntity.DEFAULT_USE);
+        }
+    }
+
+    private void flushAndClear() {
         entityManager.flush();
         entityManager.clear();
     }
