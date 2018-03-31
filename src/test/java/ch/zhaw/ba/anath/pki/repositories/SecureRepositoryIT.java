@@ -72,12 +72,15 @@ public class SecureRepositoryIT {
         secureEntity.setKey("the key");
 
         secureRepository.save(secureEntity);
-
-        testEntityManager.clear();
-        testEntityManager.flush();
+        flushAndClear();
 
         final Optional<SecureEntity> one = secureRepository.findOne(secureEntity.getId());
         assertThat(one.isPresent(), is(true));
+    }
+
+    private void flushAndClear() {
+        testEntityManager.flush();
+        testEntityManager.clear();
     }
 
     @Test
@@ -110,7 +113,24 @@ public class SecureRepositoryIT {
 
         secureEntity.setId(null);
         secureRepository.save(secureEntity);
-
         testEntityManager.flush();
+    }
+
+    @Test
+    public void deleteByKey() {
+        final SecureEntity secureEntity = new SecureEntity();
+        secureEntity.setAlgorithm("algo");
+        secureEntity.setData(new byte[]{1, 2});
+        secureEntity.setIV(new byte[]{2, 3});
+        secureEntity.setKey("the key");
+
+        secureRepository.save(secureEntity);
+        flushAndClear();
+
+        secureRepository.deleteByKey("the key");
+        flushAndClear();
+
+        final Optional<SecureEntity> secureEntityOptional = secureRepository.findOneByKey("the key");
+        assertThat(secureEntityOptional.isPresent(), is(false));
     }
 }
