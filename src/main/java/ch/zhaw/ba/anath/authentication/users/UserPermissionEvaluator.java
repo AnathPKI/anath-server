@@ -78,11 +78,11 @@ public class UserPermissionEvaluator implements PermissionEvaluator {
 
     private boolean handleUserObject(Authentication authentication, Serializable targetId, Object permission) {
         if (!(targetId instanceof Long)) {
-            log.error("Cannot evaluate permission for user object, target id is not of type Long");
+            log.error("Cannot evaluate permission for user object, target id is not of type Long. Denying");
             return false;
         }
         if (!(permission instanceof String)) {
-            log.error("Cannot evaluate permission for user object, permission is not of type String");
+            log.error("Cannot evaluate permission for user object, permission is not of type String. Denying");
             return false;
         }
 
