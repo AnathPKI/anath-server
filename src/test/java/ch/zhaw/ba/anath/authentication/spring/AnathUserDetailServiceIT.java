@@ -37,6 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,7 @@ import static org.junit.Assert.assertThat;
  * @author Rafael Ostertag
  */
 @RunWith(SpringRunner.class)
+@ActiveProfiles("tests")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional(transactionManager = "userTransactionManager")
 public class AnathUserDetailServiceIT {
