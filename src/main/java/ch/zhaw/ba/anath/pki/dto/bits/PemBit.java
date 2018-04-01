@@ -41,5 +41,5 @@ public class PemBit {
      * PEM encoded object.
      */
     @NotEmpty
-    private final String pem;
+    private String pem;
 }
