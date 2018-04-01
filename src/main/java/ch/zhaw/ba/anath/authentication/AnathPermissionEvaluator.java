@@ -29,22 +29,49 @@
 
 package ch.zhaw.ba.anath.authentication;
 
+import ch.zhaw.ba.anath.authentication.pki.CertificatePermissionEvaluator;
 import ch.zhaw.ba.anath.authentication.users.UserPermissionEvaluator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * @author Rafael Ostertag
  */
 @Component
+@Slf4j
 public class AnathPermissionEvaluator implements PermissionEvaluator {
-    private final UserPermissionEvaluator userPermissionEvaluator;
+    public static final String DEFAULT_DENY_PERMISSION_HANDLER_CALLED_MESSAGE = "Default deny permission handler " +
+            "called";
 
-    public AnathPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator) {
-        this.userPermissionEvaluator = userPermissionEvaluator;
+    private final HashMap<String, PermissionEvaluator> permissionEvaluators;
+    private final PermissionEvaluator defaultDenyEvaluator;
+
+    public AnathPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator, CertificatePermissionEvaluator
+            certificatePermissionEvaluator) {
+        this.permissionEvaluators = new HashMap<String, PermissionEvaluator>();
+        permissionEvaluators.put(UserPermissionEvaluator.TARGET_TYPE, userPermissionEvaluator);
+        permissionEvaluators.put(CertificatePermissionEvaluator.TARGET_TYPE, certificatePermissionEvaluator);
+
+        this.defaultDenyEvaluator = new PermissionEvaluator() {
+            @Override
+            public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
+                log.info(DEFAULT_DENY_PERMISSION_HANDLER_CALLED_MESSAGE);
+                return false;
+            }
+
+            @Override
+            public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType,
+                                         Object permission) {
+                log.info(DEFAULT_DENY_PERMISSION_HANDLER_CALLED_MESSAGE);
+                return false;
+            }
+        };
+
     }
 
     @Override
@@ -55,10 +82,8 @@ public class AnathPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object
             permission) {
-        if (targetType.equals("user")) {
-            return userPermissionEvaluator.hasPermission(authentication, targetId, targetType, permission);
-        }
-
-        return false;
+        final PermissionEvaluator permissionEvaluator = permissionEvaluators.getOrDefault(targetType,
+                defaultDenyEvaluator);
+        return permissionEvaluator.hasPermission(authentication, targetId, targetType, permission);
     }
 }
