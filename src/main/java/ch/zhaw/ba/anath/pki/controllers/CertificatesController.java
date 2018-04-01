@@ -29,10 +29,23 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
+import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
+import ch.zhaw.ba.anath.pki.dto.CertificateResponseDto;
+import ch.zhaw.ba.anath.pki.dto.RevokeReasonDto;
+import ch.zhaw.ba.anath.pki.services.CertificateService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigInteger;
+import java.util.List;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Rafael Ostertag
@@ -43,13 +56,43 @@ import org.springframework.web.bind.annotation.*;
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 @Slf4j
 public class CertificatesController {
+    private final CertificateService certificateService;
+
+    public CertificatesController(CertificateService certificateService) {
+        this.certificateService = certificateService;
+    }
 
     @GetMapping("/{serial}")
     @ResponseStatus(HttpStatus.OK)
-    public HttpEntity<?> getCertificate(@PathVariable String serial) {
-        throw new UnsupportedOperationException("NOT IMPLEMENTED");
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'get'))")
+    public CertificateResponseDto getCertificate(@PathVariable BigInteger serial) {
+        final CertificateResponseDto certificate = certificateService.getCertificate(serial);
+        certificate.add(linkTo(methodOn(RevocationController.class).revoke(serial, new RevokeReasonDto())).withRel
+                ("revoke"));
+        certificate.add(linkTo(methodOn(CertificatesController.class).getPlainPemCertificate(serial)).withRel("pem"));
+        return certificate;
     }
 
-//    @GetMapping
-//    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/{serial}/pem",
+            produces = {"application/pkix-certificate"})
+    @ResponseStatus(HttpStatus.OK)
+    public HttpEntity<String> getPlainPemCertificate(@PathVariable BigInteger serial) {
+        return new ResponseEntity<>(certificateService.getPlainPEMEncodedCertificate(serial), HttpStatus.OK);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    public Resources<CertificateListItemDto> getAll() {
+        final List<CertificateListItemDto> all = certificateService.getAll();
+        for (CertificateListItemDto certificateListItemDto : all) {
+            certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getCertificate
+                    (certificateListItemDto.getSerial())).withSelfRel());
+            certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getPlainPemCertificate
+                    (certificateListItemDto.getSerial())).withRel("pem"));
+            certificateListItemDto.add(linkTo(methodOn(RevocationController.class).revoke
+                    (certificateListItemDto.getSerial(), new RevokeReasonDto())).withRel("revoke"));
+        }
+        return new Resources<>(all, linkTo(SigningController.class).withRel("sign"));
+    }
 }

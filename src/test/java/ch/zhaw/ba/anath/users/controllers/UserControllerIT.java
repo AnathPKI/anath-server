@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.users.controllers;
 
 import ch.zhaw.ba.anath.TestSecuritySetup;
+import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.users.dto.*;
 import ch.zhaw.ba.anath.users.entities.UserEntity;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
@@ -79,8 +80,13 @@ public class UserControllerIT {
     private MockMvc mvc;
     @MockBean
     private UserService userService;
+
     @MockBean
     private UserRepository userRepository;
+
+    // Required to satisfy dependency injection
+    @MockBean
+    private CertificateRepository certificateRepository;
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
