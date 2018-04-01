@@ -194,7 +194,7 @@ public class SigningService {
             return;
         }
 
-        final boolean hasValidCertificate = allBySubject.stream().anyMatch(this::isCertificateValid);
+        final boolean hasValidCertificate = allBySubject.stream().anyMatch(CertificateValidityUtils::isValid);
         if (hasValidCertificate) {
             // Since we found a certificate with the given subject which is valid, this certificate is not considered
             // to be unique.
@@ -204,17 +204,6 @@ public class SigningService {
             throw new CertificateAlreadyExistsException(String.format("Valid certificate for '%s' already exists",
                     subjectString));
         }
-    }
-
-    private boolean isCertificateValid(CertificateEntity certificateEntity) {
-        final Timestamp timestampNow = new Timestamp(System.currentTimeMillis());
-
-        // We use compareTo for the not valid before/after, since the certificate is valid if notValidBefore <=
-        // timestampNow and notValidAfter <= timestampNow holds. The before() and after() methods do not cover these
-        // cases.
-        return certificateEntity.getNotValidBefore().compareTo(timestampNow) <= 0 &&
-                certificateEntity.getNotValidAfter().compareTo(timestampNow) >= 0 &&
-                certificateEntity.getStatus() == CertificateStatus.VALID;
     }
 
     private void storeCertificate(Certificate certificate, String userId, String use) {
