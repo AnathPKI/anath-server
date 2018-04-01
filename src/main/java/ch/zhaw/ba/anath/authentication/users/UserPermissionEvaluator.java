@@ -50,6 +50,7 @@ import java.util.Set;
 @Transactional(transactionManager = "userTransactionManager")
 @Slf4j
 public class UserPermissionEvaluator implements PermissionEvaluator {
+    public static final String TARGET_TYPE = "user";
     private final UserRepository userRepository;
     private final Set<String> userPermissions;
 
@@ -69,7 +70,7 @@ public class UserPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object
             permission) {
-        if (targetType.equals("user")) {
+        if (targetType.equals(TARGET_TYPE)) {
             log.info("Start evaluating permission for user object");
             return handleUserObject(authentication, targetId, permission);
         }
