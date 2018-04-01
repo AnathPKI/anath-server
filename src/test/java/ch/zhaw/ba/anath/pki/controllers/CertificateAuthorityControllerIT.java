@@ -36,7 +36,6 @@ import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityAlreadyInitializedExc
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
-import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,8 +71,6 @@ public class CertificateAuthorityControllerIT {
     private MockMvc mvc;
     @MockBean
     private CertificateAuthorityService certificateAuthorityService;
-    @MockBean
-    private UserRepository userRepository;
 
     @Test
     public void getCaCertificate() throws Exception {
