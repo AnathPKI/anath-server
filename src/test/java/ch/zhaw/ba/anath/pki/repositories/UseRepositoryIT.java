@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.pki.repositories;
 
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,4 +132,23 @@ public class UseRepositoryIT {
         testEntityManager.flush();
         testEntityManager.clear();
     }
+
+    @Test
+    public void delete() {
+        final UseEntity useEntity = new UseEntity();
+
+        useEntity.setConfig(ArrayUtils.toObject("abc".getBytes()));
+        useEntity.setUse("openvpn");
+
+        testEntityManager.persistAndFlush(useEntity);
+
+        useRepository.deleteByUse("openvpn");
+
+        testEntityManager.flush();
+        testEntityManager.clear();
+
+        final UseEntity actual = testEntityManager.find(UseEntity.class, "openvpn");
+        assertThat(actual, is(nullValue()));
+    }
+
 }
