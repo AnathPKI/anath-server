@@ -29,8 +29,10 @@
 
 package ch.zhaw.ba.anath.config.spring;
 
+import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import ch.zhaw.ba.anath.pki.core.*;
 import ch.zhaw.ba.anath.pki.core.interfaces.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,7 +40,14 @@ import org.springframework.context.annotation.Configuration;
  * @author Rafael Ostertag
  */
 @Configuration
+@Slf4j
 public class PKICore {
+    private final AnathProperties anathProperties;
+
+    public PKICore(AnathProperties anathProperties) {
+        this.anathProperties = anathProperties;
+    }
+
     @Bean
     public CertificateSerialProvider certificateSerialProvider() {
         return new UuidCertificateSerialProvider();
@@ -56,7 +65,8 @@ public class PKICore {
 
     @Bean
     public CertificateValidityProvider certificateValidityProvider() {
-        return new OneYearValidity();
+        log.info("Use ConfigurablePeriodValidity with a value of {} day(s)", anathProperties.getValidity());
+        return new ConfigurablePeriodValidity(anathProperties.getValidity());
     }
 
     @Bean

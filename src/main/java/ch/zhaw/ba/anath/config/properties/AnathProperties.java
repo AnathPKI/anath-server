@@ -46,6 +46,10 @@ public class AnathProperties {
      * The secret key used to encrypt data in the {@link ch.zhaw.ba.anath.pki.services.SecureStoreService}.
      */
     private String secretKey;
+    /**
+     * Validity of certificates in days.
+     */
+    private int validity = 180;
     private Authentication authentication = new Authentication();
 
     @Data
