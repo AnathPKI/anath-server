@@ -73,6 +73,7 @@ public class UserPermissionEvaluator implements PermissionEvaluator {
             log.info("Start evaluating permission for user object");
             return handleUserObject(authentication, targetId, permission);
         }
+        log.info("Unknown target received: {}. Denying", targetType);
         return false;
     }
 
