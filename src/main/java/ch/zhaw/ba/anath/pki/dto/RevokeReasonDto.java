@@ -27,17 +27,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.dto.bits;
+package ch.zhaw.ba.anath.pki.dto;
 
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * @author Rafael Ostertag
  */
 @Data
-public class CertificatePemBit {
-    @NotNull(message = "PEM Encoded Certificate required")
-    private PemBit pem;
+public class RevokeReasonDto {
+    @NotEmpty
+    private String reason;
 }

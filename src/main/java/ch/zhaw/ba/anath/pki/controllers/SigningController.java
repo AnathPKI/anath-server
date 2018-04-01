@@ -76,7 +76,6 @@ public class SigningController {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
                 signingRequestDto
                         .getCsr()
-                        .getPem()
                         .getPem().getBytes());
 
         try (Reader reader = new InputStreamReader(byteArrayInputStream)) {
@@ -91,8 +90,8 @@ public class SigningController {
                     signingRequestDto.getUse
                             ());
 
-            final String serialAsString = certificate.getSerial().toString();
-            final URI uri = linkTo(methodOn(CertificatesController.class).getCertificate(serialAsString)).toUri();
+            final URI uri = linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getSerial()))
+                    .toUri();
 
             return ResponseEntity
                     .created(uri)

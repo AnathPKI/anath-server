@@ -27,19 +27,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.dto.bits;
+package ch.zhaw.ba.anath.pki.dto;
 
+import ch.zhaw.ba.anath.pki.dto.bits.CertificateValidityBit;
+import ch.zhaw.ba.anath.pki.dto.bits.PemBit;
 import lombok.Data;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.ResourceSupport;
 
 /**
  * @author Rafael Ostertag
  */
 @Data
-public class CertificateSigningRequestPemBit {
-    @NotNull(message = "PEM Encoded Certificate Signing Request required")
-    @Valid
-    private PemBit pem;
+@EqualsAndHashCode(callSuper = false)
+public class CertificateResponseDto extends ResourceSupport {
+    private String use;
+    private String config;
+    private PemBit cert;
+    private CertificateValidityBit validity;
 }

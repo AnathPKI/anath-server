@@ -29,19 +29,20 @@
 
 package ch.zhaw.ba.anath.pki.dto;
 
-import ch.zhaw.ba.anath.pki.dto.bits.PemBit;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.ResourceSupport;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.math.BigInteger;
 
 /**
  * @author Rafael Ostertag
  */
 @Data
-public class SigningRequestDto {
+@EqualsAndHashCode(callSuper = false)
+public class CertificateListItemDto extends ResourceSupport {
+    private String subject;
+    private BigInteger serial;
     private String use;
-    @NotNull(message = "Certificate Signing Request must not be null")
-    @Valid
-    private PemBit csr;
+    private boolean valid;
 }
