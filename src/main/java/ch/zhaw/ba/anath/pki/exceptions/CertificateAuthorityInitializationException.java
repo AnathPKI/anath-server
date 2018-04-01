@@ -41,4 +41,8 @@ public class CertificateAuthorityInitializationException extends AnathException 
     public CertificateAuthorityInitializationException(String message) {
         super(message);
     }
+
+    public CertificateAuthorityInitializationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

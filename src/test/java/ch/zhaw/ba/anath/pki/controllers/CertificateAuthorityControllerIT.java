@@ -30,12 +30,34 @@
 package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.TestSecuritySetup;
+import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
+import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityAlreadyInitializedException;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
+import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
+import ch.zhaw.ba.anath.users.repositories.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Rafael Ostertag
@@ -45,6 +67,207 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("tests")
 @TestSecuritySetup
 public class CertificateAuthorityControllerIT {
+    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     @Autowired
     private MockMvc mvc;
+    @MockBean
+    private CertificateAuthorityService certificateAuthorityService;
+    @MockBean
+    private UserRepository userRepository;
+
+    @Test
+    public void getCaCertificate() throws Exception {
+        given(certificateAuthorityService.getCertificate()).willReturn("certificate");
+
+        mvc.perform(
+                get("/ca")
+        )
+                .andExpect(unauthenticated())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith("application/pkix-cert")));
+    }
+
+    @Test
+    public void getCaCertificateUnintialized() throws Exception {
+        given(certificateAuthorityService.getCertificate()).willThrow(new CertificateAuthorityNotInitializedException
+                ("not initialized"));
+
+        mvc.perform(
+                get("/ca")
+        )
+                .andExpect(unauthenticated())
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    public void getCaCertificateWhenAuthenticated() throws Exception {
+        given(certificateAuthorityService.getCertificate()).willReturn("certificate");
+
+        mvc.perform(
+                get("/ca")
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith("application/pkix-cert")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void importCaAsAdmin() throws Exception {
+        final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
+        importCertificateAuthorityDto.setPassword("");
+        importCertificateAuthorityDto.setPkcs12("bla");
+        mvc.perform(
+                put("/ca/import")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/ca"));
+        verify(certificateAuthorityService).importPkcs12CertificateAuthority(importCertificateAuthorityDto);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void importCaAlreadyExistingAsAdmin() throws Exception {
+        doThrow(new CertificateAuthorityAlreadyInitializedException("already initialized"))
+                .when(certificateAuthorityService).importPkcs12CertificateAuthority(any());
+
+        final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
+        importCertificateAuthorityDto.setPassword("");
+        importCertificateAuthorityDto.setPkcs12("bla");
+        mvc.perform(
+                put("/ca/import")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void importCaImportExceptionAsAdmin() throws Exception {
+        doThrow(new CertificateAuthorityInitializationException("import exception"))
+                .when(certificateAuthorityService).importPkcs12CertificateAuthority(any());
+
+        final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
+        importCertificateAuthorityDto.setPassword("");
+        importCertificateAuthorityDto.setPkcs12("bla");
+        mvc.perform(
+                put("/ca/import")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    public void importCaAsUser() throws Exception {
+        final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
+        importCertificateAuthorityDto.setPassword("");
+        importCertificateAuthorityDto.setPkcs12("bla");
+        mvc.perform(
+                put("/ca/import")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isForbidden());
+        verify(certificateAuthorityService, never()).importPkcs12CertificateAuthority(any());
+    }
+
+    @Test
+    public void importCaAsUnauthenticated() throws Exception {
+        final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
+        importCertificateAuthorityDto.setPassword("");
+        importCertificateAuthorityDto.setPkcs12("bla");
+        mvc.perform(
+                put("/ca/import")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
+        )
+                .andExpect(unauthenticated())
+                .andExpect(status().isUnauthorized());
+        verify(certificateAuthorityService, never()).importPkcs12CertificateAuthority(any());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void createSelfSignedWithInvalidDtoAsAdmin() throws Exception {
+        final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = new
+                CreateSelfSignedCertificateAuthorityDto();
+        mvc.perform(
+                put("/ca/create")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void createSelfSignedWithMinimumDtoAsAdmin() throws Exception {
+        final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = new
+                CreateSelfSignedCertificateAuthorityDto();
+        createSelfSignedCertificateAuthorityDto.setBits(1024);
+        createSelfSignedCertificateAuthorityDto.setValidDays(180);
+        createSelfSignedCertificateAuthorityDto.setOrganization("o");
+        createSelfSignedCertificateAuthorityDto.setCommonName("cn");
+
+        mvc.perform(
+                put("/ca/create")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/ca"));
+        verify(certificateAuthorityService).createSelfSignedCertificateAuthority
+                (createSelfSignedCertificateAuthorityDto);
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    public void createSelfSignedAsUser() throws Exception {
+        final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = new
+                CreateSelfSignedCertificateAuthorityDto();
+        createSelfSignedCertificateAuthorityDto.setBits(1024);
+        createSelfSignedCertificateAuthorityDto.setValidDays(180);
+        createSelfSignedCertificateAuthorityDto.setOrganization("o");
+        createSelfSignedCertificateAuthorityDto.setCommonName("cn");
+
+        mvc.perform(
+                put("/ca/create")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isForbidden());
+        verify(certificateAuthorityService, never()).createSelfSignedCertificateAuthority(any());
+    }
+
+    @Test
+    public void createSelfSignedAsUnauthenticated() throws Exception {
+        final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = new
+                CreateSelfSignedCertificateAuthorityDto();
+        createSelfSignedCertificateAuthorityDto.setBits(1024);
+        createSelfSignedCertificateAuthorityDto.setValidDays(180);
+        createSelfSignedCertificateAuthorityDto.setOrganization("o");
+        createSelfSignedCertificateAuthorityDto.setCommonName("cn");
+
+        mvc.perform(
+                put("/ca/create")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
+        )
+                .andExpect(unauthenticated())
+                .andExpect(status().isUnauthorized());
+        verify(certificateAuthorityService, never()).createSelfSignedCertificateAuthority(any());
+    }
 }

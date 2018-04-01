@@ -38,6 +38,7 @@ import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityAlreadyInitializedException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityImportException;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -199,7 +200,8 @@ public class CertificateAuthorityService {
             pemCertificateAuthorityWriter.writeCA(certificateAuthority);
         } catch (Exception e) {
             log.error("Error importing Certificate Authority into secure store: {}", e.getMessage());
-            throw new CertificateAuthorityImportException("Error importing Certificate Authority into secure store", e);
+            throw new CertificateAuthorityInitializationException("Error importing Certificate Authority into secure " +
+                    "store", e);
         }
 
         secureStoreService.put(SECURE_STORE_CA_PRIVATE_KEY, caKeyByteArrayOutputStream.toByteArray());

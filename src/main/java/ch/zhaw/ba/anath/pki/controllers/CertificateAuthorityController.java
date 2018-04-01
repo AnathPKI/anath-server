@@ -29,8 +29,9 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
+import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
-import ch.zhaw.ba.anath.pki.services.SecureStoreService;
+import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,6 +39,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Rafael Ostertag
@@ -47,10 +53,10 @@ import org.springframework.web.bind.annotation.*;
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 public class CertificateAuthorityController {
-    private final SecureStoreService secureStoreService;
+    private final CertificateAuthorityService certificateAuthorityService;
 
-    public CertificateAuthorityController(SecureStoreService secureStoreService) {
-        this.secureStoreService = secureStoreService;
+    public CertificateAuthorityController(CertificateAuthorityService certificateAuthorityService) {
+        this.certificateAuthorityService = certificateAuthorityService;
     }
 
     @GetMapping(
@@ -59,7 +65,7 @@ public class CertificateAuthorityController {
     )
     @ResponseStatus(HttpStatus.OK)
     public HttpEntity<String> getCaCertificate() {
-        String caCertificateString = null;
+        String caCertificateString = certificateAuthorityService.getCertificate();
         return new ResponseEntity<>(caCertificateString, HttpStatus.OK);
     }
 
@@ -70,6 +76,26 @@ public class CertificateAuthorityController {
     @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<Void> importCa(@RequestBody @Validated ImportCertificateAuthorityDto
                                              importCertificateAuthorityDto) {
-        throw new UnsupportedOperationException();
+        certificateAuthorityService.importPkcs12CertificateAuthority(importCertificateAuthorityDto);
+        final URI uri = linkTo(methodOn(CertificateAuthorityController.class).getCaCertificate()).toUri();
+
+        return ResponseEntity
+                .created(uri)
+                .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                .build();
+    }
+
+    @PutMapping(path = "/create")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public HttpEntity<Void> createSelfSigned(@RequestBody @Validated CreateSelfSignedCertificateAuthorityDto
+                                                     createSelfSignedCertificateAuthorityDto) {
+        certificateAuthorityService.createSelfSignedCertificateAuthority(createSelfSignedCertificateAuthorityDto);
+        final URI uri = linkTo(methodOn(CertificateAuthorityController.class).getCaCertificate()).toUri();
+
+        return ResponseEntity
+                .created(uri)
+                .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                .build();
     }
 }
