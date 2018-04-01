@@ -93,6 +93,11 @@ public class SelfSignedCertificateAuthorityTest {
         new SelfSignedCertificateAuthority(null, null, null, null, null, 512);
     }
 
+    @Test(expected = SelfSignedCACreationException.class)
+    public void keyBitSizeNotInList() {
+        new SelfSignedCertificateAuthority(null, null, null, null, null, 1025);
+    }
+
     @Test
     public void keyBitSize1024() {
         // Not throwing an exception is the test

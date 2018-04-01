@@ -47,6 +47,8 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Create a self-signed, self-issued Certificate and Private Key using RSA.
@@ -91,11 +93,22 @@ public class SelfSignedCertificateAuthority {
         this.certificateSerialProvider = certificateSerialProvider;
         this.secureRandomProvider = secureRandomProvider;
         this.signatureNameProvider = signatureNameProvider;
+        validateKeySizeOrThrow(keySize);
+
+        this.keySize = keySize;
+    }
+
+    private void validateKeySizeOrThrow(int keySize) {
         if (keySize < MIN_KEY_SIZE) {
             throw new SelfSignedCACreationException(String.format("Key size %d is smaller than minimum key size %d",
                     keySize, MIN_KEY_SIZE));
         }
-        this.keySize = keySize;
+
+        final HashSet<Integer> validKeySizes = new HashSet<>(Arrays.asList(512, 1024, 2048, 4096));
+        if (!validKeySizes.contains(keySize)) {
+            throw new SelfSignedCACreationException(String.format("Key size %d is not in list of allowed key sizes: " +
+                    "%s", keySize, validKeySizes.toString()));
+        }
     }
 
     public CertificateAuthority getCertificateAuthority() {
