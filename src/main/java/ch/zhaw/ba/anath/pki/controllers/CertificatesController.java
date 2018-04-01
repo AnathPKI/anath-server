@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -74,6 +75,7 @@ public class CertificatesController {
     }
 
     @GetMapping(path = "/{serial}/pem",
+            consumes = MediaType.ALL_VALUE,
             produces = {"application/pkix-certificate"})
     @ResponseStatus(HttpStatus.OK)
     public HttpEntity<String> getPlainPemCertificate(@PathVariable BigInteger serial) {
