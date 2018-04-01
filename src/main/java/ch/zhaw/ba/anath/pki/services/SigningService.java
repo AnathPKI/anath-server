@@ -179,6 +179,8 @@ public class SigningService {
         log.info("Test uniqueness of certificate");
         testCertificateUniquenessInCertificateRepositoryOrThrow(certificate);
 
+        log.info("Signed certificate '{}'", certificate.getSubject().toString());
+
         log.info("Store signed certificate");
         storeCertificate(certificate, userId, use);
 
@@ -230,6 +232,7 @@ public class SigningService {
 
         try {
             certificateRepository.save(certificateEntity);
+            log.info("Stored signed certificate '{}'", certificateEntity.getSubject());
         } catch (ConstraintViolationException e) {
             final String subjectString = certificate.getSubject().toString();
             log.error("Error persisting certificate '{}' with serial '{}': {}", subjectString,
