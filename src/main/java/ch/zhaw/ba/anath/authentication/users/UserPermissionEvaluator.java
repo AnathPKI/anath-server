@@ -90,6 +90,7 @@ public class UserPermissionEvaluator implements PermissionEvaluator {
         String realPermission = (String) permission;
 
         if (!userPermissions.contains(realPermission)) {
+            log.info("User permission '{}' unknown. Denying", realPermission);
             return false;
         }
 
@@ -102,6 +103,9 @@ public class UserPermissionEvaluator implements PermissionEvaluator {
         final UserEntity userEntity = optionalUserEntity.get();
         final String username = AnathSecurityHelper.getUsername(authentication);
 
-        return userEntity.getEmail().equals(username);
+        boolean result = userEntity.getEmail().equals(username);
+        log.info("User '{}' has {} to user object '{}'. {}", username, result ? "access" : "no access", userEntity
+                .getEmail(), result ? "Allowing" : "Denying");
+        return result;
     }
 }
