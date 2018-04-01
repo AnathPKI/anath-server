@@ -54,6 +54,7 @@ public class UserPermissionEvaluatorTest {
     private final static Set<SimpleGrantedAuthority> DEFAULT_USER_ROLES = Collections.singleton(new
             SimpleGrantedAuthority("USER"));
     private static final String TEST_USER_NAME = "testuser";
+    private static final String TARGET_TYPE = "user";
     private UserRepository userRepositoryMock;
     private UserPermissionEvaluator userPermissionEvaluator;
 
@@ -73,13 +74,13 @@ public class UserPermissionEvaluatorTest {
     public void hasPermission4ChangePassword() {
         final UsernamePasswordAuthenticationToken authentication = setUpTest();
 
-        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, "user", "changePassword");
+        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, TARGET_TYPE, "changePassword");
         assertThat(result, is(true));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 2L, "user", "changePassword");
+        result = userPermissionEvaluator.hasPermission(authentication, 2L, TARGET_TYPE, "changePassword");
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 3L, "user", "changePassword");
+        result = userPermissionEvaluator.hasPermission(authentication, 3L, TARGET_TYPE, "changePassword");
         assertThat(result, is(false));
     }
 
@@ -87,13 +88,13 @@ public class UserPermissionEvaluatorTest {
     public void hasPermission4GetPermissions() {
         final UsernamePasswordAuthenticationToken authentication = setUpTest();
 
-        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, "user", "get");
+        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, TARGET_TYPE, "get");
         assertThat(result, is(true));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 2L, "user", "get");
+        result = userPermissionEvaluator.hasPermission(authentication, 2L, TARGET_TYPE, "get");
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 3L, "user", "get");
+        result = userPermissionEvaluator.hasPermission(authentication, 3L, TARGET_TYPE, "get");
         assertThat(result, is(false));
     }
 
@@ -101,13 +102,13 @@ public class UserPermissionEvaluatorTest {
     public void hasPermission4UnknownPermission() {
         final UsernamePasswordAuthenticationToken authentication = setUpTest();
 
-        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, "user", "should not exist");
+        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, TARGET_TYPE, "should not exist");
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 2L, "user", "should not exist");
+        result = userPermissionEvaluator.hasPermission(authentication, 2L, TARGET_TYPE, "should not exist");
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 3L, "user", "should not exist");
+        result = userPermissionEvaluator.hasPermission(authentication, 3L, TARGET_TYPE, "should not exist");
         assertThat(result, is(false));
     }
 
@@ -129,13 +130,13 @@ public class UserPermissionEvaluatorTest {
     public void hasPermission4InvalidTargetIdType() {
         final UsernamePasswordAuthenticationToken authentication = setUpTest();
 
-        boolean result = userPermissionEvaluator.hasPermission(authentication, "id", "user", "get");
+        boolean result = userPermissionEvaluator.hasPermission(authentication, "id", TARGET_TYPE, "get");
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, "id", "user", "get");
+        result = userPermissionEvaluator.hasPermission(authentication, "id", TARGET_TYPE, "get");
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, "id", "user", "get");
+        result = userPermissionEvaluator.hasPermission(authentication, "id", TARGET_TYPE, "get");
         assertThat(result, is(false));
     }
 
@@ -143,13 +144,13 @@ public class UserPermissionEvaluatorTest {
     public void hasPermission4InvalidPermissionType() {
         final UsernamePasswordAuthenticationToken authentication = setUpTest();
 
-        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, "user", 1);
+        boolean result = userPermissionEvaluator.hasPermission(authentication, 1L, TARGET_TYPE, 1);
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 2L, "user", 1);
+        result = userPermissionEvaluator.hasPermission(authentication, 2L, TARGET_TYPE, 1);
         assertThat(result, is(false));
 
-        result = userPermissionEvaluator.hasPermission(authentication, 3L, "user", 1);
+        result = userPermissionEvaluator.hasPermission(authentication, 3L, TARGET_TYPE, 1);
         assertThat(result, is(false));
     }
 
