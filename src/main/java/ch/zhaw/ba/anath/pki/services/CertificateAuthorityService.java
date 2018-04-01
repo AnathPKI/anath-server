@@ -85,8 +85,11 @@ public class CertificateAuthorityService {
     public String getCertificate() {
         final Optional<Byte[]> optionalCaCertificate = secureStoreService.get(SECURE_STORE_CA_CERTIFICATE);
 
-        final Byte[] caCertificate = optionalCaCertificate.orElseThrow(() -> new
-                CertificateAuthorityNotInitializedException("Not initialized"));
+        final Byte[] caCertificate = optionalCaCertificate.orElseThrow(() -> {
+            log.error("Unable to get Certificate Authority certificate, Certificate Authority not initialized");
+            return new
+                    CertificateAuthorityNotInitializedException("Not initialized");
+        });
 
         return new String(ArrayUtils.toPrimitive(caCertificate));
     }
