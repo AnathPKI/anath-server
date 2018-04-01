@@ -32,6 +32,8 @@ package ch.zhaw.ba.anath.pki.dto;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Import a certificate authority private and public key in PKCS#12 format.
  *
@@ -39,7 +41,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @Data
 public class ImportCertificateAuthorityDto {
-    @NotEmpty(message = "Must not be empty")
+    @NotNull(message = "Must not be null, but can be empty")
     private String password;
     /**
      * Must be base64 encoded
