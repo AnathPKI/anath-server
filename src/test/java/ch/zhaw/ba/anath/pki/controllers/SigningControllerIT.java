@@ -31,6 +31,7 @@ package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.TestSecuritySetup;
 import ch.zhaw.ba.anath.pki.core.Certificate;
+import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.services.SigningService;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -94,6 +95,10 @@ public class SigningControllerIT {
     // Required to satisfy injection dependency
     @MockBean
     private UserRepository userRepository;
+
+    // Required to satisfy injection dependency
+    @MockBean
+    private CertificateRepository certificateRepository;
 
     private Certificate certificate;
 

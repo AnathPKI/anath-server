@@ -35,6 +35,7 @@ import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityAlreadyInitializedException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
+import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,6 +77,10 @@ public class CertificateAuthorityControllerIT {
     // Required to satisfy injection dependency
     @MockBean
     private UserRepository userRepository;
+
+    // Required to satisfy injection dependency
+    @MockBean
+    private CertificateRepository certificateRepository;
 
     @Test
     public void getCaCertificate() throws Exception {
