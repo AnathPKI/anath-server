@@ -66,7 +66,7 @@ public class CertificateAuthorityController {
     @ResponseStatus(HttpStatus.OK)
     public HttpEntity<String> getCaCertificate() {
         String caCertificateString = certificateAuthorityService.getCertificate();
-        return new ResponseEntity<>(caCertificateString, HttpStatus.OK);
+        return ResponseEntity.ok(caCertificateString);
     }
 
     @PutMapping(
