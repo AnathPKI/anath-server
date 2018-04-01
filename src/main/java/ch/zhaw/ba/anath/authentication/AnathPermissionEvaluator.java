@@ -53,7 +53,7 @@ public class AnathPermissionEvaluator implements PermissionEvaluator {
 
     public AnathPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator, CertificatePermissionEvaluator
             certificatePermissionEvaluator) {
-        this.permissionEvaluators = new HashMap<String, PermissionEvaluator>();
+        this.permissionEvaluators = new HashMap<>();
         permissionEvaluators.put(UserPermissionEvaluator.TARGET_TYPE, userPermissionEvaluator);
         permissionEvaluators.put(CertificatePermissionEvaluator.TARGET_TYPE, certificatePermissionEvaluator);
 
