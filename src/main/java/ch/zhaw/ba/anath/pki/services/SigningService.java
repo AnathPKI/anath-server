@@ -173,15 +173,16 @@ public class SigningService {
                                        String userId, String use) {
         initializeCertificateSigner();
 
-        log.info("Sign certificate signing request");
+        final String subject = certificateSigningRequest.getSubject().toString();
+        log.info("Sign certificate signing request '{}'", subject);
         final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequest);
 
-        log.info("Test uniqueness of certificate");
+        log.info("Test uniqueness of certificate '{}'", certificate.getSubject().toString());
         testCertificateUniquenessInCertificateRepositoryOrThrow(certificate);
 
-        log.info("Signed certificate '{}'", certificate.getSubject().toString());
+        log.info("Signed certificate '{}'", subject);
 
-        log.info("Store signed certificate");
+        log.info("Store signed certificate '{}'", subject);
         storeCertificate(certificate, userId, use);
 
         return certificate;
