@@ -28,6 +28,7 @@ CREATE TABLE certificates (
   -- The subject may not be UNIQUE, since uniqueness is only required for non-expired, non-revoked certificates
   subject          VARCHAR(2048) NOT NULL,
   status           VARCHAR(32)   NOT NULL,
+  revoke_reason    VARCHAR(1024),
   -- The id from a foreign system identifying the user the certificate belongs to
   user_id          VARCHAR(128)  NOT NULL,
   x509_cert_pem    BYTEA         NOT NULL,
