@@ -41,10 +41,10 @@ import java.util.Date;
  *
  * @author Rafael Ostertag
  */
-public class ConfigurableValidity implements CertificateValidityProvider {
+public class ConfigurablePeriodValidity implements CertificateValidityProvider {
     private final long periodInMillis;
 
-    public ConfigurableValidity(int days) {
+    public ConfigurablePeriodValidity(int days) {
         if (days < 1) {
             throw new IllegalArgumentException("Days must not be less than 1");
         }

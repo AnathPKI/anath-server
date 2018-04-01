@@ -40,10 +40,10 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Rafael Ostertag
  */
-public class ConfigurableValidityTest {
+public class ConfigurablePeriodValidityTest {
     private static final int ONE_SECOND_IN_MILLIS = 1000;
     private static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000L;
-    private final CertificateValidityProvider configurableValidity = new ConfigurableValidity(1);
+    private final CertificateValidityProvider configurableValidity = new ConfigurablePeriodValidity(1);
 
     @Test
     public void from() {
