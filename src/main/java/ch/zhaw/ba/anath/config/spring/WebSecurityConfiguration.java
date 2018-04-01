@@ -70,20 +70,36 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
+    /**
+     * Setup endpoint security. It does not add any filters or session management. It has been factored out, so that
+     * it can be used for tests.
+     *
+     * @param httpSecurity {@link HttpSecurity} instance
+     *
+     * @return {@link HttpSecurity} instance.
+     *
+     * @throws Exception
+     */
+    public static HttpSecurity setupSecurity(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
                 .cors()
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login/jwt").anonymous()
+                // Allow retrieval of plain certificates
+                .antMatchers(HttpMethod.GET, "/certificates/*/pem").permitAll()
                 // Allow retrieval of CA certificate
                 .antMatchers(HttpMethod.GET, "/ca").permitAll()
                 // Allow preflight checks
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
+                .anyRequest().authenticated();
+        return httpSecurity;
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        setupSecurity(http)
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(), anathProperties))
                 .addFilter(new JWTAuthorizationFilter(authenticationManager(), userDetailsService, anathProperties))
                 // this disables session creation on Spring Security

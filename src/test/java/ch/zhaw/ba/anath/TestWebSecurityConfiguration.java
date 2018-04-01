@@ -29,8 +29,8 @@
 
 package ch.zhaw.ba.anath;
 
+import ch.zhaw.ba.anath.config.spring.WebSecurityConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,18 +48,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 public class TestWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .cors()
-                .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/login/jwt").anonymous()
-                // Allow retrieval of CA certificate
-                .antMatchers(HttpMethod.GET, "/ca").permitAll()
-                // Allow preflight checks
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
+        WebSecurityConfiguration.setupSecurity(http)
                 // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
