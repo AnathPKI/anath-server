@@ -34,7 +34,6 @@ import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +47,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
@@ -65,24 +62,13 @@ import java.io.InputStreamReader;
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(transactionManager = "pkiTransactionManager")
-public class SigningServiceUninitializedCaPrivateKeyIT {
+public class SigningServiceUninitializedCaPrivateKeyIT extends CertificateAuthorityInitializer {
     public static final String TEST_CERTIFIACTE_USE_NAME = "test use";
     @PersistenceContext(unitName = "pki")
     private EntityManager entityManager;
 
     @Autowired
     private SigningService signingService;
-
-    @Autowired
-    private SecureStoreService secureStoreService;
-
-    private void initializeCaCertificate() throws IOException {
-        try (InputStream certificateInputStream = new FileInputStream(TestConstants.CA_CERT_FILE_NAME)) {
-            final byte[] certificate = IOUtils.toByteArray(certificateInputStream);
-            secureStoreService.put(CertificateAuthorityService.SECURE_STORE_CA_CERTIFICATE, certificate);
-            flushAndClear();
-        }
-    }
 
     @Test(expected = CertificateAuthorityNotInitializedException.class)
     public void signWithUninitializedCAPrivateKey() throws Exception {
@@ -95,10 +81,5 @@ public class SigningServiceUninitializedCaPrivateKeyIT {
             signingService.signCertificate(certificateSigningRequest, "test id",
                     UseEntity.DEFAULT_USE);
         }
-    }
-
-    private void flushAndClear() {
-        entityManager.flush();
-        entityManager.clear();
     }
 }

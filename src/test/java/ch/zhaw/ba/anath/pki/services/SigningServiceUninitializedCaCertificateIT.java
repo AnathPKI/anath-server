@@ -34,7 +34,6 @@ import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +47,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
@@ -65,23 +62,12 @@ import java.io.InputStreamReader;
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(transactionManager = "pkiTransactionManager")
-public class SigningServiceUninitializedCaCertificateIT {
+public class SigningServiceUninitializedCaCertificateIT extends CertificateAuthorityInitializer {
     @PersistenceContext(unitName = "pki")
     private EntityManager entityManager;
 
     @Autowired
     private SigningService signingService;
-
-    @Autowired
-    private SecureStoreService secureStoreService;
-
-    private void initializeCaPrivateKey() throws IOException {
-        try (InputStream privateKeyInputStream = new FileInputStream(TestConstants.CA_KEY_FILE_NAME)) {
-            final byte[] privateKey = IOUtils.toByteArray(privateKeyInputStream);
-            secureStoreService.put(CertificateAuthorityService.SECURE_STORE_CA_PRIVATE_KEY, privateKey);
-            flushAndClear();
-        }
-    }
 
     @Test(expected = CertificateAuthorityNotInitializedException.class)
     public void signWithUninitializedCACertificate() throws Exception {
@@ -94,10 +80,5 @@ public class SigningServiceUninitializedCaCertificateIT {
             signingService.signCertificate(certificateSigningRequest, "test id",
                     UseEntity.DEFAULT_USE);
         }
-    }
-
-    private void flushAndClear() {
-        entityManager.flush();
-        entityManager.clear();
     }
 }

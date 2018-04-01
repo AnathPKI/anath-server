@@ -39,7 +39,6 @@ import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +49,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 
@@ -72,10 +68,8 @@ import static org.junit.Assert.assertThat;
         "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
 })
 @Transactional(transactionManager = "pkiTransactionManager")
-public class SigningServiceIT {
+public class SigningServiceIT extends CertificateAuthorityInitializer {
     public static final String TEST_CERTIFIACTE_USE_NAME = "test use";
-    @PersistenceContext(unitName = "pki")
-    private EntityManager entityManager;
 
     @Autowired
     private SigningService signingService;
@@ -86,33 +80,9 @@ public class SigningServiceIT {
     @Autowired
     private CertificateRepository certificateRepository;
 
-    @Autowired
-    private SecureStoreService secureStoreService;
-
     @Before
     public void setUp() throws IOException {
         initializeCa();
-    }
-
-    private void initializeCa() throws IOException {
-        initializeCaCertificate();
-        initializeCaPrivateKey();
-    }
-
-    private void initializeCaPrivateKey() throws IOException {
-        try (InputStream privateKeyInputStream = new FileInputStream(TestConstants.CA_KEY_FILE_NAME)) {
-            final byte[] privateKey = IOUtils.toByteArray(privateKeyInputStream);
-            secureStoreService.put(CertificateAuthorityService.SECURE_STORE_CA_PRIVATE_KEY, privateKey);
-            flushAndClear();
-        }
-    }
-
-    private void initializeCaCertificate() throws IOException {
-        try (InputStream certificateInputStream = new FileInputStream(TestConstants.CA_CERT_FILE_NAME)) {
-            final byte[] certificate = IOUtils.toByteArray(certificateInputStream);
-            secureStoreService.put(CertificateAuthorityService.SECURE_STORE_CA_CERTIFICATE, certificate);
-            flushAndClear();
-        }
     }
 
     @Test
@@ -279,10 +249,5 @@ public class SigningServiceIT {
         }
 
         flushAndClear();
-    }
-
-    private void flushAndClear() {
-        entityManager.flush();
-        entityManager.clear();
     }
 }
