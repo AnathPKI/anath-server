@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath;
 
 import ch.zhaw.ba.anath.authentication.AnathPermissionEvaluator;
+import ch.zhaw.ba.anath.authentication.pki.CertificatePermissionEvaluator;
 import ch.zhaw.ba.anath.authentication.users.UserPermissionEvaluator;
 import ch.zhaw.ba.anath.config.spring.AnathPermissionEvaluatorWebSecurityConfig;
 import org.springframework.context.annotation.Import;
@@ -48,6 +49,7 @@ import java.lang.annotation.Target;
         TestWebSecurityConfiguration.class,
         AnathPermissionEvaluatorWebSecurityConfig.class,
         AnathPermissionEvaluator.class,
+        CertificatePermissionEvaluator.class,
         UserPermissionEvaluator.class})
 public @interface TestSecuritySetup {
 }
