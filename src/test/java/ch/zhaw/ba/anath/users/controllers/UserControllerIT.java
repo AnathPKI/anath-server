@@ -317,7 +317,9 @@ public class UserControllerIT {
                         .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
         )
                 .andExpect(authenticated())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.links[0].rel", is("list")))
+                .andExpect(jsonPath("$.links[0].href", is("http://localhost/users")));
         verify(userService).deleteUser(1L);
     }
 

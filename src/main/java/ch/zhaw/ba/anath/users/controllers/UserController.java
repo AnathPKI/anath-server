@@ -32,6 +32,7 @@ package ch.zhaw.ba.anath.users.controllers;
 import ch.zhaw.ba.anath.users.dto.*;
 import ch.zhaw.ba.anath.users.services.UserService;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -88,10 +89,13 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteUser(@PathVariable long id) {
+    public ResourceSupport deleteUser(@PathVariable long id) {
         userService.deleteUser(id);
+        final ResourceSupport resourceSupport = new ResourceSupport();
+        resourceSupport.add(linkTo(methodOn(UserController.class).getAll()).withRel("list"));
+        return resourceSupport;
     }
 
     @PutMapping(path = "/{id}/password")
