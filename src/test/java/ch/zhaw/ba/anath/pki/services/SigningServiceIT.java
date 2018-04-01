@@ -147,6 +147,58 @@ public class SigningServiceIT {
     }
 
     @Test
+    public void signCertificateWithSameRevoked() throws Exception {
+        final Certificate certificateToBeRevoked;
+        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            certificateToBeRevoked = signingService.signCertificate(certificateSigningRequest, "test id",
+                    UseEntity.DEFAULT_USE);
+        }
+        assertThat(certificateToBeRevoked, is(notNullValue()));
+
+        // We revoke the currently signed certificate
+        final Optional<CertificateEntity> currentActive = certificateRepository.findOneBySerial(certificateToBeRevoked
+                .getSerial());
+        final CertificateEntity certificateEntityToBeRevoked = currentActive.get();
+        certificateEntityToBeRevoked.setStatus(CertificateStatus.REVOKED);
+        certificateRepository.save(certificateEntityToBeRevoked);
+
+        flushAndClear();
+
+        // And sign it again
+        final Certificate certificate;
+        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(csr);
+            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
+                    UseEntity.DEFAULT_USE);
+        }
+        assertThat(certificate, is(notNullValue()));
+
+        flushAndClear();
+
+        Optional<CertificateEntity> optionalCertificateEntity = certificateRepository.findOneBySerial(certificate
+                .getSerial());
+        assertThat(optionalCertificateEntity.isPresent(), is(true));
+
+        final CertificateEntity certificateEntity = optionalCertificateEntity.get();
+        assertThat(certificateEntity.getStatus(), is(CertificateStatus.VALID));
+        assertThat(certificateEntity.getUserId(), is(equalTo("test id")));
+        assertThat(certificateEntity.getNotValidAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
+        assertThat(certificateEntity.getNotValidBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
+        assertThat(certificateEntity.getSubject(), is(equalTo(certificate.getSubject().toString())));
+
+        final UseEntity useEntity = certificateEntity.getUse();
+        assertThat(useEntity, is(not(nullValue())));
+        assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
+    }
+
+    @Test
     public void signWithNonExistingUse() throws Exception {
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
