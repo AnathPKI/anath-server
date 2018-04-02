@@ -31,6 +31,7 @@ package ch.zhaw.ba.anath.pki;
 
 import ch.zhaw.ba.anath.pki.services.RevocationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +43,7 @@ import java.util.Date;
  * @author Rafael Ostertag
  */
 @Component
+@Profile("!tests")
 @Slf4j
 public class CrlMaintenanceTask {
     private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000L;
