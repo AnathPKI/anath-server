@@ -29,7 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
-import ch.zhaw.ba.anath.pki.dto.RevokeReasonDto;
+import ch.zhaw.ba.anath.pki.dto.RevocationReasonDto;
 import ch.zhaw.ba.anath.pki.services.RevocationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.ResourceSupport;
@@ -61,9 +61,9 @@ public class RevocationController {
     @PutMapping(path = "/{serial}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'revoke'))")
-    public ResourceSupport revoke(@PathVariable BigInteger serial, @RequestBody @Validated RevokeReasonDto
-            revokeReasonDto) {
-        revocationService.revokeCertificate(serial, revokeReasonDto.getReason());
+    public ResourceSupport revoke(@PathVariable BigInteger serial, @RequestBody @Validated RevocationReasonDto
+            revocationReasonDto) {
+        revocationService.revokeCertificate(serial, revocationReasonDto.getReason());
 
         final ResourceSupport resourceSupport = new ResourceSupport();
         resourceSupport.add(linkTo(methodOn(CertificatesController.class).getCertificate(serial)).withSelfRel());

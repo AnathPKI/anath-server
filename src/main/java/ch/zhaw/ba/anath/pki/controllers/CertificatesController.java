@@ -31,7 +31,7 @@ package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import ch.zhaw.ba.anath.pki.dto.CertificateResponseDto;
-import ch.zhaw.ba.anath.pki.dto.RevokeReasonDto;
+import ch.zhaw.ba.anath.pki.dto.RevocationReasonDto;
 import ch.zhaw.ba.anath.pki.services.CertificateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Resources;
@@ -68,7 +68,7 @@ public class CertificatesController {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'get'))")
     public CertificateResponseDto getCertificate(@PathVariable BigInteger serial) {
         final CertificateResponseDto certificate = certificateService.getCertificate(serial);
-        certificate.add(linkTo(methodOn(RevocationController.class).revoke(serial, new RevokeReasonDto())).withRel
+        certificate.add(linkTo(methodOn(RevocationController.class).revoke(serial, new RevocationReasonDto())).withRel
                 ("revoke"));
         certificate.add(linkTo(methodOn(CertificatesController.class).getPlainPemCertificate(serial)).withRel("pem"));
         return certificate;
@@ -93,7 +93,7 @@ public class CertificatesController {
             certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getPlainPemCertificate
                     (certificateListItemDto.getSerial())).withRel("pem"));
             certificateListItemDto.add(linkTo(methodOn(RevocationController.class).revoke
-                    (certificateListItemDto.getSerial(), new RevokeReasonDto())).withRel("revoke"));
+                    (certificateListItemDto.getSerial(), new RevocationReasonDto())).withRel("revoke"));
         }
         return new Resources<>(all, linkTo(SigningController.class).withRel("sign"));
     }

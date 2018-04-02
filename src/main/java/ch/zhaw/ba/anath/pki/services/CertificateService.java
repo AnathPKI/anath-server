@@ -157,7 +157,8 @@ public class CertificateService {
         certificateValidityBit.setNotAfter(certificateEntity.getNotValidAfter());
         certificateValidityBit.setNotBefore(certificateEntity.getNotValidBefore());
         certificateValidityBit.setRevoked(certificateEntity.getStatus() == CertificateStatus.REVOKED);
-        certificateValidityBit.setRevokeReason(certificateEntity.getRevokeReason());
+        certificateValidityBit.setRevocationReason(certificateEntity.getRevocationReason());
+        certificateValidityBit.setRevocationTime(certificateEntity.getRevocationTime());
         return certificateValidityBit;
     }
 

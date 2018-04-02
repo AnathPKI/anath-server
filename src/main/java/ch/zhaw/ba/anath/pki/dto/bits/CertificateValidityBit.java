@@ -39,7 +39,8 @@ import java.util.Date;
 @Data
 public class CertificateValidityBit {
     private boolean revoked;
-    private String revokeReason;
+    private String revocationReason;
+    private Date revocationTime;
     private Date notBefore;
     private Date notAfter;
     private boolean expired;

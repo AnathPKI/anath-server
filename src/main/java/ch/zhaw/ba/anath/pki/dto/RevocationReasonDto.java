@@ -36,7 +36,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  * @author Rafael Ostertag
  */
 @Data
-public class RevokeReasonDto {
+public class RevocationReasonDto {
     @NotEmpty
     private String reason;
 }

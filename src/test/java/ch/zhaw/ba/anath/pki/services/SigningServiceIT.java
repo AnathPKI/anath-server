@@ -110,6 +110,8 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
         assertThat(certificateEntity.getNotValidAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
         assertThat(certificateEntity.getNotValidBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
         assertThat(certificateEntity.getSubject(), is(equalTo(certificate.getSubject().toString())));
+        assertThat(certificateEntity.getRevocationReason(), is(nullValue()));
+        assertThat(certificateEntity.getRevocationTime(), is(nullValue()));
 
         final UseEntity useEntity = certificateEntity.getUse();
         assertThat(useEntity, is(not(nullValue())));

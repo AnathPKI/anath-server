@@ -102,7 +102,8 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
         assertThat(certificateResponseDto.getCert().getPem(), is(certificateString));
         assertThat(certificateResponseDto.getUse(), is("plain"));
         final CertificateValidityBit validity = certificateResponseDto.getValidity();
-        assertThat(validity.getRevokeReason(), is(nullValue()));
+        assertThat(validity.getRevocationReason(), is(nullValue()));
+        assertThat(validity.getRevocationTime(), is(nullValue()));
         assertThat(validity.getNotAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
         assertThat(validity.getNotBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
         assertThat(validity.isExpired(), is(false));
@@ -179,7 +180,8 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
         assertThat(certificateResponseDto.getUse(), is(TEST_USE));
 
         final CertificateValidityBit validity = certificateResponseDto.getValidity();
-        assertThat(validity.getRevokeReason(), is(nullValue()));
+        assertThat(validity.getRevocationReason(), is(nullValue()));
+        assertThat(validity.getRevocationTime(), is(nullValue()));
         assertThat(validity.getNotAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
         assertThat(validity.getNotBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
         assertThat(validity.isExpired(), is(false));

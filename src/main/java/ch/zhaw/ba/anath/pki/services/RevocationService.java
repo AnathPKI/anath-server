@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.Optional;
 
 /**
@@ -75,8 +76,9 @@ public class RevocationService {
             throw new CertificateAlreadyRevokedException("Certificate already revoked");
         }
 
-        certificateEntity.setRevokeReason(trimmedReason);
+        certificateEntity.setRevocationReason(trimmedReason);
         certificateEntity.setStatus(CertificateStatus.REVOKED);
+        certificateEntity.setRevocationTime(new Timestamp(System.currentTimeMillis()));
 
         certificateRepository.save(certificateEntity);
         log.info("Revoked certificate with serial {} with reason '{}'", serial.toString(), trimmedReason);

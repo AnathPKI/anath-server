@@ -103,7 +103,8 @@ public class CertificatesControllerIT {
                 .andExpect(jsonPath("$.config", is(nullValue())))
                 .andExpect(jsonPath("$.cert.pem", is("PEM goes here")))
                 .andExpect(jsonPath("$.validity.revoked", is(false)))
-                .andExpect(jsonPath("$.validity.revokeReason", is(nullValue())))
+                .andExpect(jsonPath("$.validity.revocationReason", is(nullValue())))
+                .andExpect(jsonPath("$.validity.revocationTime", is(nullValue())))
                 .andExpect(jsonPath("$.validity.expired", is(false)))
                 .andExpect(jsonPath("$.validity.notBefore", is(not(nullValue()))))
                 .andExpect(jsonPath("$.validity.notAfter", is(not(nullValue()))))
@@ -134,7 +135,8 @@ public class CertificatesControllerIT {
                 .andExpect(jsonPath("$.config", is(nullValue())))
                 .andExpect(jsonPath("$.cert.pem", is("PEM goes here")))
                 .andExpect(jsonPath("$.validity.revoked", is(false)))
-                .andExpect(jsonPath("$.validity.revokeReason", is(nullValue())))
+                .andExpect(jsonPath("$.validity.revocationReason", is(nullValue())))
+                .andExpect(jsonPath("$.validity.revocationTime", is(nullValue())))
                 .andExpect(jsonPath("$.validity.expired", is(false)))
                 .andExpect(jsonPath("$.validity.notBefore", is(not(nullValue()))))
                 .andExpect(jsonPath("$.validity.notAfter", is(not(nullValue()))))
@@ -196,7 +198,7 @@ public class CertificatesControllerIT {
         final CertificateResponseDto certificateResponseDto = new CertificateResponseDto();
         certificateResponseDto.setUse("plain");
         final CertificateValidityBit certificateValidityBit = new CertificateValidityBit();
-        certificateValidityBit.setRevokeReason(null);
+        certificateValidityBit.setRevocationReason(null);
         certificateValidityBit.setRevoked(false);
         certificateValidityBit.setNotBefore(new Date());
         certificateValidityBit.setNotAfter(new Date());

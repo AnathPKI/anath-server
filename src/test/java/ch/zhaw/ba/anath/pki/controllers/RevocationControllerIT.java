@@ -30,7 +30,7 @@
 package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.TestSecuritySetup;
-import ch.zhaw.ba.anath.pki.dto.RevokeReasonDto;
+import ch.zhaw.ba.anath.pki.dto.RevocationReasonDto;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.services.RevocationService;
@@ -82,13 +82,13 @@ public class RevocationControllerIT {
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void revokeAsAdmin() throws Exception {
-        final RevokeReasonDto revokeReasonDto = new RevokeReasonDto();
-        revokeReasonDto.setReason("test");
+        final RevocationReasonDto revocationReasonDto = new RevocationReasonDto();
+        revocationReasonDto.setReason("test");
 
         mvc.perform(
                 put("/revoke/{serial}", BigInteger.ONE)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsBytes(revokeReasonDto))
+                        .content(OBJECT_MAPPER.writeValueAsBytes(revocationReasonDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk());
@@ -105,13 +105,13 @@ public class RevocationControllerIT {
         given(certificateRepository.findOneBySerial(BigInteger.ONE)).willReturn(java.util.Optional.of
                 (certificateEntity));
 
-        final RevokeReasonDto revokeReasonDto = new RevokeReasonDto();
-        revokeReasonDto.setReason("test");
+        final RevocationReasonDto revocationReasonDto = new RevocationReasonDto();
+        revocationReasonDto.setReason("test");
 
         mvc.perform(
                 put("/revoke/{serial}", BigInteger.ONE)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsBytes(revokeReasonDto))
+                        .content(OBJECT_MAPPER.writeValueAsBytes(revocationReasonDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk());
@@ -128,13 +128,13 @@ public class RevocationControllerIT {
         given(certificateRepository.findOneBySerial(BigInteger.ONE)).willReturn(java.util.Optional.of
                 (certificateEntity));
 
-        final RevokeReasonDto revokeReasonDto = new RevokeReasonDto();
-        revokeReasonDto.setReason("test");
+        final RevocationReasonDto revocationReasonDto = new RevocationReasonDto();
+        revocationReasonDto.setReason("test");
 
         mvc.perform(
                 put("/revoke/{serial}", BigInteger.ONE)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsBytes(revokeReasonDto))
+                        .content(OBJECT_MAPPER.writeValueAsBytes(revocationReasonDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -144,13 +144,13 @@ public class RevocationControllerIT {
 
     @Test
     public void revokeAsUnauthenticated() throws Exception {
-        final RevokeReasonDto revokeReasonDto = new RevokeReasonDto();
-        revokeReasonDto.setReason("test");
+        final RevocationReasonDto revocationReasonDto = new RevocationReasonDto();
+        revocationReasonDto.setReason("test");
 
         mvc.perform(
                 put("/revoke/{serial}", BigInteger.ONE)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .content(OBJECT_MAPPER.writeValueAsBytes(revokeReasonDto))
+                        .content(OBJECT_MAPPER.writeValueAsBytes(revocationReasonDto))
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());

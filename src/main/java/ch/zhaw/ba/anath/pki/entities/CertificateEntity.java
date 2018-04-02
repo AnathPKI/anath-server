@@ -68,8 +68,11 @@ public class CertificateEntity {
     @Enumerated(EnumType.STRING)
     private CertificateStatus status;
 
-    @Column(name = "revoke_reason", nullable = true)
-    private String revokeReason;
+    @Column(name = "revocation_reason", nullable = true)
+    private String revocationReason;
+
+    @Column(name = "revocation_time", nullable = true)
+    private Timestamp revocationTime;
 
     @Column(name = "user_id", nullable = false)
     private String userId;

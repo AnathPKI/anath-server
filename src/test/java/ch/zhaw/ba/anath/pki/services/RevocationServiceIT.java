@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -82,6 +83,8 @@ public class RevocationServiceIT extends CertificateAuthorityInitializer {
         final CertificateResponseDto certificateResponseDto = certificateService.getCertificate(certificate.getSerial
                 ());
 
+        assertThat(certificateResponseDto.getValidity().getRevocationTime(), is(notNullValue()));
+        assertThat(certificateResponseDto.getValidity().getRevocationReason(), is("test"));
         assertThat(certificateResponseDto.getValidity().isRevoked(), is(true));
         assertThat(certificateResponseDto.getValidity().isExpired(), is(false));
     }
