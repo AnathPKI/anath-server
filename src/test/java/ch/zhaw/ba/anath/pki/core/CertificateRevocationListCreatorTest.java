@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -77,16 +77,12 @@ public class CertificateRevocationListCreatorTest {
         final CertificateRevocationListCreator certificateRevocationListCreator =
                 createCertificateRevocationListCreater(certificateAuthority);
 
-        final Date nextUpdate = new Date(ARBITRARY_DATE_IN_MILLIS + ARBITRARY_DATE_IN_MILLIS);
-        // Used later to compare to thisUpdate.
-        final Date now = new Date();
         final CertificateRevocationList certificateRevocationList = certificateRevocationListCreator.create
-                (revokedCertificates, nextUpdate);
+                (revokedCertificates);
 
         assertEquals(certificateRevocationList.getIssuer(), certificateAuthority.getCASubjectName());
-        assertEquals(certificateRevocationList.getNextUpdate(), nextUpdate);
-        assertThat(certificateRevocationList.getThisUpdate().getTime(), is(both(greaterThan(now.getTime()
-                - TEN_SECONDS_IN_MILLIS)).and(lessThan(now.getTime() + TEN_SECONDS_IN_MILLIS))));
+        assertThat(certificateRevocationList.getNextUpdate().after(new Date()), is(true));
+        assertThat(certificateRevocationList.getThisUpdate().before(new Date()), is(true));
 
         try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(crlFile))) {
             final PEMCertificateRevocationListWriter pemCertificateRevocationListWriter = new
@@ -110,12 +106,11 @@ public class CertificateRevocationListCreatorTest {
         // Used later to compare to thisUpdate.
         final Date now = new Date();
         final CertificateRevocationList certificateRevocationList = certificateRevocationListCreator.create
-                (revokedCertificates, nextUpdate);
+                (revokedCertificates);
 
         assertEquals(certificateRevocationList.getIssuer(), certificateAuthority.getCASubjectName());
-        assertEquals(certificateRevocationList.getNextUpdate(), nextUpdate);
-        assertThat(certificateRevocationList.getThisUpdate().getTime(), is(both(greaterThan(now.getTime()
-                - TEN_SECONDS_IN_MILLIS)).and(lessThan(now.getTime() + TEN_SECONDS_IN_MILLIS))));
+        assertThat(certificateRevocationList.getNextUpdate().after(new Date()), is(true));
+        assertThat(certificateRevocationList.getThisUpdate().before(new Date()), is(true));
 
         try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(crlFile))) {
             final PEMCertificateRevocationListWriter pemCertificateRevocationListWriter = new
@@ -162,7 +157,7 @@ public class CertificateRevocationListCreatorTest {
         return
                 new CertificateRevocationListCreator(
                         new Sha512WithRsa(),
-                        certificateAuthority);
+                        certificateAuthority, new ConfigurablePeriodCRLValidity(2));
     }
 
     private CertificateAuthority readCertificateAuthority() throws IOException {

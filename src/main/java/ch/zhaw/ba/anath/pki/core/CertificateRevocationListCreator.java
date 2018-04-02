@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.RevocationListSignerException;
+import ch.zhaw.ba.anath.pki.core.interfaces.CertificateRevocationListValidityProvider;
 import ch.zhaw.ba.anath.pki.core.interfaces.SignatureNameProvider;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.cert.X509CRLHolder;
@@ -51,11 +52,13 @@ public class CertificateRevocationListCreator {
     private final SignatureNameProvider signatureNameProvider;
     private final ContentSigner contentSigner;
     private final CertificateAuthority certificateAuthority;
+    private final CertificateRevocationListValidityProvider certificateRevocationListValidityProvider;
 
     public CertificateRevocationListCreator(SignatureNameProvider signatureNameProvider, CertificateAuthority
-            certificateAuthority) {
+            certificateAuthority, CertificateRevocationListValidityProvider certificateRevocationListValidityProvider) {
         this.signatureNameProvider = signatureNameProvider;
         this.certificateAuthority = certificateAuthority;
+        this.certificateRevocationListValidityProvider = certificateRevocationListValidityProvider;
         this.contentSigner = initializeContentSigner();
     }
 
@@ -70,16 +73,18 @@ public class CertificateRevocationListCreator {
     }
 
     /**
-     * Create a {@link CertificateRevocationList}. The current time is taken for {@code thisUpdate}.
+     * Create a {@link CertificateRevocationList}. The {@code thisUpdate} and {@code nextUpdate} fields in the X.509
+     * CRL are computed using the provided {@link CertificateRevocationListValidityProvider}.
      *
      * @param revokedCertificates {@link List} of {@link RevokedCertificate}.
-     * @param nextUpdate          time when the next update is due.
      *
      * @return a {@link CertificateRevocationList} instance
      */
-    public CertificateRevocationList create(List<RevokedCertificate> revokedCertificates, Date nextUpdate) {
-        final Date now = new Date();
-        final X509v2CRLBuilder x509v2CRLBuilder = new X509v2CRLBuilder(certificateAuthority.getCASubjectName(), now);
+    public CertificateRevocationList create(List<RevokedCertificate> revokedCertificates) {
+        final Date thisUpdate = certificateRevocationListValidityProvider.thisUpdate();
+        final Date nextUpdate = certificateRevocationListValidityProvider.nextUpdate();
+        final X509v2CRLBuilder x509v2CRLBuilder = new X509v2CRLBuilder(certificateAuthority.getCASubjectName(),
+                thisUpdate);
         x509v2CRLBuilder.setNextUpdate(nextUpdate);
 
         for (RevokedCertificate revokedCertificate : revokedCertificates) {
@@ -89,6 +94,6 @@ public class CertificateRevocationListCreator {
         }
 
         final X509CRLHolder x509CRLHolder = x509v2CRLBuilder.build(contentSigner);
-        return new CertificateRevocationList(x509CRLHolder, now, nextUpdate);
+        return new CertificateRevocationList(x509CRLHolder, thisUpdate, nextUpdate);
     }
 }
