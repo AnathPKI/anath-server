@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.pki.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -37,6 +38,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Rafael Ostertag
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class UseDto extends ResourceSupport {
     @NotEmpty
     private String use;
