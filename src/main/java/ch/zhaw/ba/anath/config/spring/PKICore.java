@@ -32,9 +32,11 @@ package ch.zhaw.ba.anath.config.spring;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import ch.zhaw.ba.anath.pki.core.*;
 import ch.zhaw.ba.anath.pki.core.interfaces.*;
+import ch.zhaw.ba.anath.pki.corecustomizations.OrganizationAndEmailCertificateConstraint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * @author Rafael Ostertag
@@ -70,7 +72,16 @@ public class PKICore {
     }
 
     @Bean
-    public CertificateConstraintProvider certificateConstraintProvider() {
+    @Profile("tests")
+    public CertificateConstraintProvider testCertificateConstraintProvider() {
+        log.warn("Tests enabled, use OrganizationCertificateConstraint");
         return new OrganizationCertificateConstraint();
+    }
+
+    @Bean
+    @Profile("!tests")
+    public CertificateConstraintProvider certificateConstraintProvider() {
+        log.info("Use production OrganizationAndEmailCertificateConstraint()");
+        return new OrganizationAndEmailCertificateConstraint();
     }
 }
