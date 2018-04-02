@@ -32,6 +32,7 @@ package ch.zhaw.ba.anath.pki.services;
 import ch.zhaw.ba.anath.pki.core.*;
 import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import ch.zhaw.ba.anath.pki.dto.CertificateResponseDto;
+import ch.zhaw.ba.anath.pki.dto.UseDto;
 import ch.zhaw.ba.anath.pki.dto.bits.CertificateValidityBit;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateNotFoundException;
@@ -49,6 +50,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.*;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -65,11 +67,15 @@ import static org.junit.Assert.assertThat;
 })
 @Transactional(transactionManager = "pkiTransactionManager")
 public class CertificateServiceIT extends CertificateAuthorityInitializer {
+    private static final String TEST_USE = "test.use";
     @PersistenceContext(unitName = "pki")
     private EntityManager entityManager;
 
     @Autowired
     private CertificateService certificateService;
+
+    @Autowired
+    private UseService useService;
 
     @Autowired
     private SigningService signingService;
@@ -80,6 +86,10 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
     }
 
     private Certificate signAndAddCertificate() throws IOException {
+        return signAndAddCertificate(UseEntity.DEFAULT_USE);
+    }
+
+    private Certificate signAndAddCertificate(String use) throws IOException {
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
@@ -87,7 +97,7 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
             certificate = signingService.signCertificate(certificateSigningRequest, "test id",
-                    UseEntity.DEFAULT_USE);
+                    use);
         }
         return certificate;
     }
@@ -152,5 +162,37 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
     public void getAllEmpty() {
         final List<CertificateListItemDto> all = certificateService.getAll();
         assertThat(all, is(empty()));
+    }
+
+    @Test
+    public void testWithConfiguration() throws IOException {
+        final UseDto useDto = new UseDto();
+        useDto.setConfiguration("${caCertificate} ${userCertificate}");
+        useDto.setUse(TEST_USE);
+
+        useService.create(useDto);
+
+        final Certificate certificate = signAndAddCertificate(TEST_USE);
+
+        final CertificateResponseDto certificateResponseDto = certificateService.getCertificate(certificate.getSerial
+                ());
+
+        assertThat(certificateResponseDto.getConfig(), is(notNullValue()));
+        final byte[] decodedConfiguration = Base64.getDecoder().decode(certificateResponseDto.getConfig());
+        final String configuration = new String(decodedConfiguration);
+
+        assertThat(configuration, containsString("-----BEGIN CERTIFICATE-----"));
+        assertThat(configuration, containsString("-----END CERTIFICATE-----"));
+
+        final String certificateString = certificateToPemString(certificate);
+        assertThat(certificateResponseDto.getCert().getPem(), is(certificateString));
+        assertThat(certificateResponseDto.getUse(), is(TEST_USE));
+
+        final CertificateValidityBit validity = certificateResponseDto.getValidity();
+        assertThat(validity.getRevokeReason(), is(nullValue()));
+        assertThat(validity.getNotAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
+        assertThat(validity.getNotBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
+        assertThat(validity.isExpired(), is(false));
+        assertThat(validity.isRevoked(), is(false));
     }
 }

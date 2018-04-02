@@ -35,13 +35,16 @@ import ch.zhaw.ba.anath.pki.dto.bits.CertificateValidityBit;
 import ch.zhaw.ba.anath.pki.dto.bits.PemBit;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateNotFoundException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,9 +57,12 @@ import java.util.stream.Collectors;
 @Transactional(transactionManager = "pkiTransactionManager")
 public class CertificateService {
     private final CertificateRepository certificateRepository;
+    private final ConfigurationTemplateService configurationTemplateService;
 
-    public CertificateService(CertificateRepository certificateRepository) {
+    public CertificateService(CertificateRepository certificateRepository, ConfigurationTemplateService
+            configurationTemplateService) {
         this.certificateRepository = certificateRepository;
+        this.configurationTemplateService = configurationTemplateService;
     }
 
     /**
@@ -118,14 +124,31 @@ public class CertificateService {
     private CertificateResponseDto certificateEntityToCertificateResponseDto(CertificateEntity certificateEntity) {
         final CertificateResponseDto certificateResponseDto = new CertificateResponseDto();
         certificateResponseDto.setUse(certificateEntity.getUse().getUse());
-        // TODO: FILL IN
-        certificateResponseDto.setConfig(null);
+        final String configuration = processConfigurationTemplateAndEncodeBase64(certificateEntity);
+        certificateResponseDto.setConfig(configuration);
         final PemBit certificatePemBit = createCertificatePemBit(certificateEntity);
         certificateResponseDto.setCert(certificatePemBit);
 
         final CertificateValidityBit certificateValidityBit = createCertificateValidityBit(certificateEntity);
         certificateResponseDto.setValidity(certificateValidityBit);
         return certificateResponseDto;
+    }
+
+    private String processConfigurationTemplateAndEncodeBase64(CertificateEntity certificateEntity) {
+        final UseEntity use = certificateEntity.getUse();
+        if (use.getConfig() == null || use.getConfig().length == 0) {
+            return null;
+        }
+
+        final String pemEncodedUserCertificate = new String(certificateEntity.getX509PEMCertificate());
+        final String configurationTemplate = new String(ArrayUtils.toPrimitive(use.getConfig()));
+
+        log.info("Process configuration template for '{}'", certificateEntity.getSubject());
+        final String configuration = configurationTemplateService.process(pemEncodedUserCertificate,
+                configurationTemplate);
+
+        log.info("Base64 encode configuration");
+        return Base64.getEncoder().encodeToString(configuration.getBytes());
     }
 
     private CertificateValidityBit createCertificateValidityBit(CertificateEntity certificateEntity) {
