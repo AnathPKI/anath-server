@@ -71,7 +71,7 @@ public class SelfSignedCertificateAuthority {
      * @param selfSignedCANameBuilder     A prepared {@link SelfSignedCANameBuilder} providing the subject and issuer of
      *                                    the self-signed, self-issued certificate.
      * @param certificateValidityProvider A {@link CertificateValidityProvider} instance providing the temporal
-     *                                    validity period of the self-signed, self-issued certificate.
+     *                                    certificateValidity period of the self-signed, self-issued certificate.
      * @param certificateSerialProvider   A {@link CertificateSerialProvider} instance providing the serial number for
      *                                    the self-signed, self-issued certificate.
      * @param secureRandomProvider        A {@link SecureRandomProvider} instance providing a secure random generator

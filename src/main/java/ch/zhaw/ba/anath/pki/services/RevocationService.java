@@ -50,6 +50,7 @@ import java.util.Optional;
 @Service
 @Transactional(transactionManager = "pkiTransactionManager")
 public class RevocationService {
+
     private CertificateRepository certificateRepository;
 
     public RevocationService(CertificateRepository certificateRepository) {

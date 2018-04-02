@@ -35,7 +35,7 @@ import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import java.sql.Timestamp;
 
 /**
- * Utilities to determine the validity of a certificate represented by a {@link CertificateEntity}
+ * Utilities to determine the certificateValidity of a certificate represented by a {@link CertificateEntity}
  *
  * @author Rafael Ostertag
  */

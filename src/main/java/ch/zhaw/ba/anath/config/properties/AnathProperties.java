@@ -49,7 +49,11 @@ public class AnathProperties {
     /**
      * Validity of certificates in days.
      */
-    private int validity = 180;
+    private int certificateValidity = 180;
+    /**
+     * Validity of CRL in days
+     */
+    private int crlValidity = 30;
     private Authentication authentication = new Authentication();
 
     @Data

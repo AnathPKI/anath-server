@@ -67,8 +67,8 @@ public class PKICore {
 
     @Bean
     public CertificateValidityProvider certificateValidityProvider() {
-        log.info("Use ConfigurablePeriodValidity with a value of {} day(s)", anathProperties.getValidity());
-        return new ConfigurablePeriodValidity(anathProperties.getValidity());
+        log.info("Use ConfigurablePeriodValidity with a value of {} day(s)", anathProperties.getCertificateValidity());
+        return new ConfigurablePeriodValidity(anathProperties.getCertificateValidity());
     }
 
     @Bean
