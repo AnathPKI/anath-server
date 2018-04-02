@@ -135,6 +135,8 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isCreated())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(header().string("Location", "http://localhost/ca"));
         verify(certificateAuthorityInitializationService).importPkcs12CertificateAuthority
                 (importCertificateAuthorityDto);

@@ -49,6 +49,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -92,6 +93,8 @@ public class UsesControllerIT {
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
     }
 
@@ -106,6 +109,8 @@ public class UsesControllerIT {
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
     }
 
@@ -133,6 +138,8 @@ public class UsesControllerIT {
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
     }
 
@@ -236,6 +243,8 @@ public class UsesControllerIT {
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUseDto))
         )
                 .andExpect(authenticated())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
     }
 
@@ -284,6 +293,8 @@ public class UsesControllerIT {
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
         verify(useService).delete(TEST_KEY);
     }

@@ -50,8 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -102,6 +101,8 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
+                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].links[0].rel", is("self")))
                 .andExpect(jsonPath("$.content[0].links[0].href", is("http://localhost/users/1")));
@@ -146,6 +147,8 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
+                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.admin", is(false)))
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.lastname", is(LASTNAME)))
@@ -184,6 +187,8 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
+                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.admin", is(false)))
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.lastname", is(LASTNAME)))
@@ -268,6 +273,8 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
+                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("self")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users/1")));
     }
@@ -318,6 +325,8 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
+                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("list")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users")));
         verify(userService).deleteUser(1L);
@@ -387,6 +396,8 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
+                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("self")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users/1")));
     }

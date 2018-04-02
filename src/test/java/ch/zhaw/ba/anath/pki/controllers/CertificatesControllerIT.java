@@ -98,6 +98,8 @@ public class CertificatesControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.use", is("plain")))
                 .andExpect(jsonPath("$.config", is(nullValue())))
                 .andExpect(jsonPath("$.cert.pem", is("PEM goes here")))
@@ -130,6 +132,8 @@ public class CertificatesControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.use", is("plain")))
                 .andExpect(jsonPath("$.config", is(nullValue())))
                 .andExpect(jsonPath("$.cert.pem", is("PEM goes here")))
@@ -269,6 +273,10 @@ public class CertificatesControllerIT {
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void getAllAsAdmin() throws Exception {
+        testGetAllUsers();
+    }
+
+    private void testGetAllUsers() throws Exception {
         final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
         certificateListItemDto.setValid(true);
         certificateListItemDto.setUse("plain");
@@ -283,6 +291,8 @@ public class CertificatesControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.content[0].subject", is("subject")))
                 .andExpect(jsonPath("$.content[0].use", is("plain")))
                 .andExpect(jsonPath("$.content[0].valid", is(true)))
@@ -300,32 +310,7 @@ public class CertificatesControllerIT {
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     public void getAllAsUser() throws Exception {
-        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
-        certificateListItemDto.setValid(true);
-        certificateListItemDto.setUse("plain");
-        certificateListItemDto.setSubject("subject");
-        certificateListItemDto.setSerial(BigInteger.ONE);
-        doReturn(Collections.singletonList(certificateListItemDto)).when(certificateService).getAll();
-
-        mvc.perform(
-                get("/certificates")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-        )
-                .andExpect(authenticated())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].subject", is("subject")))
-                .andExpect(jsonPath("$.content[0].use", is("plain")))
-                .andExpect(jsonPath("$.content[0].valid", is(true)))
-                .andExpect(jsonPath("$.content[0].serial", is(1)))
-                .andExpect(jsonPath("$.content[0].links[0].rel", is("self")))
-                .andExpect(jsonPath("$.content[0].links[0].href", is("http://localhost/certificates/1")))
-                .andExpect(jsonPath("$.content[0].links[1].rel", is("pem")))
-                .andExpect(jsonPath("$.content[0].links[1].href", is("http://localhost/certificates/1/pem")))
-                .andExpect(jsonPath("$.content[0].links[2].rel", is("revoke")))
-                .andExpect(jsonPath("$.content[0].links[2].href", is("http://localhost/revoke/1")))
-                .andExpect(jsonPath("$.links[0].rel", is("sign")))
-                .andExpect(jsonPath("$.links[0].href", is("http://localhost/sign")));
+        testGetAllUsers();
     }
 
     @Test
