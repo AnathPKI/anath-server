@@ -60,8 +60,8 @@ import java.util.Optional;
 
 import static ch.zhaw.ba.anath.pki.services.CertificateAuthorityService.SECURE_STORE_CA_CERTIFICATE;
 import static ch.zhaw.ba.anath.pki.services.CertificateAuthorityService.SECURE_STORE_CA_PRIVATE_KEY;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.CoreMatchers.both;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -75,7 +75,7 @@ import static org.junit.Assert.assertThat;
 })
 @Transactional(transactionManager = "pkiTransactionManager")
 public class CertificateAuthorityServiceIT {
-    private static final String EXPECTED_CERTIFICATE = "-----BEGIN CERTIFICATE-----\n" +
+    private static final String EXPECTED_IMPORT_CERTIFICATE = "-----BEGIN CERTIFICATE-----\n" +
             "MIID/jCCAuagAwIBAgIJAPQj6jMYDszkMA0GCSqGSIb3DQEBCwUAMIGTMQswCQYD\n" +
             "VQQGEwJDSDEQMA4GA1UECAwHVGh1cmdhdTEQMA4GA1UEBwwHS2VmaWtvbjEYMBYG\n" +
             "A1UECgwPUmFmYWVsIE9zdGVydGFnMQwwCgYDVQQLDANkZXYxGDAWBgNVBAMMD1Jh\n" +
@@ -99,6 +99,7 @@ public class CertificateAuthorityServiceIT {
             "ZDg7YsEg4AwLsuuIEz1W3ff+OQu6O4/Qe1PTc+/TDJgKd8wq5Nc1oOIMI6J8Ij21\n" +
             "3Pdg9DnfsOnW5/jb/3/ix9zA\n" +
             "-----END CERTIFICATE-----\n";
+    private static final long TEN_SECONDS_IN_MILLIS = 10 * 1000L;
 
     @Autowired
     private CertificateAuthorityService certificateAuthorityService;
@@ -156,7 +157,7 @@ public class CertificateAuthorityServiceIT {
         assertThat(optionalCaKey.isPresent(), is(true));
 
         final String certificate = certificateAuthorityService.getCertificate();
-        assertThat(certificate, is(EXPECTED_CERTIFICATE));
+        assertThat(certificate, is(EXPECTED_IMPORT_CERTIFICATE));
     }
 
     @Test
@@ -175,7 +176,7 @@ public class CertificateAuthorityServiceIT {
         assertThat(optionalCaKey.isPresent(), is(true));
 
         final String certificate = certificateAuthorityService.getCertificate();
-        assertThat(certificate, is(EXPECTED_CERTIFICATE));
+        assertThat(certificate, is(EXPECTED_IMPORT_CERTIFICATE));
     }
 
     @Test
@@ -195,7 +196,7 @@ public class CertificateAuthorityServiceIT {
         assertThat(optionalCaKey.isPresent(), is(true));
 
         final String certificate = certificateAuthorityService.getCertificate();
-        assertThat(certificate, is(EXPECTED_CERTIFICATE));
+        assertThat(certificate, is(EXPECTED_IMPORT_CERTIFICATE));
     }
 
     @Test(expected = CertificateAuthorityImportException.class)
@@ -224,7 +225,7 @@ public class CertificateAuthorityServiceIT {
     }
 
     @Test
-    public void makeSelfSignedNameBuild() {
+    public void makeSelfSignedNameBuilder() {
         final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto =
                 makeCreateSelfSignedCADto();
 
@@ -282,7 +283,8 @@ public class CertificateAuthorityServiceIT {
         final long actualValidity = actualCertificate.getValidTo().getTime() - actualCertificate.getValidFrom()
                 .getTime();
         final long expectedValidity = 180 * 24 * 60 * 60 * 1000L;
-        assertThat(actualValidity, is(expectedValidity));
+        assertThat(actualValidity, is(both(greaterThan(expectedValidity - TEN_SECONDS_IN_MILLIS)).and(lessThan
+                (expectedValidity + TEN_SECONDS_IN_MILLIS))));
     }
 
     @Test(expected = CertificateAuthorityAlreadyInitializedException.class)

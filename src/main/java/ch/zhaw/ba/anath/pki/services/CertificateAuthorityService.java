@@ -49,7 +49,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -122,13 +121,16 @@ public class CertificateAuthorityService {
         final String caName = selfSignedCANameBuilder.toX500Name().toString();
         log.info("Self Signed Certificate Authority name: {}", caName);
 
-        final DaysFromNowValidityProvider validityProvider = new DaysFromNowValidityProvider
+        final CertificateValidityProvider validityProvider = new ConfigurablePeriodValidity
                 (createSelfSignedCertificateAuthorityDto.getValidDays());
-        log.info("Self Signed Certificate Authority valid from {} to {}", validityProvider.from, validityProvider.to);
+
         final SelfSignedCertificateAuthority selfSignedCertificateAuthority = new SelfSignedCertificateAuthority
                 (selfSignedCANameBuilder, validityProvider, certificateSerialProvider,
                         secureRandomProvider, signatureNameProvider, createSelfSignedCertificateAuthorityDto.getBits());
 
+        log.info("Self Signed Certificate Authority valid from {} to {}",
+                selfSignedCertificateAuthority.getCertificateAuthority().getCertificate().getValidFrom(),
+                selfSignedCertificateAuthority.getCertificateAuthority().getCertificate().getValidTo());
         final CertificateAuthority certificateAuthority = selfSignedCertificateAuthority.getCertificateAuthority();
         log.info("Self Signed Certificate Authority {} created", caName);
 
@@ -239,31 +241,6 @@ public class CertificateAuthorityService {
             log.error("Certificate Authority certificate already existing");
             throw new CertificateAuthorityAlreadyInitializedException
                     (CERTIFICATE_AUTHORITY_ALREADY_INITIALIZED_MESSAGE);
-        }
-    }
-
-    public class DaysFromNowValidityProvider implements CertificateValidityProvider {
-        private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
-        private final Date from;
-        private final Date to;
-
-        private DaysFromNowValidityProvider(int days) {
-            this.from = new Date(System.currentTimeMillis());
-            this.to = new Date(from.getTime() + daysToMillis(days));
-        }
-
-        private long daysToMillis(int days) {
-            return days * MILLIS_PER_DAY;
-        }
-
-        @Override
-        public Date from() {
-            return from;
-        }
-
-        @Override
-        public Date to() {
-            return to;
         }
     }
 }
