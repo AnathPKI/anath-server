@@ -218,7 +218,7 @@ public class CertificatesControllerIT {
                 get("/certificates/{serial}/pem", BigInteger.ONE)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
-                .andExpect(header().string("Content-Type", startsWith("application/pkix-certificate")))
+                .andExpect(header().string("Content-Type", startsWith(PkixMediaType.APPLICATION_PKIX_CERT_VALUE)))
                 .andExpect(unauthenticated())
                 .andExpect(status().isOk());
     }

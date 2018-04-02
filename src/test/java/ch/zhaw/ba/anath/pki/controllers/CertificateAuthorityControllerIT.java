@@ -94,7 +94,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith("application/pkix-cert")));
+                .andExpect(header().string("Content-Type", startsWith(PkixMediaType.APPLICATION_PKIX_CERT_VALUE)));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith("application/pkix-cert")));
+                .andExpect(header().string("Content-Type", startsWith(PkixMediaType.APPLICATION_PKIX_CERT_VALUE)));
     }
 
     @Test

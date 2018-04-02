@@ -73,7 +73,7 @@ public class CrlControllerIT {
         mvc.perform(
                 get("/crl")
         )
-                .andExpect(header().string("Content-Type", startsWith("application/pkix-crl")))
+                .andExpect(header().string("Content-Type", startsWith(PkixMediaType.APPLICATION_PKIX_CRL_VALUE)))
                 .andExpect(status().isOk());
     }
 }

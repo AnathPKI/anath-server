@@ -29,38 +29,19 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
-import ch.zhaw.ba.anath.pki.services.RevocationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Rafael Ostertag
  */
-@RestController
-@RequestMapping(value = "/crl",
-        consumes = MediaType.ALL_VALUE,
-        produces = PkixMediaType.APPLICATION_PKIX_CRL_VALUE
-)
-@Api(tags = {"Certificate Authority"})
-public class CrlController {
-    private final RevocationService revocationService;
+public final class PkixMediaType {
+    public static final String APPLICATION_PKIX_CERT_VALUE = "application/pkix-cert";
+    public static final MediaType APPLICATION_PKIX_CERT = MediaType.valueOf(APPLICATION_PKIX_CERT_VALUE);
 
-    public CrlController(RevocationService revocationService) {
-        this.revocationService = revocationService;
-    }
+    public static final String APPLICATION_PKIX_CRL_VALUE = "application/pkix-crl";
+    public static final MediaType APPLICATION_PKIX_CRL = MediaType.valueOf(APPLICATION_PKIX_CRL_VALUE);
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Get the PEM Encoded X.509 Certificate Revocation List", authorizations = {})
-    public HttpEntity<String> getCrl() {
-        return ResponseEntity.ok().body(revocationService.getCrlPemEncoded());
+    private PkixMediaType() {
+        // intentionally empty
     }
 }

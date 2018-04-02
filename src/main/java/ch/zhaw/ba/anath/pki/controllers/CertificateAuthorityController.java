@@ -69,7 +69,7 @@ public class CertificateAuthorityController {
 
     @GetMapping(
             consumes = MediaType.ALL_VALUE,
-            produces = "application/pkix-cert"
+            produces = PkixMediaType.APPLICATION_PKIX_CERT_VALUE
     )
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get the PEM Encoded X.509 CA Certificate", authorizations = {})

@@ -79,7 +79,7 @@ public class CertificatesController {
 
     @GetMapping(path = "/{serial}/pem",
             consumes = MediaType.ALL_VALUE,
-            produces = {"application/pkix-certificate"})
+            produces = {PkixMediaType.APPLICATION_PKIX_CERT_VALUE})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Retrieve a PEM Encoded User Certificate by Serial Number", authorizations = {})
     public HttpEntity<String> getPlainPemCertificate(@PathVariable BigInteger serial) {
