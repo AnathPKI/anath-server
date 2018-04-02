@@ -30,14 +30,18 @@
 package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.pki.dto.RevokeReasonDto;
+import ch.zhaw.ba.anath.pki.services.RevocationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Rafael Ostertag
@@ -48,11 +52,21 @@ import java.math.BigInteger;
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 @Slf4j
 public class RevocationController {
+    private final RevocationService revocationService;
+
+    public RevocationController(RevocationService revocationService) {
+        this.revocationService = revocationService;
+    }
+
     @PutMapping(path = "/{serial}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'revoke'))")
-    public HttpEntity<?> revoke(@PathVariable BigInteger serial, @RequestBody @Validated RevokeReasonDto
+    public ResourceSupport revoke(@PathVariable BigInteger serial, @RequestBody @Validated RevokeReasonDto
             revokeReasonDto) {
-        throw new UnsupportedOperationException();
+        revocationService.revokeCertificate(serial, revokeReasonDto.getReason());
+
+        final ResourceSupport resourceSupport = new ResourceSupport();
+        resourceSupport.add(linkTo(methodOn(CertificatesController.class).getCertificate(serial)).withSelfRel());
+        return resourceSupport;
     }
 }

@@ -29,7 +29,8 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
-import ch.zhaw.ba.anath.pki.core.*;
+import ch.zhaw.ba.anath.pki.core.Certificate;
+import ch.zhaw.ba.anath.pki.core.PEMCertificateWriter;
 import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import ch.zhaw.ba.anath.pki.dto.CertificateResponseDto;
 import ch.zhaw.ba.anath.pki.dto.UseDto;
@@ -48,7 +49,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.util.Base64;
 import java.util.List;
@@ -86,20 +89,7 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
     }
 
     private Certificate signAndAddCertificate() throws IOException {
-        return signAndAddCertificate(UseEntity.DEFAULT_USE);
-    }
-
-    private Certificate signAndAddCertificate(String use) throws IOException {
-        final Certificate certificate;
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
-                    use);
-        }
-        return certificate;
+        return TestHelper.signAndAddCertificate(signingService, UseEntity.DEFAULT_USE);
     }
 
     @Test
@@ -172,7 +162,7 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
 
         useService.create(useDto);
 
-        final Certificate certificate = signAndAddCertificate(TEST_USE);
+        final Certificate certificate = TestHelper.signAndAddCertificate(signingService, TEST_USE);
 
         final CertificateResponseDto certificateResponseDto = certificateService.getCertificate(certificate.getSerial
                 ());
