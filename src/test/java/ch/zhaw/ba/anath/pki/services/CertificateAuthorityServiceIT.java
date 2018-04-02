@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
+import ch.zhaw.ba.anath.pki.core.CertificateAuthority;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
@@ -46,7 +47,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Base64;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -111,12 +112,26 @@ public class CertificateAuthorityServiceIT {
         certificateAuthorityService.getCertificate();
     }
 
+    @Test(expected = CertificateAuthorityNotInitializedException.class)
+    public void getCertificateAuthorityNonExistingCa() {
+        certificateAuthorityService.getCertificateAuthority();
+    }
+
     @Test
     public void getCertificate() throws IOException {
         importTestCertificateAuthority();
 
         final String pemEncodedCertificate = certificateAuthorityService.getCertificate();
         assertThat(pemEncodedCertificate, is(EXPECTED_IMPORT_CERTIFICATE));
+    }
+
+    @Test
+    public void getCertificateAuthority() throws IOException {
+        importTestCertificateAuthority();
+
+        final CertificateAuthority certificateAuthority = certificateAuthorityService.getCertificateAuthority();
+        assertThat(certificateAuthority.getCertificate(), is(not(nullValue())));
+        assertThat(certificateAuthority.getPrivateKey(), is(not(nullValue())));
     }
 
 }

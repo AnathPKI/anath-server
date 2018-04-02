@@ -29,12 +29,16 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
+import ch.zhaw.ba.anath.pki.core.CertificateAuthority;
+import ch.zhaw.ba.anath.pki.core.PEMCertificateAuthorityReader;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.util.Optional;
 
 /**
@@ -68,5 +72,46 @@ public class CertificateAuthorityService {
         });
 
         return new String(ArrayUtils.toPrimitive(caCertificate));
+    }
+
+    public CertificateAuthority getCertificateAuthority() {
+        log.info("Load certificate authority");
+        Byte[] pemCaCertificateObject = retrieveCaCertificateFromSecureStoreOrThrow();
+        Byte[] pemCaPrivateKeyObject = retrieveCaPrivateKeyFromSecureStoreOrThrow();
+
+        final ByteArrayInputStream pemCaCertificateInputStream = pemByteArrayObjectToByteArrayInputStream
+                (pemCaCertificateObject);
+        final ByteArrayInputStream pemCaPrivateKeyInputStream = pemByteArrayObjectToByteArrayInputStream
+                (pemCaPrivateKeyObject);
+
+        final PEMCertificateAuthorityReader pemCertificateAuthorityReader = new PEMCertificateAuthorityReader(
+                new InputStreamReader(pemCaPrivateKeyInputStream),
+                new InputStreamReader(pemCaCertificateInputStream)
+        );
+
+        log.info("Initialized certificate authority");
+        return pemCertificateAuthorityReader.certificateAuthority();
+    }
+
+    private ByteArrayInputStream pemByteArrayObjectToByteArrayInputStream(Byte[] pemObject) {
+        return new ByteArrayInputStream(ArrayUtils.toPrimitive(pemObject));
+    }
+
+    private Byte[] retrieveCaPrivateKeyFromSecureStoreOrThrow() {
+        final Optional<Byte[]> caPrivateKeyOptional = secureStoreService.get(CertificateAuthorityService
+                .SECURE_STORE_CA_PRIVATE_KEY);
+        return caPrivateKeyOptional.orElseThrow(() -> {
+            log.error("Unable to retrieve certificate authority private key from secure storage");
+            return new CertificateAuthorityNotInitializedException("No CA private key found");
+        });
+    }
+
+    private Byte[] retrieveCaCertificateFromSecureStoreOrThrow() {
+        final Optional<Byte[]> caCertificateOptional = secureStoreService.get(CertificateAuthorityService
+                .SECURE_STORE_CA_CERTIFICATE);
+        return caCertificateOptional.orElseThrow(() -> {
+            log.error("Unable to retrieve certificate authority certificate from secure storage");
+            return new CertificateAuthorityNotInitializedException("No CA certificate found");
+        });
     }
 }

@@ -38,17 +38,18 @@ import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
-import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.exceptions.SigningServiceException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolationException;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -64,7 +65,7 @@ import java.util.Optional;
 @Slf4j
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningService {
-    private final SecureStoreService secureStoreService;
+    private final CertificateAuthorityService certificateAuthorityService;
     private final CertificateRepository certificateRepository;
     private final UseRepository useRepository;
     private final CertificateConstraintProvider certificateConstraintProvider;
@@ -74,11 +75,12 @@ public class SigningService {
     private CertificateAuthority certificateAuthority = null;
     private CertificateSigner certificateSigner = null;
 
-    public SigningService(SecureStoreService secureStoreService, CertificateRepository certificateRepository,
+    public SigningService(CertificateAuthorityService certificateAuthorityService, CertificateRepository
+            certificateRepository,
                           UseRepository useRepository, CertificateConstraintProvider certificateConstraintProvider,
                           SignatureNameProvider signatureNameProvider, CertificateValidityProvider
                                   certificateValidityProvider, CertificateSerialProvider certificateSerialProvider) {
-        this.secureStoreService = secureStoreService;
+        this.certificateAuthorityService = certificateAuthorityService;
         this.certificateRepository = certificateRepository;
         this.useRepository = useRepository;
         this.certificateConstraintProvider = certificateConstraintProvider;
@@ -113,44 +115,9 @@ public class SigningService {
         if (certificateAuthority != null) {
             return;
         }
-        log.info("Initializing certificate authority");
-        Byte[] pemCaCertificateObject = retrieveCaCertificateFromSecureStoreOrThrow();
-        Byte[] pemCaPrivateKeyObject = retrieveCaPrivateKeyFromSecureStoreOrThrow();
 
-        final ByteArrayInputStream pemCaCertificateInputStream = pemByteArrayObjectToByteArrayInputStream
-                (pemCaCertificateObject);
-        final ByteArrayInputStream pemCaPrivateKeyInputStream = pemByteArrayObjectToByteArrayInputStream
-                (pemCaPrivateKeyObject);
-
-        final PEMCertificateAuthorityReader pemCertificateAuthorityReader = new PEMCertificateAuthorityReader(
-                new InputStreamReader(pemCaPrivateKeyInputStream),
-                new InputStreamReader(pemCaCertificateInputStream)
-        );
-
-        log.info("Initialized and cached certificate authority");
-        certificateAuthority = pemCertificateAuthorityReader.certificateAuthority();
-    }
-
-    private ByteArrayInputStream pemByteArrayObjectToByteArrayInputStream(Byte[] pemObject) {
-        return new ByteArrayInputStream(ArrayUtils.toPrimitive(pemObject));
-    }
-
-    private Byte[] retrieveCaPrivateKeyFromSecureStoreOrThrow() {
-        final Optional<Byte[]> caPrivateKeyOptional = secureStoreService.get(CertificateAuthorityService
-                .SECURE_STORE_CA_PRIVATE_KEY);
-        return caPrivateKeyOptional.orElseThrow(() -> {
-            log.error("Unable to retrieve certificate authority private key from secure storage");
-            return new CertificateAuthorityNotInitializedException("No CA private key found");
-        });
-    }
-
-    private Byte[] retrieveCaCertificateFromSecureStoreOrThrow() {
-        final Optional<Byte[]> caCertificateOptional = secureStoreService.get(CertificateAuthorityService
-                .SECURE_STORE_CA_CERTIFICATE);
-        return caCertificateOptional.orElseThrow(() -> {
-            log.error("Unable to retrieve certificate authority certificate from secure storage");
-            return new CertificateAuthorityNotInitializedException("No CA certificate found");
-        });
+        log.info("Load and cache certificate authority");
+        certificateAuthority = certificateAuthorityService.getCertificateAuthority();
     }
 
     /**
