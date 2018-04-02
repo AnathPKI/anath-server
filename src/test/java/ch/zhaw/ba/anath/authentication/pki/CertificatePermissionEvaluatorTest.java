@@ -35,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 
 import java.math.BigInteger;
@@ -63,7 +62,6 @@ public class CertificatePermissionEvaluatorTest {
     public void setUp() {
         this.certificateRepositoryMock = mock(CertificateRepository.class);
         this.certificatePermissionEvaluator = new CertificatePermissionEvaluator(certificateRepositoryMock);
-        SecurityContextHolder.clearContext();
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -182,7 +180,6 @@ public class CertificatePermissionEvaluatorTest {
         final UsernamePasswordAuthenticationToken authentication = new
                 UsernamePasswordAuthenticationToken(testUser, "", DEFAULT_USER_ROLES);
 
-        SecurityContextHolder.createEmptyContext().setAuthentication(authentication);
         return authentication;
     }
 }
