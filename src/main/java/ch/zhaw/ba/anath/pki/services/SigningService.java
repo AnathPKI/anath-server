@@ -55,7 +55,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Sign a CSR and store the certificate.
+ * Sign a CSR and store the certificate. The {@link CertificateAuthority} is created on first use and kept in memory.
+ * Thus be careful when changing the CA private key and certificate, you need to restart the application.
  *
  * @author Rafael Ostertag
  */
