@@ -31,6 +31,8 @@ package ch.zhaw.ba.anath.users.controllers;
 
 import ch.zhaw.ba.anath.users.dto.*;
 import ch.zhaw.ba.anath.users.services.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
@@ -54,6 +56,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(path = "/users",
         consumes = AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON_VALUE,
         produces = AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)
+@Api(tags = {"User Management"})
 public class UserController {
     private final UserService userService;
 
@@ -64,6 +67,7 @@ public class UserController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Get All Users")
     public Resources<UserLinkDto> getAll() {
         final List<UserLinkDto> all = userService.getAll();
         all.stream().forEach(x -> x.add(linkTo(UserController.class).slash(x.getUserId()).withSelfRel()));
@@ -73,6 +77,7 @@ public class UserController {
     @GetMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#id,'user','get'))")
+    @ApiOperation(value = "Get a User")
     public UserDto getUser(@PathVariable long id) {
         final UserDto user = userService.getUser(id);
         user.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
@@ -82,6 +87,7 @@ public class UserController {
     @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Update a User")
     public UserLinkDto updateUser(@PathVariable long id, @RequestBody @Validated UpdateUserDto updateUserDto) {
         final UserLinkDto userLinkDto = userService.updateUser(id, updateUserDto);
         userLinkDto.add(linkTo(methodOn(UserController.class).getUser(id)).withSelfRel());
@@ -91,6 +97,7 @@ public class UserController {
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Delete a User")
     public ResourceSupport deleteUser(@PathVariable long id) {
         userService.deleteUser(id);
         final ResourceSupport resourceSupport = new ResourceSupport();
@@ -101,6 +108,7 @@ public class UserController {
     @PutMapping(path = "/{id}/password")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('USER') and hasPermission(#id,'user','changePassword')")
+    @ApiOperation(value = "Change Password of a User")
     public UserLinkDto changePassword(@PathVariable long id, @RequestBody @Validated ChangePasswordDto
             changePasswordDto) {
         final UserLinkDto userLinkDto = userService.changePassword(id, changePasswordDto);
@@ -111,6 +119,7 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Create a New User")
     public HttpEntity<Void> createUser(@RequestBody @Validated CreateUserDto createUserDto) {
         final UserLinkDto user = userService.createUser(createUserDto);
         final Link link = linkTo(methodOn(UserController.class).getUser(user.getUserId())).withSelfRel();

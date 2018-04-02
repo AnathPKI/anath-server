@@ -33,7 +33,8 @@ import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import ch.zhaw.ba.anath.pki.dto.CertificateResponseDto;
 import ch.zhaw.ba.anath.pki.dto.RevocationReasonDto;
 import ch.zhaw.ba.anath.pki.services.CertificateService;
-import lombok.extern.slf4j.Slf4j;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -55,7 +56,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(value = "/certificates",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
-@Slf4j
+@Api(tags = {"Certificate Authority"})
 public class CertificatesController {
     private final CertificateService certificateService;
 
@@ -66,6 +67,8 @@ public class CertificatesController {
     @GetMapping("/{serial}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'get'))")
+    @ApiOperation(value = "Retrieve a User Certificate by Serial Number", notes = "Admin users may retrieve any " +
+            "certificate. Regular users are limited to their own certificates.")
     public CertificateResponseDto getCertificate(@PathVariable BigInteger serial) {
         final CertificateResponseDto certificate = certificateService.getCertificate(serial);
         certificate.add(linkTo(methodOn(RevocationController.class).revoke(serial, new RevocationReasonDto())).withRel
@@ -78,6 +81,7 @@ public class CertificatesController {
             consumes = MediaType.ALL_VALUE,
             produces = {"application/pkix-certificate"})
     @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Retrieve a PEM Encoded User Certificate by Serial Number", authorizations = {})
     public HttpEntity<String> getPlainPemCertificate(@PathVariable BigInteger serial) {
         return new ResponseEntity<>(certificateService.getPlainPEMEncodedCertificate(serial), HttpStatus.OK);
     }
@@ -85,6 +89,7 @@ public class CertificatesController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @ApiOperation(value = "Get all User Certificates")
     public Resources<CertificateListItemDto> getAll() {
         final List<CertificateListItemDto> all = certificateService.getAll();
         for (CertificateListItemDto certificateListItemDto : all) {

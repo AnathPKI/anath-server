@@ -33,6 +33,8 @@ import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityInitializationService;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,6 +55,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(value = "/ca",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
+@Api(tags = {"Certificate Authority"})
 public class CertificateAuthorityController {
     private final CertificateAuthorityService certificateAuthorityService;
     private final CertificateAuthorityInitializationService certificateAuthorityInitializationService;
@@ -69,6 +72,7 @@ public class CertificateAuthorityController {
             produces = "application/pkix-cert"
     )
     @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get the PEM Encoded X.509 CA Certificate", authorizations = {})
     public HttpEntity<String> getCaCertificate() {
         String caCertificateString = certificateAuthorityService.getCertificate();
         return ResponseEntity.ok(caCertificateString);
@@ -79,6 +83,7 @@ public class CertificateAuthorityController {
     )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Import a CA Private Key and Certificate From a Base64 Encoded PKCS#12 File")
     public HttpEntity<Void> importCa(@RequestBody @Validated ImportCertificateAuthorityDto
                                              importCertificateAuthorityDto) {
         certificateAuthorityInitializationService.importPkcs12CertificateAuthority(importCertificateAuthorityDto);
@@ -93,6 +98,7 @@ public class CertificateAuthorityController {
     @PutMapping(path = "/create")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Create a Self-Signed CA")
     public HttpEntity<Void> createSelfSigned(@RequestBody @Validated CreateSelfSignedCertificateAuthorityDto
                                                      createSelfSignedCertificateAuthorityDto) {
         certificateAuthorityInitializationService.createSelfSignedCertificateAuthority

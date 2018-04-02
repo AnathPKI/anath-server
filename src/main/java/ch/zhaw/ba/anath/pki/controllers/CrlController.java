@@ -30,6 +30,8 @@
 package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.pki.services.RevocationService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
         consumes = MediaType.ALL_VALUE,
         produces = "application/pkix-crl"
 )
+@Api(tags = {"Certificate Authority"})
 public class CrlController {
     private final RevocationService revocationService;
 
@@ -56,6 +59,7 @@ public class CrlController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get the PEM Encoded X.509 Certificate Revocation List", authorizations = {})
     public HttpEntity<String> getCrl() {
         return ResponseEntity.ok().body(revocationService.getCrlPemEncoded());
     }

@@ -95,6 +95,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/ca").permitAll()
                 // Allow preflight checks
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Allow swagger
+                .antMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/v2/api-docs/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
+                .antMatchers(HttpMethod.GET, "/webjars/springfox-swagger-ui/**").permitAll()
                 .anyRequest().authenticated();
         return httpSecurity;
     }

@@ -36,6 +36,8 @@ import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
 import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.dto.SigningRequestDto;
 import ch.zhaw.ba.anath.pki.services.SigningService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -60,6 +62,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(path = "/sign",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
+@Api(tags = {"Certificate Authority"})
 @Slf4j
 public class SigningController {
     private static final String ERROR_READING_PEM_OBJECT_FROM_REQUEST = "Error reading PEM object from request";
@@ -72,6 +75,7 @@ public class SigningController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('USER')")
+    @ApiOperation(value = "Sign a PKCS#10 Certificate Signing Request", notes = "Only users may call this endpoint.")
     public HttpEntity<Void> signCertificateRequest(@RequestBody @Validated SigningRequestDto signingRequestDto) {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
                 signingRequestDto

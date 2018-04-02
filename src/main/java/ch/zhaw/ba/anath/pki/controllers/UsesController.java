@@ -33,7 +33,8 @@ import ch.zhaw.ba.anath.pki.dto.UpdateUseDto;
 import ch.zhaw.ba.anath.pki.dto.UseDto;
 import ch.zhaw.ba.anath.pki.dto.UseItemDto;
 import ch.zhaw.ba.anath.pki.services.UseService;
-import lombok.extern.slf4j.Slf4j;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
@@ -56,7 +57,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(value = "/uses",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
-@Slf4j
+@Api(tags = {"Certificate Authority"})
 public class UsesController {
     private static final String LIST_REL = "list";
     private final UseService useService;
@@ -68,6 +69,7 @@ public class UsesController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @ApiOperation(value = "Get all Known Certificate Uses")
     public Resources<UseItemDto> getAll() {
         final List<UseItemDto> all = useService.getAll();
         for (UseItemDto item : all) {
@@ -83,6 +85,7 @@ public class UsesController {
     @GetMapping("/{key:.*}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Get a Certificate Use")
     public UseDto getUse(@PathVariable String key) {
         final UseDto use = useService.getUse(key);
         use.add(linkTo(methodOn(UsesController.class).getUse(key)).withSelfRel());
@@ -92,6 +95,7 @@ public class UsesController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Create a new Certificate Use")
     public HttpEntity<Void> createUse(@RequestBody @Validated UseDto useDto) {
         useService.create(useDto);
         final URI uri = linkTo(methodOn(UsesController.class).getUse(useDto.getUse())).toUri();
@@ -101,6 +105,7 @@ public class UsesController {
     @PutMapping("/{key:.*}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Update an Existing Certificate Use")
     public UseItemDto updateUse(@PathVariable String key, @RequestBody @Validated UpdateUseDto updateUseDto) {
         final UseItemDto useItemDto = useService.updateUse(key, updateUseDto.getConfiguration());
         useItemDto.add(linkTo(methodOn(UsesController.class).getUse(key)).withSelfRel());
@@ -112,6 +117,7 @@ public class UsesController {
     @DeleteMapping("/{key:.*}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "Delete a Certificate Use")
     public ResourceSupport deleteUse(@PathVariable String key) {
         useService.delete(key);
 

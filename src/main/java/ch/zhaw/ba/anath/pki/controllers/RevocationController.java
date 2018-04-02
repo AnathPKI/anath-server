@@ -31,7 +31,8 @@ package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.pki.dto.RevocationReasonDto;
 import ch.zhaw.ba.anath.pki.services.RevocationService;
-import lombok.extern.slf4j.Slf4j;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,7 +51,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(value = "/revoke",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
-@Slf4j
+@Api(tags = {"Certificate Authority"})
 public class RevocationController {
     private final RevocationService revocationService;
 
@@ -61,6 +62,8 @@ public class RevocationController {
     @PutMapping(path = "/{serial}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'revoke'))")
+    @ApiOperation(value = "Revoke a User Certificate by Serial Number", notes = "Admin users may revoke any user " +
+            "certificate. Regular users may only revoke their certificates.")
     public ResourceSupport revoke(@PathVariable BigInteger serial, @RequestBody @Validated RevocationReasonDto
             revocationReasonDto) {
         revocationService.revokeCertificate(serial, revocationReasonDto.getReason());
