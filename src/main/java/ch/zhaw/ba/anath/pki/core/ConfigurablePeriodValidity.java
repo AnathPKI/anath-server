@@ -34,8 +34,8 @@ import ch.zhaw.ba.anath.pki.core.interfaces.CertificateValidityProvider;
 import java.util.Date;
 
 /**
- * Provide dates making a certificate valid for a configurable period in days. The period is measured from the instant
- * {@link #to()} is  called. This may lead to the difference of {@link #from()} and {@link #to()} being more than the
+ * Provide dates making a certificate valid for a configurable period in days. To measure the period {@link #from()}
+ * is called. This may lead to the difference of {@link #from()} and {@link #to()} being more than the
  * specified period. However, if used properly, the difference is only a few seconds, which in the context of
  * certificates does not matter.
  *
