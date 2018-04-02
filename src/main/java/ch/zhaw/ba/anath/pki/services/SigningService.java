@@ -102,6 +102,7 @@ public class SigningService {
         certificateSigner.setCertificateConstraintProvider(certificateConstraintProvider);
         certificateSigner.setCertificateSerialProvider(certificateSerialProvider);
         certificateSigner.setValidityProvider(certificateValidityProvider);
+        log.info("Initialized and cached certificate signer");
     }
 
     /**
@@ -126,7 +127,7 @@ public class SigningService {
                 new InputStreamReader(pemCaCertificateInputStream)
         );
 
-        log.info("Initialized certificate authority");
+        log.info("Initialized and cached certificate authority");
         certificateAuthority = pemCertificateAuthorityReader.certificateAuthority();
     }
 
