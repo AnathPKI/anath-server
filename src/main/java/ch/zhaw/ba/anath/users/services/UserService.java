@@ -68,7 +68,7 @@ public class UserService {
         final UserEntity newUserEntity = userEntityMapper.asEntity(createUserDto);
 
         if (newUserEntity.getPassword() == null || newUserEntity.getPassword().isEmpty()) {
-            log.error("User '{}' must have empty password", newUserEntity.getEmail());
+            log.error("User '{}' must not have empty password", newUserEntity.getEmail());
             throw new UserPasswordException("User must not have empty password");
         }
 
