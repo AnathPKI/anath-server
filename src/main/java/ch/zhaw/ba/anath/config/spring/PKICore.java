@@ -67,8 +67,16 @@ public class PKICore {
 
     @Bean
     public CertificateValidityProvider certificateValidityProvider() {
-        log.info("Use ConfigurablePeriodValidity with a value of {} day(s)", anathProperties.getCertificateValidity());
-        return new ConfigurablePeriodValidity(anathProperties.getCertificateValidity());
+        int days = anathProperties.getCertificateValidity();
+        log.info("Use ConfigurablePeriodValidity with a value of {} day(s)", days);
+        return new ConfigurablePeriodValidity(days);
+    }
+
+    @Bean
+    public CertificateRevocationListValidityProvider certificateRevocationListValidityProvider() {
+        int days = anathProperties.getCrlValidity();
+        log.info("Use ConfigurablePeriodCRLValidity with a value of {} days(s)", days);
+        return new ConfigurablePeriodCRLValidity(days);
     }
 
     @Bean
