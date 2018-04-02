@@ -32,6 +32,7 @@ package ch.zhaw.ba.anath.pki.services;
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.dto.CertificateResponseDto;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyRevokedException;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.exceptions.RevocationNoReasonException;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,9 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * @author Rafael Ostertag
@@ -69,6 +70,9 @@ public class RevocationServiceIT extends CertificateAuthorityInitializer {
     @Autowired
     private CertificateService certificateService;
 
+    @Autowired
+    private SecureStoreService secureStoreService;
+
     @Before
     public void setUp() throws IOException {
         initializeCa();
@@ -76,6 +80,7 @@ public class RevocationServiceIT extends CertificateAuthorityInitializer {
 
     @Test
     public void revokeCertificate() throws IOException {
+        testWhetherCrlIsEmpty();
         final Certificate certificate = TestHelper.signAndAddCertificate(signingService, "plain");
 
         revocationService.revokeCertificate(certificate.getSerial(), "test");
@@ -87,6 +92,51 @@ public class RevocationServiceIT extends CertificateAuthorityInitializer {
         assertThat(certificateResponseDto.getValidity().getRevocationReason(), is("test"));
         assertThat(certificateResponseDto.getValidity().isRevoked(), is(true));
         assertThat(certificateResponseDto.getValidity().isExpired(), is(false));
+
+        testCrlNonEmpty();
+    }
+
+    private void testCrlNonEmpty() {
+        final String crlPemEncoded = revocationService.getCrlPemEncoded();
+        assertThat(crlPemEncoded, is(notNullValue()));
+    }
+
+    private void testWhetherCrlIsEmpty() {
+        try {
+            revocationService.getCrlPemEncoded();
+            fail("CRL already initialized");
+        } catch (CertificateAuthorityNotInitializedException e) {
+            // good
+        }
+    }
+
+    @Test
+    public void updateCertificateRevocationListEmpty() {
+        testWhetherCrlIsEmpty();
+
+        revocationService.updateCertificateRevocationList();
+
+        testCrlNonEmpty();
+    }
+
+    @Test
+    public void updateCertificateRevocationList() throws IOException {
+        // Create empty crl. Take size 'n'. Sign a certificate and revoke it. Take size 'm' of crl. 'm > n' must hold.
+        testWhetherCrlIsEmpty();
+
+        // Create empty crl.
+        revocationService.updateCertificateRevocationList();
+
+        final String emptyCrl = revocationService.getCrlPemEncoded();
+        final int sizeEmpty = emptyCrl.length();
+
+        final Certificate certificate = TestHelper.signAndAddCertificate(signingService, "plain");
+        revocationService.revokeCertificate(certificate.getSerial(), "test");
+
+        final String crlWithRevokedCertificate = revocationService.getCrlPemEncoded();
+        final int sizeWithRevokedCertificate = crlWithRevokedCertificate.length();
+
+        assertThat(sizeWithRevokedCertificate, is(greaterThan(sizeEmpty)));
     }
 
     @Test(expected = RevocationNoReasonException.class)

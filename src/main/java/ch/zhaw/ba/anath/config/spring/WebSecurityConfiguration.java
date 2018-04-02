@@ -89,6 +89,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login/jwt").anonymous()
                 // Allow retrieval of plain certificates
                 .antMatchers(HttpMethod.GET, "/certificates/*/pem").permitAll()
+                // Allow retrieval of CRL
+                .antMatchers(HttpMethod.GET, "/crl").permitAll()
                 // Allow retrieval of CA certificate
                 .antMatchers(HttpMethod.GET, "/ca").permitAll()
                 // Allow preflight checks

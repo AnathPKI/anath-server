@@ -107,6 +107,9 @@ public class CertificateAuthorityInitializationServiceIT {
     private CertificateAuthorityService certificateAuthorityService;
 
     @Autowired
+    private RevocationService revocationService;
+
+    @Autowired
     private SecureStoreService secureStoreService;
 
     @Test(expected = CertificateAuthorityImportException.class)
@@ -152,6 +155,8 @@ public class CertificateAuthorityInitializationServiceIT {
         assertThat(optionalCaCert.isPresent(), is(true));
         final Optional<Byte[]> optionalCaKey = secureStoreService.get(SECURE_STORE_CA_PRIVATE_KEY);
         assertThat(optionalCaKey.isPresent(), is(true));
+        final String crlPemEncoded = revocationService.getCrlPemEncoded();
+        assertThat(crlPemEncoded, is(notNullValue()));
 
         final String certificate = certificateAuthorityService.getCertificate();
         assertThat(certificate, is(EXPECTED_IMPORT_CERTIFICATE));
@@ -171,6 +176,8 @@ public class CertificateAuthorityInitializationServiceIT {
         assertThat(optionalCaCert.isPresent(), is(true));
         final Optional<Byte[]> optionalCaKey = secureStoreService.get(SECURE_STORE_CA_PRIVATE_KEY);
         assertThat(optionalCaKey.isPresent(), is(true));
+        final String crlPemEncoded = revocationService.getCrlPemEncoded();
+        assertThat(crlPemEncoded, is(notNullValue()));
 
         final String certificate = certificateAuthorityService.getCertificate();
         assertThat(certificate, is(EXPECTED_IMPORT_CERTIFICATE));
@@ -191,6 +198,8 @@ public class CertificateAuthorityInitializationServiceIT {
         assertThat(optionalCaCert.isPresent(), is(true));
         final Optional<Byte[]> optionalCaKey = secureStoreService.get(SECURE_STORE_CA_PRIVATE_KEY);
         assertThat(optionalCaKey.isPresent(), is(true));
+        final String crlPemEncoded = revocationService.getCrlPemEncoded();
+        assertThat(crlPemEncoded, is(notNullValue()));
 
         final String certificate = certificateAuthorityService.getCertificate();
         assertThat(certificate, is(EXPECTED_IMPORT_CERTIFICATE));

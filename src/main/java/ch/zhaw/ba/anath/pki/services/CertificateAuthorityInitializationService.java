@@ -65,16 +65,18 @@ public class CertificateAuthorityInitializationService {
     private final CertificateSerialProvider certificateSerialProvider;
     private final SecureRandomProvider secureRandomProvider;
     private final SignatureNameProvider signatureNameProvider;
+    private final RevocationService revocationService;
 
-    public CertificateAuthorityInitializationService(SecureStoreService secureStoreService, CertificateSerialProvider
-            certificateSerialProvider,
-
-                                                     SecureRandomProvider secureRandomProvider, SignatureNameProvider
-                                                             signatureNameProvider) {
+    public CertificateAuthorityInitializationService(SecureStoreService secureStoreService,
+                                                     CertificateSerialProvider certificateSerialProvider,
+                                                     SecureRandomProvider secureRandomProvider,
+                                                     SignatureNameProvider signatureNameProvider, RevocationService
+                                                             revocationService) {
         this.secureStoreService = secureStoreService;
         this.certificateSerialProvider = certificateSerialProvider;
         this.secureRandomProvider = secureRandomProvider;
         this.signatureNameProvider = signatureNameProvider;
+        this.revocationService = revocationService;
     }
 
     /**
@@ -94,6 +96,8 @@ public class CertificateAuthorityInitializationService {
 
         importCertificateAuthorityIntoSecureStore(certificateAuthority);
         log.info("Imported Certificate Authority: {}", certificateAuthority.getCertificate().getSubject().toString());
+
+        createInitialRevocationList();
     }
 
     public void createSelfSignedCertificateAuthority(CreateSelfSignedCertificateAuthorityDto
@@ -120,6 +124,13 @@ public class CertificateAuthorityInitializationService {
 
         importCertificateAuthorityIntoSecureStore(certificateAuthority);
         log.info("Self Signed Certificate Authority {} imported", caName);
+
+        createInitialRevocationList();
+    }
+
+    private void createInitialRevocationList() {
+        log.info("Create initial revocation list");
+        revocationService.updateCertificateRevocationList();
     }
 
     SelfSignedCANameBuilder makeSelfSignedNameBuilder(CreateSelfSignedCertificateAuthorityDto

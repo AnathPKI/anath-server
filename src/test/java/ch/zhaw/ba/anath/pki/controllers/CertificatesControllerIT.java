@@ -61,8 +61,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Rafael Ostertag
@@ -219,6 +218,7 @@ public class CertificatesControllerIT {
                 get("/certificates/{serial}/pem", BigInteger.ONE)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
+                .andExpect(header().string("Content-Type", startsWith("application/pkix-certificate")))
                 .andExpect(unauthenticated())
                 .andExpect(status().isOk());
     }

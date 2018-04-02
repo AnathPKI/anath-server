@@ -36,4 +36,11 @@ CREATE TABLE certificates (
   certificate_use   VARCHAR(256)  NOT NULL REFERENCES certificate_uses (certificate_use)
 );
 
+CREATE TABLE crl (
+  id           BIGSERIAL,
+  this_update  TIMESTAMP NOT NULL,
+  next_update  TIMESTAMP NOT NULL,
+  x509_crl_pem BYTEA     NOT NULL
+);
+
 INSERT INTO certificate_uses (certificate_use, config) VALUES ('plain', null);
