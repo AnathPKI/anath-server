@@ -31,6 +31,7 @@ package ch.zhaw.ba.anath.pki.controllers;
 
 import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
+import ch.zhaw.ba.anath.pki.services.CertificateAuthorityInitializationService;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -54,9 +55,13 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 public class CertificateAuthorityController {
     private final CertificateAuthorityService certificateAuthorityService;
+    private final CertificateAuthorityInitializationService certificateAuthorityInitializationService;
 
-    public CertificateAuthorityController(CertificateAuthorityService certificateAuthorityService) {
+    public CertificateAuthorityController(CertificateAuthorityService certificateAuthorityService,
+                                          CertificateAuthorityInitializationService
+                                                  certificateAuthorityInitializationService) {
         this.certificateAuthorityService = certificateAuthorityService;
+        this.certificateAuthorityInitializationService = certificateAuthorityInitializationService;
     }
 
     @GetMapping(
@@ -76,7 +81,7 @@ public class CertificateAuthorityController {
     @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<Void> importCa(@RequestBody @Validated ImportCertificateAuthorityDto
                                              importCertificateAuthorityDto) {
-        certificateAuthorityService.importPkcs12CertificateAuthority(importCertificateAuthorityDto);
+        certificateAuthorityInitializationService.importPkcs12CertificateAuthority(importCertificateAuthorityDto);
         final URI uri = linkTo(methodOn(CertificateAuthorityController.class).getCaCertificate()).toUri();
 
         return ResponseEntity
@@ -90,7 +95,8 @@ public class CertificateAuthorityController {
     @ResponseStatus(HttpStatus.CREATED)
     public HttpEntity<Void> createSelfSigned(@RequestBody @Validated CreateSelfSignedCertificateAuthorityDto
                                                      createSelfSignedCertificateAuthorityDto) {
-        certificateAuthorityService.createSelfSignedCertificateAuthority(createSelfSignedCertificateAuthorityDto);
+        certificateAuthorityInitializationService.createSelfSignedCertificateAuthority
+                (createSelfSignedCertificateAuthorityDto);
         final URI uri = linkTo(methodOn(CertificateAuthorityController.class).getCaCertificate()).toUri();
 
         return ResponseEntity

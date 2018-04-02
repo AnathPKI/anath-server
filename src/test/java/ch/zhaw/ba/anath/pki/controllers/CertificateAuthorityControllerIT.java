@@ -36,6 +36,7 @@ import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityAlreadyInitializedExc
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityInitializationException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
+import ch.zhaw.ba.anath.pki.services.CertificateAuthorityInitializationService;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,6 +74,8 @@ public class CertificateAuthorityControllerIT {
     private MockMvc mvc;
     @MockBean
     private CertificateAuthorityService certificateAuthorityService;
+    @MockBean
+    private CertificateAuthorityInitializationService certificateAuthorityInitializationService;
 
     // Required to satisfy injection dependency
     @MockBean
@@ -133,14 +136,15 @@ public class CertificateAuthorityControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "http://localhost/ca"));
-        verify(certificateAuthorityService).importPkcs12CertificateAuthority(importCertificateAuthorityDto);
+        verify(certificateAuthorityInitializationService).importPkcs12CertificateAuthority
+                (importCertificateAuthorityDto);
     }
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void importCaAlreadyExistingAsAdmin() throws Exception {
         doThrow(new CertificateAuthorityAlreadyInitializedException("already initialized"))
-                .when(certificateAuthorityService).importPkcs12CertificateAuthority(any());
+                .when(certificateAuthorityInitializationService).importPkcs12CertificateAuthority(any());
 
         final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
         importCertificateAuthorityDto.setPassword("");
@@ -158,7 +162,7 @@ public class CertificateAuthorityControllerIT {
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void importCaImportExceptionAsAdmin() throws Exception {
         doThrow(new CertificateAuthorityInitializationException("import exception"))
-                .when(certificateAuthorityService).importPkcs12CertificateAuthority(any());
+                .when(certificateAuthorityInitializationService).importPkcs12CertificateAuthority(any());
 
         final ImportCertificateAuthorityDto importCertificateAuthorityDto = new ImportCertificateAuthorityDto();
         importCertificateAuthorityDto.setPassword("");
@@ -185,7 +189,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(certificateAuthorityService, never()).importPkcs12CertificateAuthority(any());
+        verify(certificateAuthorityInitializationService, never()).importPkcs12CertificateAuthority(any());
     }
 
     @Test
@@ -200,7 +204,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(certificateAuthorityService, never()).importPkcs12CertificateAuthority(any());
+        verify(certificateAuthorityInitializationService, never()).importPkcs12CertificateAuthority(any());
     }
 
     @Test
@@ -235,7 +239,7 @@ public class CertificateAuthorityControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "http://localhost/ca"));
-        verify(certificateAuthorityService).createSelfSignedCertificateAuthority
+        verify(certificateAuthorityInitializationService).createSelfSignedCertificateAuthority
                 (createSelfSignedCertificateAuthorityDto);
     }
 
@@ -256,7 +260,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(certificateAuthorityService, never()).createSelfSignedCertificateAuthority(any());
+        verify(certificateAuthorityInitializationService, never()).createSelfSignedCertificateAuthority(any());
     }
 
     @Test
@@ -275,6 +279,6 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(certificateAuthorityService, never()).createSelfSignedCertificateAuthority(any());
+        verify(certificateAuthorityInitializationService, never()).createSelfSignedCertificateAuthority(any());
     }
 }
