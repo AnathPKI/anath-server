@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * Retrieve user certificates as PEM, or in Anath JSON format.
  * @author Rafael Ostertag
  */
 @Slf4j

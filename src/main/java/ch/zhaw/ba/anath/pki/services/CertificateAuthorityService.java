@@ -42,6 +42,7 @@ import java.io.InputStreamReader;
 import java.util.Optional;
 
 /**
+ * Get the CA as {@link CertificateAuthority} or the CA Certificate in PEM encoding.
  * @author Rafael Ostertag
  */
 @Service

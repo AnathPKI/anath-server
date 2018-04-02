@@ -53,6 +53,7 @@ import static ch.zhaw.ba.anath.pki.services.CertificateAuthorityService.SECURE_S
 import static ch.zhaw.ba.anath.pki.services.CertificateAuthorityService.SECURE_STORE_CA_PRIVATE_KEY;
 
 /**
+ * Initializes the Certificate Authority by creating a self-signed CA or by importing a CA from a PKCS#12 structure.
  * @author Rafael Ostertag
  */
 @Service
