@@ -85,8 +85,6 @@ public class SigningController {
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
 
-            // TODO: Test if username matches email in signing request.
-
             final String username = AnathSecurityHelper.getUsername();
             final Certificate certificate = signingService.signCertificate(certificateSigningRequest, username,
                     signingRequestDto.getUse
