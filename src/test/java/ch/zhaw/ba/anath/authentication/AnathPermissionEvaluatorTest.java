@@ -36,9 +36,11 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 /**
  * @author Rafael Ostertag
@@ -66,22 +68,22 @@ public class AnathPermissionEvaluatorTest {
     @Test
     public void hasPermission4UserTargetType() {
         anathPermissionEvaluator.hasPermission(null, null, UserPermissionEvaluator.TARGET_TYPE, null);
-        verify(userPermissionEvaluator).hasPermission(any(), any(), anyString(), any());
-        verify(certificatePermissionEvaluator, never()).hasPermission(any(), any(), anyString(), any());
+        then(userPermissionEvaluator).should().hasPermission(any(), any(), anyString(), any());
+        then(certificatePermissionEvaluator).should(never()).hasPermission(any(), any(), anyString(), any());
     }
 
     @Test
     public void hasPermission4CertifiateTargetType() {
         anathPermissionEvaluator.hasPermission(null, null, CertificatePermissionEvaluator.TARGET_TYPE, null);
-        verify(certificatePermissionEvaluator).hasPermission(any(), any(), anyString(), any());
-        verify(userPermissionEvaluator, never()).hasPermission(any(), any(), anyString(), any());
+        then(certificatePermissionEvaluator).should().hasPermission(any(), any(), anyString(), any());
+        then(userPermissionEvaluator).should(never()).hasPermission(any(), any(), anyString(), any());
     }
 
     @Test
     public void hasPermission4UnknownTargetType() {
         final boolean result = anathPermissionEvaluator.hasPermission(null, null, "should not exist", null);
         assertThat(result, is(false));
-        verify(certificatePermissionEvaluator, never()).hasPermission(any(), any(), anyString(), any());
-        verify(userPermissionEvaluator, never()).hasPermission(any(), any(), anyString(), any());
+        then(certificatePermissionEvaluator).should(never()).hasPermission(any(), any(), anyString(), any());
+        then(userPermissionEvaluator).should(never()).hasPermission(any(), any(), anyString(), any());
     }
 }

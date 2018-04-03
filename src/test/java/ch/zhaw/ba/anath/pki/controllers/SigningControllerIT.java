@@ -48,12 +48,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigInteger;
 
-import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -124,7 +123,7 @@ public class SigningControllerIT {
                 .andExpect(header().string("Content-Type", AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE))
                 .andExpect(status().isCreated());
 
-        then(signingService.signCertificate(any(), eq("user"), eq("plain")));
+        then(signingService).should().signCertificate(any(), eq("user"), eq("plain"));
     }
 
     @Test
@@ -138,7 +137,7 @@ public class SigningControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
-        verify(signingService, never()).signCertificate(any(), anyString(), anyString());
+        then(signingService).should(never()).signCertificate(any(), anyString(), anyString());
     }
 
     @Test
@@ -151,6 +150,6 @@ public class SigningControllerIT {
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
 
-        verify(signingService, never()).signCertificate(any(), anyString(), anyString());
+        then(signingService).should(never()).signCertificate(any(), anyString(), anyString());
     }
 }

@@ -51,10 +51,10 @@ import java.util.Collections;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -156,7 +156,7 @@ public class UsesControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
-        verify(useService, never()).getUse(anyString());
+        then(useService).should(never()).getUse(anyString());
     }
 
     @Test
@@ -170,7 +170,7 @@ public class UsesControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(useService, never()).getUse(anyString());
+        then(useService).should(never()).getUse(anyString());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class UsesControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(useService, never()).create(any());
+        then(useService).should(never()).create(any());
     }
 
     @Test
@@ -226,7 +226,7 @@ public class UsesControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(useService, never()).create(any());
+        then(useService).should(never()).create(any());
     }
 
     @Test
@@ -264,7 +264,7 @@ public class UsesControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
-        verify(useService, never()).updateUse(anyString(), anyString());
+        then(useService).should(never()).updateUse(anyString(), anyString());
     }
 
     @Test
@@ -282,7 +282,7 @@ public class UsesControllerIT {
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
 
-        verify(useService, never()).updateUse(anyString(), anyString());
+        then(useService).should(never()).updateUse(anyString(), anyString());
     }
 
     @Test
@@ -296,7 +296,7 @@ public class UsesControllerIT {
                 .andExpect(header().string("Content-Type", startsWith(AnathMediaType
                         .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
-        verify(useService).delete(TEST_KEY);
+        then(useService).should().delete(TEST_KEY);
     }
 
     @Test
@@ -308,7 +308,7 @@ public class UsesControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(useService, never()).delete(anyString());
+        then(useService).should(never()).delete(anyString());
     }
 
     @Test
@@ -319,6 +319,6 @@ public class UsesControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(useService, never()).delete(anyString());
+        then(useService).should(never()).delete(anyString());
     }
 }

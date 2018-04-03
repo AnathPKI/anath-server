@@ -39,9 +39,9 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Rafael Ostertag
@@ -92,6 +92,6 @@ public class ConfigurationTemplateServiceTest {
         expected = "The CA Cert: CA CERT. The user cert USER CERT 2";
         assertThat(expandedTemplate, is(expandedTemplate));
 
-        verify(secureStoreServiceMock).get(anyString());
+        then(secureStoreServiceMock).should().get(anyString());
     }
 }

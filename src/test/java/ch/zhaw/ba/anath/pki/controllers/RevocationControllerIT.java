@@ -49,10 +49,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigInteger;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -93,7 +93,7 @@ public class RevocationControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isOk());
 
-        verify(revocationService).revokeCertificate(BigInteger.ONE, "test");
+        then(revocationService).should().revokeCertificate(BigInteger.ONE, "test");
     }
 
     @Test
@@ -116,7 +116,7 @@ public class RevocationControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isOk());
 
-        verify(revocationService).revokeCertificate(BigInteger.ONE, "test");
+        then(revocationService).should().revokeCertificate(BigInteger.ONE, "test");
     }
 
     @Test
@@ -139,7 +139,7 @@ public class RevocationControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
-        verify(revocationService, never()).revokeCertificate(any(), anyString());
+        then(revocationService).should(never()).revokeCertificate(any(), anyString());
     }
 
     @Test
@@ -155,6 +155,6 @@ public class RevocationControllerIT {
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
 
-        verify(revocationService, never()).revokeCertificate(any(), anyString());
+        then(revocationService).should(never()).revokeCertificate(any(), anyString());
     }
 }

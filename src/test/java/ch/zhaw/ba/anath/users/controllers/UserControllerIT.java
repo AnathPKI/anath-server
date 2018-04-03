@@ -52,10 +52,10 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -118,7 +118,7 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(userService, never()).getAll();
+        then(userService).should(never()).getAll();
     }
 
     @Test
@@ -130,7 +130,7 @@ public class UserControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(userService, never()).getAll();
+        then(userService).should(never()).getAll();
     }
 
     @Test
@@ -235,7 +235,7 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(userService, never()).getUser(anyLong());
+        then(userService).should(never()).getUser(anyLong());
     }
 
     @Test
@@ -247,7 +247,7 @@ public class UserControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(userService, never()).getUser(anyLong());
+        then(userService).should(never()).getUser(anyLong());
     }
 
     private UserLinkDto makeLinkUserDto() {
@@ -291,7 +291,7 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(userService, never()).updateUser(anyLong(), any());
+        then(userService).should(never()).updateUser(anyLong(), any());
     }
 
     @Test
@@ -305,7 +305,7 @@ public class UserControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(userService, never()).updateUser(anyLong(), any());
+        then(userService).should(never()).updateUser(anyLong(), any());
     }
 
     private UpdateUserDto makeUpdateUserDto() {
@@ -329,7 +329,7 @@ public class UserControllerIT {
                         .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("list")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users")));
-        verify(userService).deleteUser(1L);
+        then(userService).should().deleteUser(1L);
     }
 
     @Test
@@ -341,7 +341,7 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(userService, never()).deleteUser(anyLong());
+        then(userService).should(never()).deleteUser(anyLong());
     }
 
     @Test
@@ -352,7 +352,7 @@ public class UserControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(userService, never()).deleteUser(anyLong());
+        then(userService).should(never()).deleteUser(anyLong());
     }
 
     @Test
@@ -370,7 +370,7 @@ public class UserControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
-        verify(userService, never()).changePassword(anyLong(), any());
+        then(userService).should(never()).changePassword(anyLong(), any());
     }
 
     @Test
@@ -479,7 +479,7 @@ public class UserControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(userService, never()).createUser(any());
+        then(userService).should(never()).createUser(any());
     }
 
     @Test
@@ -493,7 +493,7 @@ public class UserControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(userService, never()).createUser(any());
+        then(userService).should(never()).createUser(any());
     }
 
     private CreateUserDto makeCreateUserDto() {

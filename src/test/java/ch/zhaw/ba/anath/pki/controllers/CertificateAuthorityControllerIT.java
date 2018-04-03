@@ -52,8 +52,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -138,7 +140,7 @@ public class CertificateAuthorityControllerIT {
                 .andExpect(header().string("Content-Type", startsWith(AnathMediaType
                         .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
                 .andExpect(header().string("Location", "http://localhost/ca"));
-        verify(certificateAuthorityInitializationService).importPkcs12CertificateAuthority
+        then(certificateAuthorityInitializationService).should().importPkcs12CertificateAuthority
                 (importCertificateAuthorityDto);
     }
 
@@ -191,7 +193,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(certificateAuthorityInitializationService, never()).importPkcs12CertificateAuthority(any());
+        then(certificateAuthorityInitializationService).should(never()).importPkcs12CertificateAuthority(any());
     }
 
     @Test
@@ -206,7 +208,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(certificateAuthorityInitializationService, never()).importPkcs12CertificateAuthority(any());
+        then(certificateAuthorityInitializationService).should(never()).importPkcs12CertificateAuthority(any());
     }
 
     @Test
@@ -241,7 +243,7 @@ public class CertificateAuthorityControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "http://localhost/ca"));
-        verify(certificateAuthorityInitializationService).createSelfSignedCertificateAuthority
+        then(certificateAuthorityInitializationService).should().createSelfSignedCertificateAuthority
                 (createSelfSignedCertificateAuthorityDto);
     }
 
@@ -262,7 +264,7 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
-        verify(certificateAuthorityInitializationService, never()).createSelfSignedCertificateAuthority(any());
+        then(certificateAuthorityInitializationService).should(never()).createSelfSignedCertificateAuthority(any());
     }
 
     @Test
@@ -281,6 +283,6 @@ public class CertificateAuthorityControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
-        verify(certificateAuthorityInitializationService, never()).createSelfSignedCertificateAuthority(any());
+        then(certificateAuthorityInitializationService).should(never()).createSelfSignedCertificateAuthority(any());
     }
 }
