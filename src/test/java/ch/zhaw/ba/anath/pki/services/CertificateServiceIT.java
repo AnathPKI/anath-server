@@ -147,6 +147,7 @@ public class CertificateServiceIT extends CertificateAuthorityInitializer {
         assertThat(certificateListItemDto.getSerial(), is(certificate.getSerial()));
         assertThat(certificateListItemDto.getSubject(), is(certificate.getSubject().toString()));
         assertThat(certificateListItemDto.getUse(), is("plain"));
+        assertThat(certificateListItemDto.getUserId(), is(TestHelper.TEST_USER_ID));
     }
 
     @Test

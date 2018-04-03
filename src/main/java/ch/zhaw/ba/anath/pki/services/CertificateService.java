@@ -119,6 +119,7 @@ public class CertificateService {
         certificateListItemDto.setSubject(certificateEntity.getSubject());
         certificateListItemDto.setUse(certificateEntity.getUse().getUse());
         certificateListItemDto.setValid(CertificateValidityUtils.isValid(certificateEntity));
+        certificateListItemDto.setUserId(certificateEntity.getUserId());
         return certificateListItemDto;
     }
 

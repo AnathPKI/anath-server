@@ -277,11 +277,7 @@ public class CertificatesControllerIT {
     }
 
     private void testGetAllUsers() throws Exception {
-        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
-        certificateListItemDto.setValid(true);
-        certificateListItemDto.setUse("plain");
-        certificateListItemDto.setSubject("subject");
-        certificateListItemDto.setSerial(BigInteger.ONE);
+        final CertificateListItemDto certificateListItemDto = makeCertificateListItemDto();
         doReturn(Collections.singletonList(certificateListItemDto)).when(certificateService).getAll();
 
         mvc.perform(
@@ -297,6 +293,7 @@ public class CertificatesControllerIT {
                 .andExpect(jsonPath("$.content[0].use", is("plain")))
                 .andExpect(jsonPath("$.content[0].valid", is(true)))
                 .andExpect(jsonPath("$.content[0].serial", is(1)))
+                .andExpect(jsonPath("$.content[0].userId").doesNotExist())
                 .andExpect(jsonPath("$.content[0].links[0].rel", is("self")))
                 .andExpect(jsonPath("$.content[0].links[0].href", is("http://localhost/certificates/1")))
                 .andExpect(jsonPath("$.content[0].links[1].rel", is("pem")))
@@ -315,11 +312,7 @@ public class CertificatesControllerIT {
 
     @Test
     public void getAllAsUnauthenticated() throws Exception {
-        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
-        certificateListItemDto.setValid(true);
-        certificateListItemDto.setUse("plain");
-        certificateListItemDto.setSubject("subject");
-        certificateListItemDto.setSerial(BigInteger.ONE);
+        final CertificateListItemDto certificateListItemDto = makeCertificateListItemDto();
         doReturn(Collections.singletonList(certificateListItemDto)).when(certificateService).getAll();
 
         mvc.perform(
@@ -329,5 +322,15 @@ public class CertificatesControllerIT {
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
+    }
+
+    private CertificateListItemDto makeCertificateListItemDto() {
+        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
+        certificateListItemDto.setValid(true);
+        certificateListItemDto.setUse("plain");
+        certificateListItemDto.setSubject("subject");
+        certificateListItemDto.setSerial(BigInteger.ONE);
+        certificateListItemDto.setUserId("user");
+        return certificateListItemDto;
     }
 }

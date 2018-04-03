@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.ResourceSupport;
@@ -45,4 +46,7 @@ public class CertificateListItemDto extends ResourceSupport {
     private BigInteger serial;
     private String use;
     private boolean valid;
+    // This is used internally to filter lists by users.
+    @JsonIgnore
+    private String userId;
 }
