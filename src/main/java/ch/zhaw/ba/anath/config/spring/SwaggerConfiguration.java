@@ -71,7 +71,8 @@ public class SwaggerConfiguration {
                 .securityContexts(securityContexts)
                 .tags(
                         new Tag("Certificate Authority", "Certificate Authority and User Certificate API"),
-                        new Tag("User Management", "User Management API")
+                        new Tag("User Management", "User Management API"),
+                        new Tag("Misc", "Miscellaneous")
                 )
                 .useDefaultResponseMessages(false);
     }
