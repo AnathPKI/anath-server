@@ -34,6 +34,7 @@ node {
     withMaven(
             jdk: "Oracle JDK 8u162",
             maven: "Default Maven",
+            mavenSettingsConfig: "sonar-settings",
             mavenLocalRepo: ".repository",
             options: [
                     openTasksPublisher(disabled: false),
