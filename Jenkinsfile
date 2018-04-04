@@ -49,6 +49,28 @@ node {
         }
     }
 
+    stage("Push to Artifact Repository") {
+        if (env.BRANCH_NAME.startsWith('PR-')) {
+            echo "Not deploying, commit is pull request"
+            return
+        }
+        if (env.BRANCH_NAME.startsWith('release/')) {
+            echo "Not deploying, commit is on release branch ${env.BRANCH_NAME}"
+            return
+        }
+        withMaven(
+                jdk: "Oracle JDK 8u162",
+                maven: "Default Maven",
+                mavenSettingsConfig: "nexus-settings",
+                mavenLocalRepo: ".repository",
+                options: [
+                        openTasksPublisher(disabled: true),
+                        junitPublisher(disabled: true, ignoreAttachments: false)
+                ]) {
+            sh "mvn -DskipTests=true -DskipITs=true deploy"
+        }
+    }
+
     stage("Code Coverage") {
         jacoco classPattern: 'target/classes', execPattern: 'target/*.exec', sourcePattern: 'src/main/java'
     }
