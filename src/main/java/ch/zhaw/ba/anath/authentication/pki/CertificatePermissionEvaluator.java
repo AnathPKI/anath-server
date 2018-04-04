@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.authentication.pki;
 
 import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
+import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,11 @@ import java.util.Set;
 @Slf4j
 public class CertificatePermissionEvaluator implements PermissionEvaluator {
     public static final String TARGET_TYPE = "certificate";
+    public static final String PERMISSION_NOT_STRING_MESSAGE = "Cannot evaluate permission for certificate object, " +
+            "permission is not of type String. Denying";
+
+    public static final String CERTIFICATE_PERMISSION_UNKNOWN_MESSAGE = "Certificate permission '{}' unknown. Denying";
+
     private final CertificateRepository certificateRepository;
     private final Set<String> certificatePermissions;
 
@@ -65,7 +71,31 @@ public class CertificatePermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        throw new UnsupportedOperationException("hasPermission(Authentication,Object,Object) unsupported");
+        if (!(targetDomainObject instanceof CertificateListItemDto)) {
+            log.info("Unknown targetDomainObject received: {}. Denying.", targetDomainObject.getClass().getName());
+            return false;
+        }
+
+        if (!(permission instanceof String)) {
+            log.error(PERMISSION_NOT_STRING_MESSAGE);
+            return false;
+        }
+
+        String realPermission = (String) permission;
+
+        if (!certificatePermissions.contains(realPermission)) {
+            log.info(CERTIFICATE_PERMISSION_UNKNOWN_MESSAGE, realPermission);
+            return false;
+        }
+
+        final CertificateListItemDto realObject = (CertificateListItemDto) targetDomainObject;
+        if (realObject.getUserId() == null) {
+            log.error("userId is null. Denying.");
+            return false;
+        }
+        final String username = AnathSecurityHelper.getUsername(authentication);
+
+        return realObject.getUserId().equals(username);
     }
 
     @Override
@@ -86,7 +116,7 @@ public class CertificatePermissionEvaluator implements PermissionEvaluator {
             return false;
         }
         if (!(permission instanceof String)) {
-            log.error("Cannot evaluate permission for certificate object, permission is not of type String. Denying");
+            log.error(PERMISSION_NOT_STRING_MESSAGE);
             return false;
         }
 
@@ -94,7 +124,7 @@ public class CertificatePermissionEvaluator implements PermissionEvaluator {
         String realPermission = (String) permission;
 
         if (!certificatePermissions.contains(realPermission)) {
-            log.info("Certificate permission '{}' unknown. Denying", realPermission);
+            log.info(CERTIFICATE_PERMISSION_UNKNOWN_MESSAGE, realPermission);
             return false;
         }
 

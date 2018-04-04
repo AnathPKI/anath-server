@@ -31,6 +31,7 @@ package ch.zhaw.ba.anath.authentication;
 
 import ch.zhaw.ba.anath.authentication.pki.CertificatePermissionEvaluator;
 import ch.zhaw.ba.anath.authentication.users.UserPermissionEvaluator;
+import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,9 +61,15 @@ public class AnathPermissionEvaluatorTest {
                 certificatePermissionEvaluator);
     }
 
+    @Test
+    public void hasPermission3CertificateListItemDto() {
+        anathPermissionEvaluator.hasPermission(null, new CertificateListItemDto(), null);
+        then(certificatePermissionEvaluator).should().hasPermission(any(), any(), any());
+    }
+
     @Test(expected = UnsupportedOperationException.class)
-    public void hasPermission3() {
-        anathPermissionEvaluator.hasPermission(null, null, null);
+    public void hasPermission3AnyObject() {
+        anathPermissionEvaluator.hasPermission(null, new Object(), null);
     }
 
     @Test

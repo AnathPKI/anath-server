@@ -31,6 +31,7 @@ package ch.zhaw.ba.anath.authentication;
 
 import ch.zhaw.ba.anath.authentication.pki.CertificatePermissionEvaluator;
 import ch.zhaw.ba.anath.authentication.users.UserPermissionEvaluator;
+import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -48,14 +49,15 @@ public class AnathPermissionEvaluator implements PermissionEvaluator {
     public static final String DEFAULT_DENY_PERMISSION_HANDLER_CALLED_MESSAGE = "Default deny permission handler " +
             "called";
 
-    private final HashMap<String, PermissionEvaluator> permissionEvaluators;
+    private final HashMap<String, PermissionEvaluator> permissionEvaluatorsByTargetType;
     private final PermissionEvaluator defaultDenyEvaluator;
 
     public AnathPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator, CertificatePermissionEvaluator
             certificatePermissionEvaluator) {
-        this.permissionEvaluators = new HashMap<>();
-        permissionEvaluators.put(UserPermissionEvaluator.TARGET_TYPE, userPermissionEvaluator);
-        permissionEvaluators.put(CertificatePermissionEvaluator.TARGET_TYPE, certificatePermissionEvaluator);
+        this.permissionEvaluatorsByTargetType = new HashMap<>();
+        permissionEvaluatorsByTargetType.put(UserPermissionEvaluator.TARGET_TYPE, userPermissionEvaluator);
+        permissionEvaluatorsByTargetType.put(CertificatePermissionEvaluator.TARGET_TYPE,
+                certificatePermissionEvaluator);
 
         this.defaultDenyEvaluator = new PermissionEvaluator() {
             @Override
@@ -71,18 +73,25 @@ public class AnathPermissionEvaluator implements PermissionEvaluator {
                 return false;
             }
         };
-
     }
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        throw new UnsupportedOperationException("hasPermission(Authentication,Object,Object) unsupported");
+        if (targetDomainObject instanceof CertificateListItemDto) {
+            final PermissionEvaluator permissionEvaluator =
+                    permissionEvaluatorsByTargetType.get(CertificatePermissionEvaluator.TARGET_TYPE);
+            return permissionEvaluator.hasPermission(authentication, targetDomainObject, permission);
+        }
+
+        log.error("hasPermission(Authentication,Object,Object) not supported for {}", targetDomainObject.getClass()
+                .getName());
+        throw new UnsupportedOperationException("hasPermission(Authentication,Object,Object) not supported");
     }
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object
             permission) {
-        final PermissionEvaluator permissionEvaluator = permissionEvaluators.getOrDefault(targetType,
+        final PermissionEvaluator permissionEvaluator = permissionEvaluatorsByTargetType.getOrDefault(targetType,
                 defaultDenyEvaluator);
         return permissionEvaluator.hasPermission(authentication, targetId, targetType, permission);
     }

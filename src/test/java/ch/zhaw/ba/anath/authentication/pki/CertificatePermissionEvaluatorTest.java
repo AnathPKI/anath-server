@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.authentication.pki;
 
+import ch.zhaw.ba.anath.pki.dto.CertificateListItemDto;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import org.junit.Before;
@@ -64,9 +65,73 @@ public class CertificatePermissionEvaluatorTest {
         this.certificatePermissionEvaluator = new CertificatePermissionEvaluator(certificateRepositoryMock);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void hasPermission3() {
-        certificatePermissionEvaluator.hasPermission(null, null, null);
+    @Test
+    public void hasPermission3AnyObject() {
+        final boolean result = certificatePermissionEvaluator.hasPermission(null, new Object(), null);
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void hasPermission3PermissionNonString() {
+        final boolean result = certificatePermissionEvaluator.hasPermission(null, new CertificateListItemDto(), 3);
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void hasPermission3UnknownPermission() {
+        final boolean result = certificatePermissionEvaluator.hasPermission(null, new CertificateListItemDto(),
+                "should not exist");
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void hasPermission3NullUserId() {
+        final boolean result = certificatePermissionEvaluator.hasPermission(null, new CertificateListItemDto(), "get");
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void hasPermission3GetAndUserIdMatch() {
+        final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = setUpTest();
+        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
+        certificateListItemDto.setUserId(TEST_USER_NAME);
+        final boolean result = certificatePermissionEvaluator.hasPermission(usernamePasswordAuthenticationToken,
+                certificateListItemDto,
+                "get");
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void hasPermission3RevokeAndUserIdMatch() {
+        final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = setUpTest();
+        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
+        certificateListItemDto.setUserId(TEST_USER_NAME);
+        final boolean result = certificatePermissionEvaluator.hasPermission(usernamePasswordAuthenticationToken,
+                certificateListItemDto,
+                "revoke");
+        assertThat(result, is(true));
+    }
+
+    @Test
+    public void hasPermission3GetAndUserIdNonMatch() {
+        final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = setUpTest();
+        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
+        certificateListItemDto.setUserId(TEST_USER_NAME + " another");
+        final boolean result = certificatePermissionEvaluator.hasPermission(usernamePasswordAuthenticationToken,
+                certificateListItemDto,
+                "get");
+        assertThat(result, is(false));
+    }
+
+    @Test
+    public void hasPermission3RevokeAndUserIdNonMatch() {
+        final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = setUpTest();
+        final CertificateListItemDto certificateListItemDto = new CertificateListItemDto();
+        certificateListItemDto.setUserId(TEST_USER_NAME + " another");
+        final boolean result = certificatePermissionEvaluator.hasPermission(usernamePasswordAuthenticationToken,
+                certificateListItemDto,
+                "revoke");
+        assertThat(result, is(false));
     }
 
     @Test
