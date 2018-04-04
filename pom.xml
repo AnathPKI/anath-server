@@ -33,6 +33,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Inherit defaults from Spring Boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.10.RELEASE</version>
+    </parent>
+
     <groupId>ch.zhaw.ba</groupId>
     <artifactId>anath-server</artifactId>
     <version>1.0.0-SNAPSHOT</version>
@@ -42,12 +49,7 @@
     <name>anath-server</name>
     <url>http://maven.apache.org</url>
 
-    <!-- Inherit defaults from Spring Boot -->
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.10.RELEASE</version>
-    </parent>
+
 
     <scm>
         <connection>scm:ssh://git@bitbucket.datonus.ch:7999/bapki/anath-server.git</connection>
