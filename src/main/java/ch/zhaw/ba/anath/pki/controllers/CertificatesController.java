@@ -43,8 +43,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -90,16 +92,27 @@ public class CertificatesController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @ApiOperation(value = "Get all User Certificates")
-    public Resources<CertificateListItemDto> getAll() {
-        final List<CertificateListItemDto> all = certificateService.getAll();
-        for (CertificateListItemDto certificateListItemDto : all) {
-            certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getCertificate
-                    (certificateListItemDto.getSerial())).withSelfRel());
-            certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getPlainPemCertificate
-                    (certificateListItemDto.getSerial())).withRel("pem"));
-            certificateListItemDto.add(linkTo(methodOn(RevocationController.class).revoke
-                    (certificateListItemDto.getSerial(), new RevocationReasonDto())).withRel("revoke"));
-        }
+    public Resources<CertificateListItemDto> getAll(HttpServletRequest httpServletRequest) {
+        List<CertificateListItemDto> all = certificateService.getAll();
+
+        boolean isAdmin = httpServletRequest.isUserInRole("ADMIN");
+        String username = httpServletRequest.getUserPrincipal().getName();
+
+        all = all.stream()
+                .filter(x -> isAdmin || (x.getUserId() != null && x.getUserId().equals(username)))
+                .map(this::addLinksToCertificateListItemDto)
+                .collect(Collectors.toList());
+
         return new Resources<>(all, linkTo(SigningController.class).withRel("sign"));
+    }
+
+    private CertificateListItemDto addLinksToCertificateListItemDto(CertificateListItemDto certificateListItemDto) {
+        certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getCertificate
+                (certificateListItemDto.getSerial())).withSelfRel());
+        certificateListItemDto.add(linkTo(methodOn(CertificatesController.class).getPlainPemCertificate
+                (certificateListItemDto.getSerial())).withRel("pem"));
+        certificateListItemDto.add(linkTo(methodOn(RevocationController.class).revoke
+                (certificateListItemDto.getSerial(), new RevocationReasonDto())).withRel("revoke"));
+        return certificateListItemDto;
     }
 }

@@ -71,6 +71,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("tests")
 @TestSecuritySetup
 public class CertificatesControllerIT {
+    private static final String DEFAULT_USER_ID = "user";
     @Autowired
     private MockMvc mvc;
 
@@ -116,10 +117,10 @@ public class CertificatesControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
+    @WithMockUser(username = DEFAULT_USER_ID, roles = {"USER"})
     public void getCertificateAsUser() throws Exception {
         final CertificateEntity certificateEntity = new CertificateEntity();
-        certificateEntity.setUserId("user");
+        certificateEntity.setUserId(DEFAULT_USER_ID);
         given(certificateRepository.findOneBySerial(BigInteger.ONE)).willReturn(Optional.of(certificateEntity));
 
         final CertificateResponseDto certificateResponseDto = makeCertificateResponseDto();
@@ -150,7 +151,7 @@ public class CertificatesControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
+    @WithMockUser(username = DEFAULT_USER_ID, roles = {"USER"})
     public void getCertificateAsUnauthorizedUser() throws Exception {
         final CertificateEntity certificateEntity = new CertificateEntity();
         certificateEntity.setUserId("another user");
@@ -241,7 +242,7 @@ public class CertificatesControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
+    @WithMockUser(username = DEFAULT_USER_ID, roles = {"USER"})
     public void getPlainPemCertificateAsUser() throws Exception {
         final CertificateResponseDto certificateResponseDto = makeCertificateResponseDto();
         given(certificateService.getPlainPEMEncodedCertificate(BigInteger.ONE)).willReturn("certificate");
@@ -256,7 +257,7 @@ public class CertificatesControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
+    @WithMockUser(username = DEFAULT_USER_ID, roles = {"USER"})
     public void getNonExistingPlainPemCertificateAsUser() throws Exception {
         given(certificateService.getPlainPEMEncodedCertificate(BigInteger.ONE)).willThrow(new
                 CertificateNotFoundException(""));
@@ -305,10 +306,31 @@ public class CertificatesControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
+    @WithMockUser(username = DEFAULT_USER_ID, roles = {"USER"})
     public void getAllAsUser() throws Exception {
         testGetAllUsers();
     }
+
+    @Test
+    @WithMockUser(username = DEFAULT_USER_ID + "another", roles = {"USER"})
+    public void getAllAsUserNoUserIdMatching() throws Exception {
+        final CertificateListItemDto certificateListItemDto = makeCertificateListItemDto();
+        doReturn(Collections.singletonList(certificateListItemDto)).when(certificateService).getAll();
+
+        mvc.perform(
+                get("/certificates")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
+                .andExpect(jsonPath("$.content", is(empty())))
+                .andExpect(jsonPath("$.links[0].rel", is("sign")))
+                .andExpect(jsonPath("$.links[0].href", is("http://localhost/sign")));
+    }
+
 
     @Test
     public void getAllAsUnauthenticated() throws Exception {
@@ -330,7 +352,7 @@ public class CertificatesControllerIT {
         certificateListItemDto.setUse("plain");
         certificateListItemDto.setSubject("subject");
         certificateListItemDto.setSerial(BigInteger.ONE);
-        certificateListItemDto.setUserId("user");
+        certificateListItemDto.setUserId(DEFAULT_USER_ID);
         return certificateListItemDto;
     }
 }
