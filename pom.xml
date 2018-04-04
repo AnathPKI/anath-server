@@ -76,6 +76,14 @@
         <java.version>1.8</java.version>
         <!-- We need a plugin newer than 3.1 to use selma sucessfuly -->
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+
+         <sonar.junit.reportPaths>target/surefire-reports,target/failsafe-reports</sonar.junit.reportPaths>
+        <sonar.jacoco.reportPaths>target/jacoco.exec,target/jacoco-it.exec</sonar.jacoco.reportPaths>
+        <sonar.import_unknown_files>true</sonar.import_unknown_files>
+        <sonar.coverage.exclusions>
+            **/*Exception.java,**/*Dto.java,**/*Entity.java,**/*Repository.java,**/*SelmaGeneratedClass.java,**/nonproduction/*.java,**/configuration/**.java,**/dto/**.java,**/Application.java
+        </sonar.coverage.exclusions>
+        <sonar.exclusions>**/*SelmaGeneratedClass.java,**/nonproduction/*.java</sonar.exclusions>
     </properties>
 
     <dependencies>
