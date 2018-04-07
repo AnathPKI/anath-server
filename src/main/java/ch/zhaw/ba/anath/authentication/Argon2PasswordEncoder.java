@@ -37,8 +37,9 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.Charset;
 
 /**
- * Argon password encoder. Implementation taken from <a href="https://www.owasp.org/index
- * .php/Password_Storage_Cheat_Sheet">OWASP Password Storage Cheat Sheet</a> (2018-03-27).
+ * Argon password encoder. Implementation taken from
+ * <a href="https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet">OWASP Password Storage Cheat Sheet</a>
+ * (2018-03-27).
  *
  * @author Rafael Ostertag
  */

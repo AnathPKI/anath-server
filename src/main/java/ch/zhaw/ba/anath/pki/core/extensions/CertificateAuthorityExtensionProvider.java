@@ -37,6 +37,14 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
  * @author Rafael Ostertag
  */
 public interface CertificateAuthorityExtensionProvider {
+    /**
+     * Add extension to {@link X509v3CertificateBuilder}.
+     *
+     * @param certificateBuilder {@link X509v3CertificateBuilder} instance.
+     * @param extensionArguments {@link ExtensionArguments} instance providing arguments
+     *
+     * @return {@link X509v3CertificateBuilder} instance.
+     */
     X509v3CertificateBuilder addExtension(X509v3CertificateBuilder certificateBuilder, ExtensionArguments
             extensionArguments);
 }

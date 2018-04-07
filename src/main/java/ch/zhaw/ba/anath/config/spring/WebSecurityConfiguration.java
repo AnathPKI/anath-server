@@ -78,7 +78,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
      *
      * @return {@link HttpSecurity} instance.
      *
-     * @throws Exception
+     * @throws Exception on error
      */
     public static HttpSecurity setupSecurity(HttpSecurity httpSecurity) throws Exception {
         httpSecurity

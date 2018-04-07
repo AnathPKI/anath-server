@@ -133,6 +133,8 @@ public class SigningService {
      * @param use                             the use. If the use cannot be found in the database, the {@value
      *                                        UseEntity#DEFAULT_USE} is used.
      *
+     * @return {@link Certificate} instance.
+     *
      * @throws CertificateAlreadyExistsException when a non-revoked, non-expired for the given subject already
      *                                           exists, or the serial number is taken.
      * @throws SigningServiceException           if no default certificate use can be found.
