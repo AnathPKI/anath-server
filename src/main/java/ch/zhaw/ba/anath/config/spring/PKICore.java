@@ -31,6 +31,8 @@ package ch.zhaw.ba.anath.config.spring;
 
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import ch.zhaw.ba.anath.pki.core.*;
+import ch.zhaw.ba.anath.pki.core.extensions.CertificateExtensionsActionsFactoryInterface;
+import ch.zhaw.ba.anath.pki.core.extensions.Rfc5280CAExtensionsActionsFactory;
 import ch.zhaw.ba.anath.pki.core.interfaces.*;
 import ch.zhaw.ba.anath.pki.corecustomizations.OrganizationAndEmailCertificateConstraint;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +79,11 @@ public class PKICore {
         int days = anathProperties.getCrlValidity();
         log.info("Use ConfigurablePeriodCRLValidity with a value of {} days(s)", days);
         return new ConfigurablePeriodCRLValidity(days);
+    }
+
+    @Bean
+    public CertificateExtensionsActionsFactoryInterface certificateExtensionsActionsFactory() {
+        return new Rfc5280CAExtensionsActionsFactory();
     }
 
     @Bean

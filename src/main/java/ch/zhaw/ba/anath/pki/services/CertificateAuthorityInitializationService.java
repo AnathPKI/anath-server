@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.pki.services;
 
 import ch.zhaw.ba.anath.pki.core.*;
+import ch.zhaw.ba.anath.pki.core.extensions.CertificateExtensionsActionsFactoryInterface;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateSerialProvider;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateValidityProvider;
 import ch.zhaw.ba.anath.pki.core.interfaces.SecureRandomProvider;
@@ -66,17 +67,21 @@ public class CertificateAuthorityInitializationService {
     private final CertificateSerialProvider certificateSerialProvider;
     private final SecureRandomProvider secureRandomProvider;
     private final SignatureNameProvider signatureNameProvider;
+    private final CertificateExtensionsActionsFactoryInterface certificateExtensionsActionsFactory;
     private final RevocationService revocationService;
 
     public CertificateAuthorityInitializationService(SecureStoreService secureStoreService,
                                                      CertificateSerialProvider certificateSerialProvider,
                                                      SecureRandomProvider secureRandomProvider,
-                                                     SignatureNameProvider signatureNameProvider, RevocationService
+                                                     SignatureNameProvider signatureNameProvider,
+                                                     CertificateExtensionsActionsFactoryInterface
+                                                             certificateExtensionsActionsFactory, RevocationService
                                                              revocationService) {
         this.secureStoreService = secureStoreService;
         this.certificateSerialProvider = certificateSerialProvider;
         this.secureRandomProvider = secureRandomProvider;
         this.signatureNameProvider = signatureNameProvider;
+        this.certificateExtensionsActionsFactory = certificateExtensionsActionsFactory;
         this.revocationService = revocationService;
     }
 
@@ -115,7 +120,8 @@ public class CertificateAuthorityInitializationService {
 
         final SelfSignedCertificateAuthority selfSignedCertificateAuthority = new SelfSignedCertificateAuthority
                 (selfSignedCANameBuilder, validityProvider, certificateSerialProvider,
-                        secureRandomProvider, signatureNameProvider, createSelfSignedCertificateAuthorityDto.getBits());
+                        secureRandomProvider, signatureNameProvider, certificateExtensionsActionsFactory,
+                        createSelfSignedCertificateAuthorityDto.getBits());
 
         log.info("Self Signed Certificate Authority valid from {} to {}",
                 selfSignedCertificateAuthority.getCertificateAuthority().getCertificate().getValidFrom(),

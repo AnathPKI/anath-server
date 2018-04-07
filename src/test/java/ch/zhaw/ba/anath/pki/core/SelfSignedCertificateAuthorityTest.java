@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.SelfSignedCACreationException;
+import ch.zhaw.ba.anath.pki.core.extensions.Rfc5280CAExtensionsActionsFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,7 +62,7 @@ public class SelfSignedCertificateAuthorityTest {
                 new UuidCertificateSerialProvider(),
                 new SecureRandomProviderImpl(),
                 new Sha512WithRsa(),
-                2048);
+                new Rfc5280CAExtensionsActionsFactory(), 2048);
     }
 
     @Test
@@ -90,12 +91,12 @@ public class SelfSignedCertificateAuthorityTest {
 
     @Test(expected = SelfSignedCACreationException.class)
     public void keyBitSizeBelow1024() {
-        new SelfSignedCertificateAuthority(null, null, null, null, null, 512);
+        new SelfSignedCertificateAuthority(null, null, null, null, null, new Rfc5280CAExtensionsActionsFactory(), 512);
     }
 
     @Test(expected = SelfSignedCACreationException.class)
     public void keyBitSizeNotInList() {
-        new SelfSignedCertificateAuthority(null, null, null, null, null, 1025);
+        new SelfSignedCertificateAuthority(null, null, null, null, null, new Rfc5280CAExtensionsActionsFactory(), 1025);
     }
 
     @Test
@@ -107,7 +108,7 @@ public class SelfSignedCertificateAuthorityTest {
                 new UuidCertificateSerialProvider(),
                 new SecureRandomProviderImpl(),
                 new Sha512WithRsa(),
-                1024);
+                new Rfc5280CAExtensionsActionsFactory(), 1024);
     }
 
     @Test
