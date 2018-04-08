@@ -70,7 +70,7 @@ public class AnathProperties {
             /**
              * Expiration time in minutes.
              */
-            private int expirationTime = 480;
+            private int expirationTime = 60;
         }
 
         /**
