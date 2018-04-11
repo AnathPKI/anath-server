@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 public class Argon2PasswordEncoderTest {
 
     @Test
-    public void then() {
+    public void verify() {
         final Argon2PasswordEncoder argon2PasswordEncoder = new Argon2PasswordEncoder(new AnathProperties());
 
         final String password = "TheSuperSecretPassword";
