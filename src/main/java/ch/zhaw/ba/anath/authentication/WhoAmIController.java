@@ -29,18 +29,22 @@
 
 package ch.zhaw.ba.anath.authentication;
 
+import ch.zhaw.ba.anath.users.entities.UserEntity;
+import ch.zhaw.ba.anath.users.exceptions.UserDoesNotExistException;
+import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Rafael Ostertag
@@ -50,15 +54,33 @@ import java.util.Map;
         produces = MediaType.APPLICATION_JSON_UTF8_VALUE
 )
 @Api(tags = {"Misc"})
+@Slf4j
+@Transactional(transactionManager = "userTransactionManager")
 public class WhoAmIController {
+    private final UserRepository userRepository;
+
+    public WhoAmIController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
-    public Map<String, Object> whoAmiI(HttpServletRequest httpServletRequest) {
-        final HashMap<String, Object> whoAmIInformation = new HashMap<>();
-        whoAmIInformation.put("user", httpServletRequest.getUserPrincipal().getName());
-        whoAmIInformation.put("admin", httpServletRequest.isUserInRole("ADMIN"));
+    public WhoAmIDto whoAmiI(HttpServletRequest httpServletRequest) {
+        // TODO: refactor. Pulling in the repository is ugly, may be it can be solved using the UserService.
+        final String userName = httpServletRequest.getUserPrincipal().getName();
+        final Optional<UserEntity> optionalUser = userRepository.findOneByEmail(userName);
+        final UserEntity userEntity = optionalUser.orElseThrow(() -> {
+            log.error("User '{}' not found", userName);
+            return new UserDoesNotExistException("User does not exist");
+        });
 
-        return whoAmIInformation;
+        final WhoAmIDto whoAmIDto = new WhoAmIDto();
+        whoAmIDto.setAdmin(userEntity.getAdmin());
+        whoAmIDto.setUser(userEntity.getEmail());
+        whoAmIDto.setFirstname(userEntity.getFirstname());
+        whoAmIDto.setLastname(userEntity.getLastname());
+
+        return whoAmIDto;
     }
 }
