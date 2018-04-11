@@ -84,7 +84,7 @@ public class CertificateAuthorityController {
     @GetMapping(
             path = "/ca.pem",
             consumes = MediaType.ALL_VALUE,
-            produces = PkixMediaType.APPLICATION_PKIX_CERT_VALUE
+            produces = {PkixMediaType.APPLICATION_PKIX_CERT_VALUE, MediaType.ALL_VALUE}
     )
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get the PEM Encoded X.509 CA Certificate", authorizations = {})
@@ -99,7 +99,9 @@ public class CertificateAuthorityController {
             produces = PkixMediaType.APPLICATION_PKIX_CRL_VALUE
     )
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Get the PEM Encoded X.509 Certificate Revocation List", authorizations = {})
+    @ApiOperation(value = "Get the PEM Encoded X.509 Certificate Revocation List",
+            authorizations = {}
+    )
     public HttpEntity<String> getCrl() {
         return ResponseEntity.ok().body(revocationService.getCrlPemEncoded());
     }

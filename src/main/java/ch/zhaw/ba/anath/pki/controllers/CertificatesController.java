@@ -96,8 +96,16 @@ public class CertificatesController {
     )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'get'))")
-    @ApiOperation(value = "Retrieve a User Certificate by Serial Number", notes = "Admin users may retrieve any " +
-            "certificate. Regular users are limited to their own certificates.")
+    @ApiOperation(value = "Retrieve a User Certificate by Serial Number", notes =
+            "This endpoint returns a 'application/vnd.anath.v1+json' representation of the resource when the " +
+                    "client sent 'application/vnd.anath.v1+json'. In that case admin users may retrieve any " +
+                    "certificate. Regular users are limited to their own certificates. When the client does not send " +
+                    "an " +
+                    "'Accept' header, or the content of the 'Accept' header is not 'application/vnd.anath.v1+json', " +
+                    "the PEM encoded user certificate is returned an NO authentication is required.",
+            response =
+                    CertificateResponseDto
+                            .class)
     public CertificateResponseDto getCertificate(@PathVariable BigInteger serial) {
         final CertificateResponseDto certificate = certificateService.getCertificate(serial);
         certificate.add(linkTo(methodOn(CertificatesController.class).revoke(serial, new RevocationReasonDto())).withRel
@@ -108,11 +116,13 @@ public class CertificatesController {
 
     @GetMapping(path = "/{serial}",
             consumes = MediaType.ALL_VALUE,
-            produces = {PkixMediaType.APPLICATION_PKIX_CERT_VALUE, MediaType.ALL_VALUE})
+            produces = {PkixMediaType.APPLICATION_PKIX_CERT_VALUE, MediaType.ALL_VALUE}
+    )
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Retrieve a PEM Encoded User Certificate by Serial Number", authorizations = {})
     public HttpEntity<String> getPlainPemCertificate(@PathVariable BigInteger serial) {
-        return new ResponseEntity<>(certificateService.getPlainPEMEncodedCertificate(serial), HttpStatus.OK);
+        return ResponseEntity
+                .ok(certificateService.getPlainPEMEncodedCertificate(serial));
+
     }
 
     @PutMapping(path = "/{serial}/revoke")
