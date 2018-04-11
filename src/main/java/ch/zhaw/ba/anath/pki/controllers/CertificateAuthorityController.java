@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
+import ch.zhaw.ba.anath.AnathExtensionMediaType;
 import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityInitializationService;
@@ -106,8 +107,8 @@ public class CertificateAuthorityController {
 
     @PutMapping(
             path = "/",
-            consumes = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE,
-            produces = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
+            consumes = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE,
+            produces = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
     )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
@@ -143,7 +144,7 @@ public class CertificateAuthorityController {
 
         return ResponseEntity
                 .created(uri)
-                .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                 .build();
     }
 

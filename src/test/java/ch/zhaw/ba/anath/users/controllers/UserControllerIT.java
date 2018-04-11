@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.users.controllers;
 
+import ch.zhaw.ba.anath.AnathExtensionMediaType;
 import ch.zhaw.ba.anath.TestSecuritySetup;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.users.dto.*;
@@ -96,13 +97,13 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users")
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
-                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].links[0].rel", is("self")))
                 .andExpect(jsonPath("$.content[0].links[0].href", is("http://localhost/users/1")));
@@ -113,8 +114,8 @@ public class UserControllerIT {
     public void getAllAsUser() throws Exception {
         mvc.perform(
                 get("/users")
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -125,8 +126,8 @@ public class UserControllerIT {
     public void getAllAsUnauthenticated() throws Exception {
         mvc.perform(
                 get("/users")
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
@@ -142,13 +143,13 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
-                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.admin", is(false)))
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.lastname", is(LASTNAME)))
@@ -182,13 +183,13 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
-                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.admin", is(false)))
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.lastname", is(LASTNAME)))
@@ -209,8 +210,8 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -230,8 +231,8 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -242,8 +243,8 @@ public class UserControllerIT {
     public void getUserUnauthenticated() throws Exception {
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
-                        .accept(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
@@ -268,13 +269,13 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUserDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
-                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("self")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users/1")));
     }
@@ -286,7 +287,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUserDto))
         )
                 .andExpect(authenticated())
@@ -300,7 +301,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUserDto))
         )
                 .andExpect(unauthenticated())
@@ -321,12 +322,12 @@ public class UserControllerIT {
     public void deleteUserAsAdmin() throws Exception {
         mvc.perform(
                 delete("/users/{id}", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
-                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("list")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users")));
         then(userService).should().deleteUser(1L);
@@ -337,7 +338,7 @@ public class UserControllerIT {
     public void deleteUserAsUser() throws Exception {
         mvc.perform(
                 delete("/users/{id}", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -348,7 +349,7 @@ public class UserControllerIT {
     public void deleteUserUnatheticated() throws Exception {
         mvc.perform(
                 delete("/users/{id}", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
@@ -364,7 +365,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}/password", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(changePasswordDto))
         )
                 .andExpect(authenticated())
@@ -391,13 +392,13 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}/password", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(changePasswordDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", startsWith(AnathUserMediaType
-                        .APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(jsonPath("$.links[0].rel", is("self")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users/1")));
     }
@@ -417,7 +418,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}/password", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(changePasswordDto))
         )
                 .andExpect(authenticated())
@@ -442,7 +443,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 put("/users/{id}/password", 1)
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(changePasswordDto))
         )
                 .andExpect(authenticated())
@@ -459,7 +460,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 post("/users")
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createUserDto))
         )
                 .andExpect(authenticated())
@@ -474,7 +475,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 post("/users")
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createUserDto))
         )
                 .andExpect(authenticated())
@@ -488,7 +489,7 @@ public class UserControllerIT {
 
         mvc.perform(
                 post("/users")
-                        .contentType(AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createUserDto))
         )
                 .andExpect(unauthenticated())

@@ -27,19 +27,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.users.controllers;
+package ch.zhaw.ba.anath;
 
 import org.springframework.http.MediaType;
 
 /**
+ * Mime Type used for extensions of the Anath protocol not specified in section 3.1.
+ *
  * @author Rafael Ostertag
  */
-public final class AnathUserMediaType {
-    public static final String APPLICATION_VND_ANATH_USER_V1_JSON_VALUE = "application/vnd.anath.user.v1+json";
-    public static final MediaType APPLICATION_VND_ANATH_USER_V1_JSON = MediaType.valueOf
-            (APPLICATION_VND_ANATH_USER_V1_JSON_VALUE);
+public final class AnathExtensionMediaType {
 
-    private AnathUserMediaType() {
-        // intentionally empty
+    public static final String APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE =
+            "application/vnd.anath.extension.v1+json";
+    public static final MediaType APPLICATION_VND_ANATH_EXTENSION_V1_JSON =
+            MediaType.valueOf(APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE);
+
+    private AnathExtensionMediaType() {
+        // intentionally empty.
     }
 }

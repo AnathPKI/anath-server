@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.users.controllers;
 
+import ch.zhaw.ba.anath.AnathExtensionMediaType;
 import ch.zhaw.ba.anath.users.dto.*;
 import ch.zhaw.ba.anath.users.services.UserService;
 import io.swagger.annotations.Api;
@@ -54,8 +55,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping(path = "/users",
-        consumes = AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON_VALUE,
-        produces = AnathUserMediaType.APPLICATION_VND_ANATH_USER_V1_JSON_VALUE)
+        consumes = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE,
+        produces = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)
 @Api(tags = {"User Management"})
 public class UserController {
     private final UserService userService;
