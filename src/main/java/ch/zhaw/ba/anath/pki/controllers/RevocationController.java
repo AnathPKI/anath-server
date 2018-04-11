@@ -29,62 +29,47 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
-import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
+import ch.zhaw.ba.anath.pki.dto.RevocationReasonDto;
 import ch.zhaw.ba.anath.pki.services.RevocationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigInteger;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Rafael Ostertag
  */
 @RestController
-@RequestMapping(value = "/")
-@Slf4j
+@RequestMapping(value = "/certificates",
+        consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
+        produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 @Api(tags = {"Certificate Authority"})
-public class CertificateAuthorityController {
-
-    private final CertificateAuthorityService certificateAuthorityService;
-
+public class RevocationController {
     private final RevocationService revocationService;
 
-    public CertificateAuthorityController(CertificateAuthorityService certificateAuthorityService,
-                                          RevocationService revocationService) {
-        this.certificateAuthorityService = certificateAuthorityService;
+    public RevocationController(RevocationService revocationService) {
         this.revocationService = revocationService;
     }
 
-    @GetMapping(
-            path = "/ca.pem",
-            consumes = MediaType.ALL_VALUE,
-            produces = {PkixMediaType.APPLICATION_PKIX_CERT_VALUE, MediaType.ALL_VALUE}
-    )
+    @PutMapping(path = "/{serial}/revoke")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Get the PEM Encoded X.509 CA Certificate", authorizations = {})
-    public HttpEntity<String> getCaCertificate() {
-        String caCertificateString = certificateAuthorityService.getCertificate();
-        return ResponseEntity.ok(caCertificateString);
-    }
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#serial, 'certificate', 'revoke'))")
+    @ApiOperation(value = "Revoke a User Certificate by Serial Number", notes = "Admin users may revoke any user " +
+            "certificate. Regular users may only revoke their certificates.")
+    public ResourceSupport revoke(@PathVariable BigInteger serial, @RequestBody @Validated RevocationReasonDto
+            revocationReasonDto) {
+        revocationService.revokeCertificate(serial, revocationReasonDto.getReason());
 
-    @GetMapping(
-            path = "/crl.pem",
-            consumes = MediaType.ALL_VALUE,
-            produces = PkixMediaType.APPLICATION_PKIX_CRL_VALUE
-    )
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Get the PEM Encoded X.509 Certificate Revocation List",
-            authorizations = {}
-    )
-    public HttpEntity<String> getCrl() {
-        return ResponseEntity.ok().body(revocationService.getCrlPemEncoded());
+        final ResourceSupport resourceSupport = new ResourceSupport();
+        resourceSupport.add(linkTo(methodOn(CertificatesController.class).getCertificate(serial)).withSelfRel());
+        return resourceSupport;
     }
-
 }
