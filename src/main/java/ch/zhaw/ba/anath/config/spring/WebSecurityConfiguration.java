@@ -89,8 +89,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login/jwt").anonymous()
-                // Allow retrieval of plain certificates
-                .antMatchers(HttpMethod.GET, "/certificates/*/pem").permitAll()
+                // Allow retrieval of plain certificates. But for the love of god, make sure that only pem
+                // certificates can be retrieved by unauthenticated users.
+                .antMatchers(HttpMethod.GET, "/certificates/*").permitAll()
                 // Allow retrieval of CRL
                 .antMatchers(HttpMethod.GET, "/crl.pem").permitAll()
                 // Allow retrieval of CA certificate

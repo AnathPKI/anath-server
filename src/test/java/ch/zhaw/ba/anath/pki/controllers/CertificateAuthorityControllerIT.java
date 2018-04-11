@@ -38,6 +38,7 @@ import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityNotInitializedExcepti
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityInitializationService;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
+import ch.zhaw.ba.anath.pki.services.RevocationService;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -76,8 +77,12 @@ public class CertificateAuthorityControllerIT {
     private MockMvc mvc;
     @MockBean
     private CertificateAuthorityService certificateAuthorityService;
+
     @MockBean
     private CertificateAuthorityInitializationService certificateAuthorityInitializationService;
+
+    @MockBean
+    private RevocationService revocationService;
 
     // Required to satisfy injection dependency
     @MockBean
@@ -112,6 +117,16 @@ public class CertificateAuthorityControllerIT {
     }
 
     @Test
+    public void getCrl() throws Exception {
+        given(revocationService.getCrlPemEncoded()).willReturn("crl");
+        mvc.perform(
+                get("/crl.pem")
+        )
+                .andExpect(header().string("Content-Type", startsWith(PkixMediaType.APPLICATION_PKIX_CRL_VALUE)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @WithMockUser(username = "user", roles = {"USER"})
     public void getCaCertificateWhenAuthenticated() throws Exception {
         given(certificateAuthorityService.getCertificate()).willReturn("certificate");
@@ -132,7 +147,7 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -155,7 +170,7 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -173,7 +188,7 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -188,7 +203,7 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -203,7 +218,7 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(unauthenticated())
@@ -218,7 +233,22 @@ public class CertificateAuthorityControllerIT {
                 CreateSelfSignedCertificateAuthorityDto();
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
+        )
+                .andExpect(authenticated())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void createSelfSignedValidationErrorAsDto() throws Exception {
+        final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = new
+                CreateSelfSignedCertificateAuthorityDto();
+        createSelfSignedCertificateAuthorityDto.setBits(512);
+        mvc.perform(
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -237,7 +267,7 @@ public class CertificateAuthorityControllerIT {
 
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -261,7 +291,7 @@ public class CertificateAuthorityControllerIT {
 
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -280,7 +310,7 @@ public class CertificateAuthorityControllerIT {
 
         mvc.perform(
                 put("/")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(unauthenticated())

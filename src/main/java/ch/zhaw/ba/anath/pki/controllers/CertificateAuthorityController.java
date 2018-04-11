@@ -33,17 +33,25 @@ import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityInitializationService;
 import ch.zhaw.ba.anath.pki.services.CertificateAuthorityService;
+import ch.zhaw.ba.anath.pki.services.RevocationService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.SmartValidator;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -53,16 +61,23 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping(value = "/")
+@Slf4j
 @Api(tags = {"Certificate Authority"})
 public class CertificateAuthorityController {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final CertificateAuthorityService certificateAuthorityService;
     private final CertificateAuthorityInitializationService certificateAuthorityInitializationService;
+    private final RevocationService revocationService;
+    private final SmartValidator validator;
 
     public CertificateAuthorityController(CertificateAuthorityService certificateAuthorityService,
                                           CertificateAuthorityInitializationService
-                                                  certificateAuthorityInitializationService) {
+                                                  certificateAuthorityInitializationService, RevocationService
+                                                  revocationService, SmartValidator validator) {
         this.certificateAuthorityService = certificateAuthorityService;
         this.certificateAuthorityInitializationService = certificateAuthorityInitializationService;
+        this.revocationService = revocationService;
+        this.validator = validator;
     }
 
     @GetMapping(
@@ -77,17 +92,53 @@ public class CertificateAuthorityController {
         return ResponseEntity.ok(caCertificateString);
     }
 
+    @GetMapping(
+            path = "/crl.pem",
+            consumes = MediaType.ALL_VALUE,
+            produces = PkixMediaType.APPLICATION_PKIX_CRL_VALUE
+    )
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "Get the PEM Encoded X.509 Certificate Revocation List", authorizations = {})
+    public HttpEntity<String> getCrl() {
+        return ResponseEntity.ok().body(revocationService.getCrlPemEncoded());
+    }
+
+
     @PutMapping(
             path = "/",
-            consumes = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON_VALUE,
+            consumes = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE,
             produces = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
     )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Import a CA Private Key and Certificate From a Base64 Encoded PKCS#12 File")
-    public HttpEntity<Void> importCa(@RequestBody @Validated ImportCertificateAuthorityDto
-                                             importCertificateAuthorityDto) {
-        certificateAuthorityInitializationService.importPkcs12CertificateAuthority(importCertificateAuthorityDto);
+    @ApiOperation(value = "Create a Self-Signed CA or import a CA Private Key and Certificate From a Base64 Encoded " +
+            "PKCS#12 File")
+    public HttpEntity<Void> initializeCa(@RequestBody byte[] data) throws NoSuchMethodException,
+            MethodArgumentNotValidException {
+        final Optional<ImportCertificateAuthorityDto> optionalImportDto = deserializeToImportCertificateAuthorityDto
+                (data, new MethodParameter(CertificateAuthorityController.class
+                        .getMethod("initializeCa", byte[].class), 0));
+
+        final Optional<CreateSelfSignedCertificateAuthorityDto> optionalCreateSelfSignedCa =
+                deserializeToCreateSelfSignedCertificateAuthorityDto(data, new MethodParameter
+                        (CertificateAuthorityController.class
+                                .getMethod("initializeCa", byte[].class), 0));
+
+        if (!optionalImportDto.isPresent() && !optionalCreateSelfSignedCa.isPresent()) {
+            throw new IllegalArgumentException("Unable to determine initialization type");
+        }
+
+        if (optionalImportDto.isPresent()) {
+            final ImportCertificateAuthorityDto importCertificateAuthorityDto = optionalImportDto.get();
+            certificateAuthorityInitializationService.importPkcs12CertificateAuthority(importCertificateAuthorityDto);
+        }
+
+        if (optionalCreateSelfSignedCa.isPresent()) {
+            final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto =
+                    optionalCreateSelfSignedCa.get();
+            certificateAuthorityInitializationService.createSelfSignedCertificateAuthority
+                    (createSelfSignedCertificateAuthorityDto);
+        }
         final URI uri = linkTo(methodOn(CertificateAuthorityController.class).getCaCertificate()).toUri();
 
         return ResponseEntity
@@ -96,23 +147,47 @@ public class CertificateAuthorityController {
                 .build();
     }
 
-    @PutMapping(
-            path = "/",
-            consumes = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON_VALUE,
-            produces = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
-    )
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Create a Self-Signed CA")
-    public HttpEntity<Void> createSelfSigned(@RequestBody @Validated CreateSelfSignedCertificateAuthorityDto
-                                                     createSelfSignedCertificateAuthorityDto) {
-        certificateAuthorityInitializationService.createSelfSignedCertificateAuthority
-                (createSelfSignedCertificateAuthorityDto);
-        final URI uri = linkTo(methodOn(CertificateAuthorityController.class).getCaCertificate()).toUri();
+    private Optional<ImportCertificateAuthorityDto> deserializeToImportCertificateAuthorityDto(byte[] data,
+                                                                                               MethodParameter
+                                                                                                       methodParameter) throws MethodArgumentNotValidException {
+        try {
+            final ImportCertificateAuthorityDto importCertificateAuthorityDto = OBJECT_MAPPER.readValue(data,
+                    ImportCertificateAuthorityDto.class);
 
-        return ResponseEntity
-                .created(uri)
-                .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
-                .build();
+            validateBeanOrThrow(importCertificateAuthorityDto, methodParameter);
+
+            return Optional.of(importCertificateAuthorityDto);
+        } catch (IOException e) {
+            log.warn("Data read is not import data");
+            return Optional.empty();
+        }
     }
+
+    private Optional<CreateSelfSignedCertificateAuthorityDto> deserializeToCreateSelfSignedCertificateAuthorityDto(
+            byte[] data,
+            MethodParameter methodParameter) throws MethodArgumentNotValidException {
+        try {
+            final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = OBJECT_MAPPER
+                    .readValue(data,
+                    CreateSelfSignedCertificateAuthorityDto.class);
+
+            validateBeanOrThrow(createSelfSignedCertificateAuthorityDto, methodParameter);
+
+            return Optional.of(createSelfSignedCertificateAuthorityDto);
+        } catch (IOException e) {
+            log.warn("Data read is for creating a self signed ca");
+            return Optional.empty();
+        }
+    }
+
+    private void validateBeanOrThrow(Object object, MethodParameter methodParameter) throws
+            MethodArgumentNotValidException {
+        BeanPropertyBindingResult bindingResult =
+                new BeanPropertyBindingResult(object, object.getClass().getName());
+        validator.validate(object, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new MethodArgumentNotValidException(methodParameter, bindingResult);
+        }
+    }
+
 }
