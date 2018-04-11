@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
+import ch.zhaw.ba.anath.AnathExtensionMediaType;
 import ch.zhaw.ba.anath.pki.dto.UpdateUseDto;
 import ch.zhaw.ba.anath.pki.dto.UseDto;
 import ch.zhaw.ba.anath.pki.dto.UseItemDto;
@@ -39,6 +40,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -56,7 +58,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RestController
 @RequestMapping(value = "/uses",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
-        produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
+        produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE
+)
 @Api(tags = {"Certificate Authority"})
 public class UsesController {
     private static final String LIST_REL = "list";
@@ -66,7 +69,10 @@ public class UsesController {
         this.useService = useService;
     }
 
-    @GetMapping
+    @GetMapping(
+            consumes = MediaType.ALL_VALUE,
+            produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @ApiOperation(value = "Get all Known Certificate Uses")
@@ -82,7 +88,11 @@ public class UsesController {
         return new Resources<>(all, linkTo(methodOn(UsesController.class).createUse(new UseDto())).withRel("new"));
     }
 
-    @GetMapping("/{key:.*}")
+    @GetMapping(
+            value = "/{key:.*}",
+            consumes = MediaType.ALL_VALUE,
+            produces = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Get a Certificate Use")
@@ -92,7 +102,10 @@ public class UsesController {
         return use;
     }
 
-    @PostMapping
+    @PostMapping(
+            consumes = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE,
+            produces = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
+    )
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Create a new Certificate Use")
@@ -102,7 +115,11 @@ public class UsesController {
         return ResponseEntity.created(uri).build();
     }
 
-    @PutMapping("/{key:.*}")
+    @PutMapping(
+            value = "/{key:.*}",
+            consumes = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE,
+            produces = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Update an Existing Certificate Use")
@@ -114,7 +131,11 @@ public class UsesController {
         return useItemDto;
     }
 
-    @DeleteMapping("/{key:.*}")
+    @DeleteMapping(
+            value = "/{key:.*}",
+            consumes = MediaType.ALL_VALUE,
+            produces = AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Delete a Certificate Use")

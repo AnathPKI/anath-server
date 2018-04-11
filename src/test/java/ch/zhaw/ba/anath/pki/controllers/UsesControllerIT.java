@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.controllers;
 
+import ch.zhaw.ba.anath.AnathExtensionMediaType;
 import ch.zhaw.ba.anath.TestSecuritySetup;
 import ch.zhaw.ba.anath.pki.dto.UpdateUseDto;
 import ch.zhaw.ba.anath.pki.dto.UseDto;
@@ -90,7 +91,6 @@ public class UsesControllerIT {
         mvc.perform(
                 get("/uses")
                         .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(header().string("Content-Type", startsWith(AnathMediaType
@@ -106,7 +106,6 @@ public class UsesControllerIT {
         mvc.perform(
                 get("/uses")
                         .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(header().string("Content-Type", startsWith(AnathMediaType
@@ -121,7 +120,6 @@ public class UsesControllerIT {
         mvc.perform(
                 get("/uses")
                         .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
@@ -134,12 +132,11 @@ public class UsesControllerIT {
 
         mvc.perform(
                 get("/uses/{key}", TEST_KEY)
-                        .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
-                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
-                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
     }
 
@@ -150,8 +147,7 @@ public class UsesControllerIT {
 
         mvc.perform(
                 get("/uses/{key}", TEST_KEY)
-                        .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -165,8 +161,7 @@ public class UsesControllerIT {
 
         mvc.perform(
                 get("/uses/{key}", TEST_KEY)
-                        .accept(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
@@ -184,7 +179,8 @@ public class UsesControllerIT {
 
         mvc.perform(
                 post("/uses")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(useDto))
         )
                 .andExpect(authenticated())
@@ -203,7 +199,8 @@ public class UsesControllerIT {
 
         mvc.perform(
                 post("/uses")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(useDto))
         )
                 .andExpect(authenticated())
@@ -221,7 +218,8 @@ public class UsesControllerIT {
 
         mvc.perform(
                 post("/uses")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(useDto))
         )
                 .andExpect(unauthenticated())
@@ -239,12 +237,12 @@ public class UsesControllerIT {
 
         mvc.perform(
                 put("/uses/{key}", TEST_KEY)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUseDto))
         )
                 .andExpect(authenticated())
-                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
-                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
     }
 
@@ -258,7 +256,8 @@ public class UsesControllerIT {
 
         mvc.perform(
                 put("/uses/{key}", TEST_KEY)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUseDto))
         )
                 .andExpect(authenticated())
@@ -276,7 +275,8 @@ public class UsesControllerIT {
 
         mvc.perform(
                 put("/uses/{key}", TEST_KEY)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(updateUseDto))
         )
                 .andExpect(unauthenticated())
@@ -290,11 +290,10 @@ public class UsesControllerIT {
     public void deleteUseAsAdmin() throws Exception {
         mvc.perform(
                 delete("/uses/{key}", TEST_KEY)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
-                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
-                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
+                .andExpect(header().string("Content-Type", startsWith(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
                 .andExpect(status().isOk());
         then(useService).should().delete(TEST_KEY);
     }
@@ -304,7 +303,7 @@ public class UsesControllerIT {
     public void deleteUseAsUser() throws Exception {
         mvc.perform(
                 delete("/uses/{key}", TEST_KEY)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
@@ -315,7 +314,7 @@ public class UsesControllerIT {
     public void deleteUseAsUnauthenticated() throws Exception {
         mvc.perform(
                 delete("/uses/{key}", TEST_KEY)
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                        .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
