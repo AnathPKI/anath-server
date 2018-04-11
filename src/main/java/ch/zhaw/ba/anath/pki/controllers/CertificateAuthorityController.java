@@ -52,9 +52,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * @author Rafael Ostertag
  */
 @RestController
-@RequestMapping(value = "/ca",
-        consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
-        produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
+@RequestMapping(value = "/")
 @Api(tags = {"Certificate Authority"})
 public class CertificateAuthorityController {
     private final CertificateAuthorityService certificateAuthorityService;
@@ -68,6 +66,7 @@ public class CertificateAuthorityController {
     }
 
     @GetMapping(
+            path = "/ca.pem",
             consumes = MediaType.ALL_VALUE,
             produces = PkixMediaType.APPLICATION_PKIX_CERT_VALUE
     )
@@ -79,7 +78,9 @@ public class CertificateAuthorityController {
     }
 
     @PutMapping(
-            path = "/import"
+            path = "/",
+            consumes = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON_VALUE,
+            produces = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
     )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
@@ -91,11 +92,15 @@ public class CertificateAuthorityController {
 
         return ResponseEntity
                 .created(uri)
-                .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                 .build();
     }
 
-    @PutMapping(path = "/create")
+    @PutMapping(
+            path = "/",
+            consumes = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON_VALUE,
+            produces = AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE
+    )
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Self-Signed CA")
@@ -107,7 +112,7 @@ public class CertificateAuthorityController {
 
         return ResponseEntity
                 .created(uri)
-                .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                 .build();
     }
 }

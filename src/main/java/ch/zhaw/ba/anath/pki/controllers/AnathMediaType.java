@@ -38,6 +38,18 @@ public final class AnathMediaType {
     public static final String APPLICATION_VND_ANATH_V1_JSON_VALUE = "application/vnd.anath.v1+json";
     public static final MediaType APPLICATION_VND_ANATH_V1_JSON = MediaType.valueOf
             (APPLICATION_VND_ANATH_V1_JSON_VALUE);
+    public static final String APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE =
+            "application/vnd.anath.extension.v1+json";
+    public static final MediaType APPLICATION_VND_ANATH_EXTENSION_V1_JSON =
+            MediaType.valueOf(APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE);
+    public static final String APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON_VALUE =
+            "application/vnd.anath.extension.import-ca+json";
+    public static final MediaType APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON =
+            MediaType.valueOf(APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON_VALUE);
+    public static final String APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON_VALUE =
+            "application/vnd.anath.extension.create-ca+json";
+    public static final MediaType APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON =
+            MediaType.valueOf(APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON_VALUE);
 
     private AnathMediaType() {
         // intentionally empty

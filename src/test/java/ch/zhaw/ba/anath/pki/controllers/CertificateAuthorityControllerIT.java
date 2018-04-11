@@ -92,7 +92,7 @@ public class CertificateAuthorityControllerIT {
         given(certificateAuthorityService.getCertificate()).willReturn("certificate");
 
         mvc.perform(
-                get("/ca")
+                get("/ca.pem")
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isOk())
@@ -105,7 +105,7 @@ public class CertificateAuthorityControllerIT {
                 ("not initialized"));
 
         mvc.perform(
-                get("/ca")
+                get("/ca.pem")
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isInternalServerError());
@@ -117,7 +117,7 @@ public class CertificateAuthorityControllerIT {
         given(certificateAuthorityService.getCertificate()).willReturn("certificate");
 
         mvc.perform(
-                get("/ca")
+                get("/ca.pem")
         )
                 .andExpect(authenticated())
                 .andExpect(status().isOk())
@@ -131,15 +131,15 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPassword("");
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
-                put("/ca/import")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Content-Type", startsWith(AnathMediaType
-                        .APPLICATION_VND_ANATH_V1_JSON_VALUE)))
-                .andExpect(header().string("Location", "http://localhost/ca"));
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
+                .andExpect(header().string("Location", "http://localhost/ca.pem"));
         then(certificateAuthorityInitializationService).should().importPkcs12CertificateAuthority
                 (importCertificateAuthorityDto);
     }
@@ -154,8 +154,8 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPassword("");
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
-                put("/ca/import")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -172,8 +172,8 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPassword("");
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
-                put("/ca/import")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -187,8 +187,8 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPassword("");
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
-                put("/ca/import")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -202,8 +202,8 @@ public class CertificateAuthorityControllerIT {
         importCertificateAuthorityDto.setPassword("");
         importCertificateAuthorityDto.setPkcs12("bla");
         mvc.perform(
-                put("/ca/import")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_IMPORT_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(importCertificateAuthorityDto))
         )
                 .andExpect(unauthenticated())
@@ -217,8 +217,8 @@ public class CertificateAuthorityControllerIT {
         final CreateSelfSignedCertificateAuthorityDto createSelfSignedCertificateAuthorityDto = new
                 CreateSelfSignedCertificateAuthorityDto();
         mvc.perform(
-                put("/ca/create")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -236,13 +236,15 @@ public class CertificateAuthorityControllerIT {
         createSelfSignedCertificateAuthorityDto.setCommonName("cn");
 
         mvc.perform(
-                put("/ca/create")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "http://localhost/ca"));
+                .andExpect(header().string("Content-Type", startsWith(AnathMediaType
+                        .APPLICATION_VND_ANATH_EXTENSION_V1_JSON_VALUE)))
+                .andExpect(header().string("Location", "http://localhost/ca.pem"));
         then(certificateAuthorityInitializationService).should().createSelfSignedCertificateAuthority
                 (createSelfSignedCertificateAuthorityDto);
     }
@@ -258,8 +260,8 @@ public class CertificateAuthorityControllerIT {
         createSelfSignedCertificateAuthorityDto.setCommonName("cn");
 
         mvc.perform(
-                put("/ca/create")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(authenticated())
@@ -277,8 +279,8 @@ public class CertificateAuthorityControllerIT {
         createSelfSignedCertificateAuthorityDto.setCommonName("cn");
 
         mvc.perform(
-                put("/ca/create")
-                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
+                put("/")
+                        .contentType(AnathMediaType.APPLICATION_VND_ANATH_EXTENSION_CREATE_CA_JSON)
                         .content(OBJECT_MAPPER.writeValueAsBytes(createSelfSignedCertificateAuthorityDto))
         )
                 .andExpect(unauthenticated())
