@@ -55,6 +55,7 @@ public class AnathProperties {
      */
     private int crlValidity = 30;
     private Authentication authentication = new Authentication();
+    private Confirmation confirmation;
 
     @Data
     public static class Authentication {
@@ -122,5 +123,16 @@ public class AnathProperties {
              */
             private int parallelism = 4;
         }
+    }
+
+    @Data
+    public static class Confirmation {
+        /**
+         * Token validity in minutes
+         */
+        private int tokenValidity = 60;
+        private String mailServer = "localhost";
+        private int mailPort = 25;
+        private String sender = "rafi@guengel.ch";
     }
 }
