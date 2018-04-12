@@ -78,7 +78,7 @@ public class SigningServiceUninitializedCaPrivateKeyIT extends CertificateAuthor
                     PEMCertificateSigningRequestReader(csr);
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
-            signingService.signCertificate(certificateSigningRequest, "test id",
+            signingService.tentativelySignCertificate(certificateSigningRequest, "test id",
                     UseEntity.DEFAULT_USE);
         }
     }

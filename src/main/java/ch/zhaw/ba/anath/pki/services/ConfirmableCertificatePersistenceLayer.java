@@ -29,37 +29,36 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
-import ch.zhaw.ba.anath.pki.core.Certificate;
-import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
-import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
-import ch.zhaw.ba.anath.pki.core.TestConstants;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 
 /**
+ * Confirmable Certificate Persistence Layer. Anath supports persisting certificates to Database after
+ * confirmation. Thus persisting Signed Certificates is abstracted by this interface which is used by
+ * {@link SigningService}.
+ * <p>
+ * Abstracting enables switching out the persisting layer using spring profiles.
+ *
  * @author Rafael Ostertag
  */
-public final class TestHelper {
+public interface ConfirmableCertificatePersistenceLayer {
+    /**
+     * Store the {@link CertificateEntity}. Implementations are free to choose between immediate persistence or
+     * tentative persistence. Upon tentative persistence, implementations must return a token identifying the
+     * {@link CertificateEntity} which may be passed to {@link #confirm(String, String)} later on.
+     *
+     * @param certificateEntity {@link CertificateEntity} to store.
+     *
+     * @return Token as String.
+     */
+    String store(CertificateEntity certificateEntity);
 
-    public static final String TEST_USER_ID = "test id";
-
-    private TestHelper() {
-        // intentionally empty
-    }
-
-    static Certificate signAndAddCertificate(SigningService signingService, String use) throws IOException {
-        final Certificate certificate;
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            String token = signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID,
-                    use);
-            certificate = signingService.confirmTentativelySignedCertificate(token, TEST_USER_ID);
-        }
-        return certificate;
-    }
+    /**
+     * Confirm the token and persist the {@link CertificateEntity} permanently.
+     *
+     * @param token  token as received by a call to {@link #store(CertificateEntity)}.
+     * @param userId the user id the confirmation token belongs to.
+     *
+     * @return the {@link CertificateEntity}.
+     */
+    CertificateEntity confirm(String token, String userId);
 }

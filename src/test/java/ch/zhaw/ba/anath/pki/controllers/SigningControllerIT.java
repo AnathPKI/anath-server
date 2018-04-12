@@ -89,6 +89,7 @@ public class SigningControllerIT {
             "}";
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String THE_TOKEN = "the-token";
 
     @Autowired
     private MockMvc mvc;
@@ -117,7 +118,9 @@ public class SigningControllerIT {
     @WithMockUser(username = "user", roles = {"USER"})
     public void signCertificateRequestUser() throws Exception {
 
-        given(signingService.signCertificate(Matchers.any(), eq("user"), eq("plain"))).willReturn(certificate);
+        given(signingService.tentativelySignCertificate(Matchers.any(), eq("user"), eq("plain"))).willReturn
+                (THE_TOKEN);
+        given(signingService.confirmTentativelySignedCertificate(THE_TOKEN, "user")).willReturn(certificate);
         mvc.perform(
                 post("/certificates")
                         .content(validCsrRequestBody)
@@ -128,7 +131,7 @@ public class SigningControllerIT {
                 .andExpect(header().string("Content-Type", AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE))
                 .andExpect(status().isCreated());
 
-        then(signingService).should().signCertificate(Matchers.any(), eq("user"), eq("plain"));
+        then(signingService).should().tentativelySignCertificate(Matchers.any(), eq("user"), eq("plain"));
     }
 
     @Test
@@ -142,7 +145,7 @@ public class SigningControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
-        then(signingService).should(never()).signCertificate(Matchers.any(), anyString(), anyString());
+        then(signingService).should(never()).tentativelySignCertificate(Matchers.any(), anyString(), anyString());
     }
 
     @Test
@@ -155,6 +158,6 @@ public class SigningControllerIT {
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
 
-        then(signingService).should(never()).signCertificate(Matchers.any(), anyString(), anyString());
+        then(signingService).should(never()).tentativelySignCertificate(Matchers.any(), anyString(), anyString());
     }
 }

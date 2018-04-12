@@ -46,10 +46,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -76,8 +74,9 @@ public class SigningController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('USER')")
     @ApiOperation(value = "Sign a PKCS#10 Certificate Signing Request", notes = "Only users may call this endpoint.")
-    public HttpEntity<Void> signCertificateRequest(@RequestBody @Validated SigningRequestDto signingRequestDto) {
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
+    public HttpEntity<Void> signCertificateRequest(@RequestBody @Validated SigningRequestDto signingRequestDto,
+                                                   HttpServletRequest httpServletRequest) {
+        final InputStream byteArrayInputStream = new ByteArrayInputStream(
                 signingRequestDto
                         .getCsr()
                         .getPem().getBytes());
@@ -90,8 +89,10 @@ public class SigningController {
                     .certificationRequest();
 
             final String username = AnathSecurityHelper.getUsername();
-            final Certificate certificate = signingService.signCertificate(certificateSigningRequest, username,
+            final String token = signingService.tentativelySignCertificate(certificateSigningRequest, username,
                     signingRequestDto.getUse());
+            final Certificate certificate = signingService.confirmTentativelySignedCertificate(token,
+                    httpServletRequest.getUserPrincipal().getName());
 
             final URI uri = linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getSerial()))
                     .toUri();

@@ -70,6 +70,7 @@ import static org.junit.Assert.assertThat;
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningServiceIT extends CertificateAuthorityInitializer {
     public static final String TEST_CERTIFIACTE_USE_NAME = "test use";
+    private static final String TEST_USER_ID = "test id";
 
     @Autowired
     private SigningService signingService;
@@ -88,14 +89,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
     @Test
     public void sign() throws Exception {
         final Certificate certificate;
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
-                    UseEntity.DEFAULT_USE);
-        }
+        certificate = signCertificate();
         assertThat(certificate, is(notNullValue()));
 
         flushAndClear();
@@ -106,7 +100,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
 
         final CertificateEntity certificateEntity = optionalCertificateEntity.get();
         assertThat(certificateEntity.getStatus(), is(CertificateStatus.VALID));
-        assertThat(certificateEntity.getUserId(), is(equalTo("test id")));
+        assertThat(certificateEntity.getUserId(), is(equalTo(TEST_USER_ID)));
         assertThat(certificateEntity.getNotValidAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
         assertThat(certificateEntity.getNotValidBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
         assertThat(certificateEntity.getSubject(), is(equalTo(certificate.getSubject().toString())));
@@ -118,17 +112,24 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
         assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
     }
 
-    @Test
-    public void signCertificateWithSameRevoked() throws Exception {
-        final Certificate certificateToBeRevoked;
+    private Certificate signCertificate() throws IOException {
+        Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
                     PEMCertificateSigningRequestReader(csr);
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
-            certificateToBeRevoked = signingService.signCertificate(certificateSigningRequest, "test id",
+            String token = signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID,
                     UseEntity.DEFAULT_USE);
+            certificate = signingService.confirmTentativelySignedCertificate(token, TEST_USER_ID);
         }
+        return certificate;
+    }
+
+    @Test
+    public void signCertificateWithSameRevoked() throws Exception {
+        final Certificate certificateToBeRevoked;
+        certificateToBeRevoked = signCertificate();
         assertThat(certificateToBeRevoked, is(notNullValue()));
 
         // We revoke the currently signed certificate
@@ -142,14 +143,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
 
         // And sign it again
         final Certificate certificate;
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
-                    UseEntity.DEFAULT_USE);
-        }
+        certificate = signCertificate();
         assertThat(certificate, is(notNullValue()));
 
         flushAndClear();
@@ -160,7 +154,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
 
         final CertificateEntity certificateEntity = optionalCertificateEntity.get();
         assertThat(certificateEntity.getStatus(), is(CertificateStatus.VALID));
-        assertThat(certificateEntity.getUserId(), is(equalTo("test id")));
+        assertThat(certificateEntity.getUserId(), is(equalTo(TEST_USER_ID)));
         assertThat(certificateEntity.getNotValidAfter().getTime(), is(equalTo(certificate.getValidTo().getTime())));
         assertThat(certificateEntity.getNotValidBefore().getTime(), is(equalTo(certificate.getValidFrom().getTime())));
         assertThat(certificateEntity.getSubject(), is(equalTo(certificate.getSubject().toString())));
@@ -178,8 +172,9 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
                     PEMCertificateSigningRequestReader(csr);
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
-            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
+            String token = signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID,
                     "does not exist");
+            certificate = signingService.confirmTentativelySignedCertificate(token, TEST_USER_ID);
         }
         assertThat(certificate, is(notNullValue()));
 
@@ -211,8 +206,9 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
                     PEMCertificateSigningRequestReader(csr);
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
-            certificate = signingService.signCertificate(certificateSigningRequest, "test id",
+            String token = signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID,
                     TEST_CERTIFIACTE_USE_NAME);
+            certificate = signingService.confirmTentativelySignedCertificate(token, TEST_USER_ID);
         }
         assertThat(certificate, is(notNullValue()));
 
@@ -235,7 +231,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
                     PEMCertificateSigningRequestReader(csr);
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
-            signingService.signCertificate(certificateSigningRequest, "test id", UseEntity
+            signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID, UseEntity
                     .DEFAULT_USE);
         }
 
@@ -246,7 +242,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
                     PEMCertificateSigningRequestReader(csr);
             final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
                     .certificationRequest();
-            signingService.signCertificate(certificateSigningRequest, "test id", UseEntity
+            signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID, UseEntity
                     .DEFAULT_USE);
         }
 

@@ -45,11 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ConstraintViolationException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +63,7 @@ import java.util.Optional;
 public class SigningService {
     private final CertificateAuthorityService certificateAuthorityService;
     private final CertificateRepository certificateRepository;
+    private final ConfirmableCertificatePersistenceLayer confirmableCertificatePersistenceLayer;
     private final UseRepository useRepository;
     private final CertificateConstraintProvider certificateConstraintProvider;
     private final SignatureNameProvider signatureNameProvider;
@@ -75,13 +72,17 @@ public class SigningService {
     private CertificateAuthority certificateAuthority = null;
     private CertificateSigner certificateSigner = null;
 
-    public SigningService(CertificateAuthorityService certificateAuthorityService, CertificateRepository
-            certificateRepository,
-                          UseRepository useRepository, CertificateConstraintProvider certificateConstraintProvider,
-                          SignatureNameProvider signatureNameProvider, CertificateValidityProvider
-                                  certificateValidityProvider, CertificateSerialProvider certificateSerialProvider) {
+    public SigningService(CertificateAuthorityService certificateAuthorityService,
+                          CertificateRepository certificateRepository,
+                          ConfirmableCertificatePersistenceLayer confirmableCertificatePersistenceLayer,
+                          UseRepository useRepository,
+                          CertificateConstraintProvider certificateConstraintProvider,
+                          SignatureNameProvider signatureNameProvider,
+                          CertificateValidityProvider certificateValidityProvider,
+                          CertificateSerialProvider certificateSerialProvider) {
         this.certificateAuthorityService = certificateAuthorityService;
         this.certificateRepository = certificateRepository;
+        this.confirmableCertificatePersistenceLayer = confirmableCertificatePersistenceLayer;
         this.useRepository = useRepository;
         this.certificateConstraintProvider = certificateConstraintProvider;
         this.signatureNameProvider = signatureNameProvider;
@@ -123,8 +124,8 @@ public class SigningService {
     /**
      * Sign a CSR.
      * <p>
-     * The CSR will be signed and added to the database. If the subject of the CSR already exists and the certificate
-     * is non-revoked and non-expired, the signing process will be aborted and an exception thrown.
+     * The CSR will be signed and tentatively added to a stoer. If the subject of the CSR already exists and the
+     * certificate is non-revoked and non-expired, the signing process will be aborted and an exception thrown.
      * <p>
      * Besides exception mentioned below,  {@link ch.zhaw.ba.anath.pki.core.exceptions.PKIException} may be thrown.
      *
@@ -133,15 +134,15 @@ public class SigningService {
      * @param use                             the use. If the use cannot be found in the database, the {@value
      *                                        UseEntity#DEFAULT_USE} is used.
      *
-     * @return {@link Certificate} instance.
+     * @return Confirmation token. This is used to confirm the certificate.
      *
      * @throws CertificateAlreadyExistsException when a non-revoked, non-expired for the given subject already
      *                                           exists, or the serial number is taken.
      * @throws SigningServiceException           if no default certificate use can be found.
      */
 
-    public Certificate signCertificate(CertificateSigningRequest certificateSigningRequest,
-                                       String userId, String use) {
+    public String tentativelySignCertificate(CertificateSigningRequest certificateSigningRequest,
+                                             String userId, String use) {
         initializeCertificateSigner();
 
         final String subject = certificateSigningRequest.getSubject().toString();
@@ -154,9 +155,27 @@ public class SigningService {
         log.info("Signed certificate '{}'", subject);
 
         log.info("Store signed certificate '{}'", subject);
-        storeCertificate(certificate, userId, use);
+        return storeCertificate(certificate, userId, use);
+    }
 
-        return certificate;
+    /**
+     * Confirm a tentatively signed certificate.
+     *
+     * @param token  token as received by {@link #tentativelySignCertificate(CertificateSigningRequest, String, String)}
+     * @param userId
+     *
+     * @return the {@link Certificate} instance.
+     */
+    public Certificate confirmTentativelySignedCertificate(String token, String userId) {
+        final CertificateEntity confirmedCertificate = confirmableCertificatePersistenceLayer.confirm(token, userId);
+        final InputStream memoryStream = new ByteArrayInputStream(confirmedCertificate.getX509PEMCertificate());
+        try (Reader pemCertificateStreamReader = new InputStreamReader(memoryStream)) {
+            final PEMCertificateReader pemCertificateReader = new PEMCertificateReader(pemCertificateStreamReader);
+            return pemCertificateReader.certificate();
+        } catch (IOException e) {
+            log.error("Error reading certificate from PEM: {}", e.getMessage());
+            throw new SigningServiceException("Error reading certificate");
+        }
     }
 
     private void testCertificateUniquenessInCertificateRepositoryOrThrow(Certificate certificate) {
@@ -178,7 +197,7 @@ public class SigningService {
         }
     }
 
-    private void storeCertificate(Certificate certificate, String userId, String use) {
+    private String storeCertificate(Certificate certificate, String userId, String use) {
         final UseEntity useEntity = fetchUseEntity(use);
 
         final CertificateEntity certificateEntity = new CertificateEntity();
@@ -191,15 +210,7 @@ public class SigningService {
         certificateEntity.setX509PEMCertificate(certificateToByteArray(certificate));
         certificateEntity.setUse(useEntity);
 
-        try {
-            certificateRepository.save(certificateEntity);
-            log.info("Stored signed certificate '{}'", certificateEntity.getSubject());
-        } catch (ConstraintViolationException e) {
-            final String subjectString = certificate.getSubject().toString();
-            log.error("Error persisting certificate '{}' with serial '{}': {}", subjectString,
-                    certificate.getSerial().toString(), e.getMessage());
-            throw new CertificateAlreadyExistsException(String.format("Certificate already exists: %s", subjectString));
-        }
+        return confirmableCertificatePersistenceLayer.store(certificateEntity);
     }
 
     private UseEntity fetchUseEntity(String use) {
