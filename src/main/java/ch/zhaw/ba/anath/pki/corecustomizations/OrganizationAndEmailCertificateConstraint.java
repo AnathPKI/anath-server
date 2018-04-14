@@ -29,17 +29,20 @@
 
 package ch.zhaw.ba.anath.pki.corecustomizations;
 
+import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
 import ch.zhaw.ba.anath.pki.core.OrganizationCertificateConstraint;
 import ch.zhaw.ba.anath.pki.core.exceptions.CertificateConstraintException;
+import ch.zhaw.ba.anath.users.dto.UserDto;
+import ch.zhaw.ba.anath.users.services.UserService;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * Validate the Certificate Signing Request like {@link ch.zhaw.ba.anath.pki.core.OrganizationCertificateConstraint}.
- * In addition, it validates the emailAddress RDN using the currently logged in user. If the emailAddress does not
- * match or is missing, it throws a {@link CertificateConstraintException}.
+ * Validate the Certificate Signing Request like {@link OrganizationCertificateConstraint}.
+ * In addition, it validates the emailAddress and CN RDN part using the currently logged in user. If the emailAddress
+ * or CN does not match or is missing, it throws a {@link CertificateConstraintException}.
  * <p>
  * The email address is assumed to be the user name of the currently logged in user in the Spring Security
  * {@link SecurityContextHolder}.
@@ -47,23 +50,40 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * @author Rafael Ostertag
  */
 public class OrganizationAndEmailCertificateConstraint extends OrganizationCertificateConstraint {
+    private final UserService userService;
+
+    public OrganizationAndEmailCertificateConstraint(UserService userService) {
+        this.userService = userService;
+    }
+
     @Override
     public void validateSubject(X500Name subjectName, X500Name issuerName) {
         super.validateSubject(subjectName, issuerName);
 
         emailSetOrThrow(subjectName);
         doEmailsMatchOrThrow(subjectName);
+
+        cnSetOrThrow(subjectName);
+        doesCnMatchOrThrow(subjectName);
+    }
+
+    private void doesCnMatchOrThrow(X500Name subjectName) {
+        final UserDto user = userService.getUser(AnathSecurityHelper.getUsername());
+
+        final String commonName = subjectName.getRDNs(BCStyle.CN)[0].getFirst().getValue().toString();
+
+        final String expectedCommonName = user.getFirstname() + " " + user.getLastname();
+        if (!commonName.equals(expectedCommonName)) {
+            throw new CertificateConstraintException("CN in CSR and last- and firstname of currently logged in user " +
+                    "do not match");
+        }
     }
 
     private void doEmailsMatchOrThrow(X500Name subjectName) {
         final String subjectEmail = subjectName.getRDNs(BCStyle.E)[0].getFirst().getValue().toString();
 
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new CertificateConstraintException("No authenticated user found");
-        }
+        final String name = AnathSecurityHelper.getUsername();
 
-        final String name = authentication.getName();
         if (!name.equals(subjectEmail)) {
             throw new CertificateConstraintException("emailAddress in CSR and email of currently logged in user do " +
                     "not match");
@@ -71,8 +91,17 @@ public class OrganizationAndEmailCertificateConstraint extends OrganizationCerti
     }
 
     private void emailSetOrThrow(X500Name subjectName) {
-        if (subjectName.getRDNs(BCStyle.E).length != 1) {
-            throw new CertificateConstraintException("emailAddress not set");
+        fieldPresentOrThrow(subjectName, BCStyle.E, "emailAddress not set");
+    }
+
+    private void cnSetOrThrow(X500Name subjectName) {
+        fieldPresentOrThrow(subjectName, BCStyle.CN, "CN not set");
+    }
+
+    private void fieldPresentOrThrow(X500Name subjectName, ASN1ObjectIdentifier asn1ObjectIdentifier, String
+            errorMessage) {
+        if (subjectName.getRDNs(asn1ObjectIdentifier).length != 1) {
+            throw new CertificateConstraintException(errorMessage);
         }
     }
 }

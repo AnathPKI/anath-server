@@ -133,6 +133,18 @@ public class UserService {
         return userEntityMapper.asUserDto(userEntity);
     }
 
+    public UserDto getUser(String emailAdress) {
+        log.info("Looking up user with email address '{}'", emailAdress);
+
+        final Optional<UserEntity> userEntityOptional = userRepository.findOneByEmail(emailAdress);
+        final UserEntity userEntity = userEntityOptional.orElseThrow(() -> {
+            log.error("User with email address '{}' not found", emailAdress);
+            return new UserDoesNotExistException("User not found");
+        });
+
+        return userEntityMapper.asUserDto(userEntity);
+    }
+
     public List<UserLinkDto> getAll() {
         return userRepository.findAll().stream()
                 .map(userEntityMapper::asUserLinkDto)

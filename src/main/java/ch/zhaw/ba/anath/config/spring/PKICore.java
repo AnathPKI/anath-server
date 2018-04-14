@@ -35,6 +35,7 @@ import ch.zhaw.ba.anath.pki.core.extensions.CertificateExtensionsActionsFactoryI
 import ch.zhaw.ba.anath.pki.core.extensions.Rfc5280CAExtensionsActionsFactory;
 import ch.zhaw.ba.anath.pki.core.interfaces.*;
 import ch.zhaw.ba.anath.pki.corecustomizations.OrganizationAndEmailCertificateConstraint;
+import ch.zhaw.ba.anath.users.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -95,8 +96,8 @@ public class PKICore {
 
     @Bean
     @Profile("!tests")
-    public CertificateConstraintProvider certificateConstraintProvider() {
+    public CertificateConstraintProvider certificateConstraintProvider(UserService userService) {
         log.info("Use production OrganizationAndEmailCertificateConstraint()");
-        return new OrganizationAndEmailCertificateConstraint();
+        return new OrganizationAndEmailCertificateConstraint(userService);
     }
 }

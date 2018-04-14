@@ -31,6 +31,8 @@ package ch.zhaw.ba.anath.pki.corecustomizations;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.CertificateConstraintException;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateConstraintProvider;
+import ch.zhaw.ba.anath.users.dto.UserDto;
+import ch.zhaw.ba.anath.users.services.UserService;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -45,6 +47,9 @@ import org.springframework.security.core.userdetails.User;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Rafael Ostertag
  */
@@ -54,29 +59,46 @@ public class OrganizationAndEmailCertificateConstraintTest {
             SimpleGrantedAuthority("USER"));
     private static final String TEST_ORGANIZATION = "ACME";
     private static final String TEST_EMAIL = "user@example.com";
-    private final CertificateConstraintProvider organizationAndEmailCertficateConstraint = new
-            OrganizationAndEmailCertificateConstraint();
+    private static final String TEST_NAME = "James Kirk";
+    private static final int FIRSTNAME_INDEX = 0;
+    private static final int LASTNAME_INDEX = 1;
+    private CertificateConstraintProvider organizationAndEmailCertficateConstraint;
     private X500Name issuerName;
+    private UserService userServiceMock;
 
     @Before
     public void setUp() {
         issuerName = buildIssuerName();
         SecurityContextHolder.clearContext();
+
+        userServiceMock = mock(UserService.class);
+        organizationAndEmailCertficateConstraint = new
+                OrganizationAndEmailCertificateConstraint(userServiceMock);
     }
 
     @Test
     public void validateSubject() {
         setUpTestUser(TEST_EMAIL);
-        final X500Name subject = buildSubjectName(TEST_ORGANIZATION, TEST_EMAIL);
+        setUpUserServiceMock(TEST_EMAIL, TEST_NAME);
+        final X500Name subject = buildSubjectName(TEST_ORGANIZATION, TEST_EMAIL, TEST_NAME);
 
         organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
         // Not throwing an exception is the test
     }
 
+    private void setUpUserServiceMock(String testEmail, String testName) {
+        final UserDto userDto = new UserDto();
+        final String[] nameComponents = testName.split(" ");
+        userDto.setFirstname(nameComponents[FIRSTNAME_INDEX]);
+        userDto.setLastname(nameComponents[LASTNAME_INDEX]);
+        given(userServiceMock.getUser(testEmail)).willReturn(userDto);
+    }
+
     @Test(expected = CertificateConstraintException.class)
     public void validateNonMatchingOrganization() {
         setUpTestUser(TEST_EMAIL);
-        final X500Name subject = buildSubjectName(TEST_ORGANIZATION + "another", TEST_EMAIL);
+        setUpUserServiceMock(TEST_EMAIL, TEST_NAME);
+        final X500Name subject = buildSubjectName(TEST_ORGANIZATION + "another", TEST_EMAIL, TEST_NAME);
 
         organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
     }
@@ -84,7 +106,17 @@ public class OrganizationAndEmailCertificateConstraintTest {
     @Test(expected = CertificateConstraintException.class)
     public void validateNonMatchingEmail() {
         setUpTestUser(TEST_EMAIL);
-        final X500Name subject = buildSubjectName(TEST_ORGANIZATION, "user2@example.com");
+        setUpUserServiceMock("user2@example.com", TEST_NAME);
+        final X500Name subject = buildSubjectName(TEST_ORGANIZATION, "user2@example.com", TEST_NAME);
+
+        organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
+    }
+
+    @Test(expected = CertificateConstraintException.class)
+    public void validateNonMatchingCN() {
+        setUpTestUser(TEST_EMAIL);
+        setUpUserServiceMock(TEST_EMAIL, "Jean-Luc Piccard");
+        final X500Name subject = buildSubjectName(TEST_ORGANIZATION, TEST_EMAIL, TEST_NAME);
 
         organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
     }
@@ -99,16 +131,25 @@ public class OrganizationAndEmailCertificateConstraintTest {
                 .addRDN(BCStyle.L, "Kefikon")
                 .addRDN(BCStyle.O, TEST_ORGANIZATION)
                 .addRDN(BCStyle.OU, "dev")
-                .addRDN(BCStyle.CN, "Rafael Ostertag")
+                .addRDN(BCStyle.CN, TEST_NAME)
                 .build();
 
         organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
     }
 
     @Test(expected = CertificateConstraintException.class)
-    public void noAuthenticatedUser() {
-        final X500Name subjectName = buildSubjectName(TEST_ORGANIZATION, TEST_EMAIL);
-        organizationAndEmailCertficateConstraint.validateSubject(subjectName, issuerName);
+    public void validateNoCNInSubject() {
+        setUpTestUser(TEST_EMAIL);
+        X500NameBuilder x500NameBuilder = new X500NameBuilder();
+        final X500Name subject = x500NameBuilder
+                .addRDN(BCStyle.C, "CH")
+                .addRDN(BCStyle.ST, "Thurgau")
+                .addRDN(BCStyle.L, "Kefikon")
+                .addRDN(BCStyle.O, TEST_ORGANIZATION)
+                .addRDN(BCStyle.OU, "dev")
+                .build();
+
+        organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
     }
 
     private UsernamePasswordAuthenticationToken setUpTestUser(String username) {
@@ -133,7 +174,7 @@ public class OrganizationAndEmailCertificateConstraintTest {
                 .build();
     }
 
-    private X500Name buildSubjectName(String organization, String email) {
+    private X500Name buildSubjectName(String organization, String email, String testName) {
         X500NameBuilder x500NameBuilder = new X500NameBuilder();
         return x500NameBuilder
                 .addRDN(BCStyle.C, "CH")
@@ -141,7 +182,7 @@ public class OrganizationAndEmailCertificateConstraintTest {
                 .addRDN(BCStyle.L, "Kefikon")
                 .addRDN(BCStyle.O, organization)
                 .addRDN(BCStyle.OU, "dev")
-                .addRDN(BCStyle.CN, "Rafael Ostertag")
+                .addRDN(BCStyle.CN, testName)
                 .addRDN(BCStyle.E, email)
                 .build();
     }

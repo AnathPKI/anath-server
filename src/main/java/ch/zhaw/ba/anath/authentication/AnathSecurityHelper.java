@@ -57,7 +57,7 @@ public final class AnathSecurityHelper {
     }
 
     /**
-     * Get the user name from a privoded {@link Authentication} instance.
+     * Get the user name from a provided {@link Authentication} instance.
      *
      * @param authentication {@link Authentication} instance.
      *

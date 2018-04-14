@@ -221,13 +221,17 @@ public class UserServiceIT {
     }
 
     @Test
-    public void getUser() {
+    public void getUserById() {
         final UserEntity userEntity = makeUserEntity();
         userRepository.save(userEntity);
         flushAndClear();
 
         final UserDto user = userService.getUser(userEntity.getId());
 
+        matchUserDtoAndUserEntity(userEntity, user);
+    }
+
+    public void matchUserDtoAndUserEntity(UserEntity userEntity, UserDto user) {
         assertThat(user.getEmail(), is(userEntity.getEmail()));
         assertThat(user.getFirstname(), is(userEntity.getFirstname()));
         assertThat(user.getLastname(), is(userEntity.getLastname()));
@@ -235,8 +239,24 @@ public class UserServiceIT {
     }
 
     @Test(expected = UserDoesNotExistException.class)
-    public void getNonExistingUser() {
+    public void getNonExistingUserById() {
         userService.getUser(42L);
+    }
+
+    @Test
+    public void getUserByEmail() {
+        final UserEntity userEntity = makeUserEntity();
+        userRepository.save(userEntity);
+        flushAndClear();
+
+        final UserDto user = userService.getUser(userEntity.getEmail());
+
+        matchUserDtoAndUserEntity(userEntity, user);
+    }
+
+    @Test(expected = UserDoesNotExistException.class)
+    public void getNonExistingUserByEmail() {
+        userService.getUser("kirk@starfleet.org");
     }
 
     @Test
