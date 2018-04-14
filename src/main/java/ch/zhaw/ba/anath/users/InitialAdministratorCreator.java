@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath;
+package ch.zhaw.ba.anath.users;
 
 import ch.zhaw.ba.anath.users.entities.UserEntity;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
