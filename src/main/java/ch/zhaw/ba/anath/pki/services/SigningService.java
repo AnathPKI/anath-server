@@ -67,6 +67,7 @@ public class SigningService {
     private final CertificateValidityProvider certificateValidityProvider;
     private final CertificateSerialProvider certificateSerialProvider;
     private final CertificateUniquenessService certificateUniquenessService;
+    private final ConfirmationNotificationService confirmationNotificationService;
     private CertificateAuthority certificateAuthority = null;
     private CertificateSigner certificateSigner = null;
 
@@ -77,7 +78,8 @@ public class SigningService {
                           SignatureNameProvider signatureNameProvider,
                           CertificateValidityProvider certificateValidityProvider,
                           CertificateSerialProvider certificateSerialProvider, CertificateUniquenessService
-                                  certificateUniquenessService) {
+                                  certificateUniquenessService, ConfirmationNotificationService
+                                  confirmationNotificationService) {
         this.certificateAuthorityService = certificateAuthorityService;
         this.confirmableCertificatePersistenceLayer = confirmableCertificatePersistenceLayer;
         this.useRepository = useRepository;
@@ -86,6 +88,7 @@ public class SigningService {
         this.certificateValidityProvider = certificateValidityProvider;
         this.certificateSerialProvider = certificateSerialProvider;
         this.certificateUniquenessService = certificateUniquenessService;
+        this.confirmationNotificationService = confirmationNotificationService;
     }
 
     /**
@@ -153,14 +156,18 @@ public class SigningService {
         log.info("Signed certificate '{}'", subject);
 
         log.info("Store signed certificate '{}'", subject);
-        return storeCertificate(certificate, userId, use);
+        final String token = storeCertificate(certificate, userId, use);
+
+        confirmationNotificationService.sendMail(token, userId);
+
+        return token;
     }
 
     /**
      * Confirm a tentatively signed certificate.
      *
      * @param token  token as received by {@link #tentativelySignCertificate(CertificateSigningRequest, String, String)}
-     * @param userId
+     * @param userId the user id the token belongs to.
      *
      * @return the {@link Certificate} instance.
      */

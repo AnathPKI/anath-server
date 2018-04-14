@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -56,6 +57,7 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.then;
 
 /**
  * {@link SigningService} caches the CA. Tests requiring a non-initialized CA cannot be run in here.
@@ -74,6 +76,9 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
 
     @Autowired
     private SigningService signingService;
+
+    @MockBean
+    private ConfirmationNotificationService confirmationNotificationService;
 
     @Autowired
     private UseRepository useRepository;
@@ -110,6 +115,8 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
         final UseEntity useEntity = certificateEntity.getUse();
         assertThat(useEntity, is(not(nullValue())));
         assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
+
+        then(confirmationNotificationService).should().sendMail(certificate.getSerial().toString(), TEST_USER_ID);
     }
 
     private Certificate signCertificate() throws IOException {
@@ -162,6 +169,8 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
         final UseEntity useEntity = certificateEntity.getUse();
         assertThat(useEntity, is(not(nullValue())));
         assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
+
+        then(confirmationNotificationService).should().sendMail(certificate.getSerial().toString(), TEST_USER_ID);
     }
 
     @Test
@@ -188,6 +197,8 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
         final UseEntity useEntity = certificateEntity.getUse();
         assertThat(useEntity, is(not(nullValue())));
         assertThat(useEntity.getUse(), is(UseEntity.DEFAULT_USE));
+
+        then(confirmationNotificationService).should().sendMail(certificate.getSerial().toString(), TEST_USER_ID);
     }
 
     @Test
@@ -213,6 +224,8 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
         final UseEntity useEntity = certificateEntity.getUse();
         assertThat(useEntity, is(not(nullValue())));
         assertThat(useEntity.getUse(), is(TEST_CERTIFIACTE_USE_NAME));
+
+        then(confirmationNotificationService).should().sendMail(certificate.getSerial().toString(), TEST_USER_ID);
     }
 
     @Test(expected = CertificateAlreadyExistsException.class)
