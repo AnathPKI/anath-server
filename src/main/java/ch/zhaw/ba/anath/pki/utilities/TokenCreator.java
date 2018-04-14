@@ -29,17 +29,11 @@
 
 package ch.zhaw.ba.anath.pki.utilities;
 
-import ch.zhaw.ba.anath.pki.exceptions.ConfirmationTokenException;
 import ch.zhaw.ba.anath.pki.services.ConfirmableCertificatePersistenceLayer;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.util.UUID;
 
 /**
@@ -49,34 +43,14 @@ import java.util.UUID;
  */
 @Slf4j
 public class TokenCreator {
-    private static final String HASH_ALGORITHM = "SHA256";
-    private static final String SECURITY_PROVIDOER = "BC";
     private static final int UUID_SIZE_IN_BITS = 128;
     private static final int BITS_PER_BYTE = 8;
     private static final int SIZE_IN_BYTES_OF_UUID = UUID_SIZE_IN_BITS / BITS_PER_BYTE;
 
-    static {
-        Security.insertProviderAt(new BouncyCastleProvider(), 1);
-    }
-
     public String token() {
         final UUID uuid = UUID.randomUUID();
-        final byte[] hashedUuid = hashUuid(uuid);
-        return Hex.toHexString(hashedUuid);
-    }
-
-    private byte[] hashUuid(UUID uuid) {
-        try {
-            byte[] uuidAsByteArray = uuidToByteArray(uuid);
-            final MessageDigest messageDigest = MessageDigest.getInstance(HASH_ALGORITHM, SECURITY_PROVIDOER);
-            return messageDigest.digest(uuidAsByteArray);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("Algorithm {} not found", HASH_ALGORITHM);
-            throw new ConfirmationTokenException("No algorithm found", e);
-        } catch (NoSuchProviderException e) {
-            log.error("Provider {} not found", SECURITY_PROVIDOER);
-            throw new ConfirmationTokenException("Security Provider not found", e);
-        }
+        final byte[] uuidAsByteArray = uuidToByteArray(uuid);
+        return Hex.toHexString(uuidAsByteArray);
     }
 
     private byte[] uuidToByteArray(UUID uuid) {
