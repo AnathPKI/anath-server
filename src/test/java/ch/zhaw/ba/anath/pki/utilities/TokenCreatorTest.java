@@ -40,10 +40,10 @@ import static org.junit.Assert.assertThat;
  */
 public class TokenCreatorTest {
 
-    private static final int SIZE_IN_BITS_OF_SHA256_DIGEST = 256;
+    private static final int SIZE_IN_BITS_UUID = 128;
     private static final int BITS_PER_BYTE = 8;
     private static final int HEX_DIGITS_PER_BYTE = 2;
-    private static final int EXPECTED_STRING_SIZE = SIZE_IN_BITS_OF_SHA256_DIGEST / BITS_PER_BYTE * HEX_DIGITS_PER_BYTE;
+    private static final int EXPECTED_STRING_SIZE = SIZE_IN_BITS_UUID / BITS_PER_BYTE * HEX_DIGITS_PER_BYTE;
     private static final int ROUNDS = 10;
 
     @Test
