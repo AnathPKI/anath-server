@@ -39,6 +39,7 @@ import ch.zhaw.ba.anath.pki.services.SigningService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,20 +55,39 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
+ * Non-Confirming Signing Controller.
+ *
  * @author Rafael Ostertag
  */
-@RestController
+@RestController("SigningWithoutConfirmation")
+@Profile("!confirm")
 @RequestMapping(value = "/certificates",
         consumes = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE,
         produces = AnathMediaType.APPLICATION_VND_ANATH_V1_JSON_VALUE)
 @Api(tags = {"Certificate Authority"})
 @Slf4j
-public class SigningController {
+public class SigningControllerWithoutConfirmation {
     private static final String ERROR_READING_PEM_OBJECT_FROM_REQUEST = "Error reading PEM object from request";
     private final SigningService signingService;
 
-    public SigningController(SigningService signingService) {
+    public SigningControllerWithoutConfirmation(SigningService signingService) {
         this.signingService = signingService;
+        log.info("Non-Confirming Signing Controller loaded");
+    }
+
+    public static CertificateSigningRequest readCertificateSigningRequest(InputStream byteArrayInputStream) {
+        CertificateSigningRequest certificateSigningRequest;
+        try (Reader reader = new InputStreamReader(byteArrayInputStream)) {
+            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
+                    PEMCertificateSigningRequestReader(reader);
+
+            certificateSigningRequest = pemCertificateSigningRequestReader
+                    .certificationRequest();
+        } catch (IOException e) {
+            log.error(ERROR_READING_PEM_OBJECT_FROM_REQUEST);
+            throw new AnathException(ERROR_READING_PEM_OBJECT_FROM_REQUEST);
+        }
+        return certificateSigningRequest;
     }
 
     @PostMapping
@@ -81,14 +101,10 @@ public class SigningController {
                         .getCsr()
                         .getPem().getBytes());
 
-        try (Reader reader = new InputStreamReader(byteArrayInputStream)) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(reader);
+        CertificateSigningRequest certificateSigningRequest;
+        certificateSigningRequest = readCertificateSigningRequest(byteArrayInputStream);
 
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-
-            final String username = AnathSecurityHelper.getUsername();
+        final String username = AnathSecurityHelper.getUsername();
             final String token = signingService.tentativelySignCertificate(certificateSigningRequest, username,
                     signingRequestDto.getUse());
             final Certificate certificate = signingService.confirmTentativelySignedCertificate(token,
@@ -101,9 +117,5 @@ public class SigningController {
                     .created(uri)
                     .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
                     .build();
-        } catch (IOException e) {
-            log.error(ERROR_READING_PEM_OBJECT_FROM_REQUEST);
-            throw new AnathException(ERROR_READING_PEM_OBJECT_FROM_REQUEST);
-        }
     }
 }

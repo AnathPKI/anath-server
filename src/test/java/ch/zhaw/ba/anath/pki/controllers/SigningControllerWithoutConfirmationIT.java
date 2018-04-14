@@ -34,7 +34,6 @@ import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.services.SigningService;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,11 +64,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Rafael Ostertag
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(SigningController.class)
+@WebMvcTest(SigningControllerWithoutConfirmation.class)
 @ActiveProfiles("tests")
 @TestSecuritySetup
-public class SigningControllerIT {
-    private static final String validCsrRequestBody = "{ \n" +
+public class SigningControllerWithoutConfirmationIT {
+    public static final String VALID_CSR_REQUEST_BODY = "{ \n" +
             "\"use\" : \"plain\",\n" +
             "\"csr\": { \n" +
             "\"pem\": \"-----BEGIN CERTIFICATE " +
@@ -88,7 +87,6 @@ public class SigningControllerIT {
             "}\n" +
             "}";
 
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String THE_TOKEN = "the-token";
 
     @Autowired
@@ -123,7 +121,7 @@ public class SigningControllerIT {
         given(signingService.confirmTentativelySignedCertificate(THE_TOKEN, "user")).willReturn(certificate);
         mvc.perform(
                 post("/certificates")
-                        .content(validCsrRequestBody)
+                        .content(VALID_CSR_REQUEST_BODY)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
@@ -132,6 +130,7 @@ public class SigningControllerIT {
                 .andExpect(status().isCreated());
 
         then(signingService).should().tentativelySignCertificate(Matchers.any(), eq("user"), eq("plain"));
+        then(signingService).should().confirmTentativelySignedCertificate(THE_TOKEN, "user");
     }
 
     @Test
@@ -139,25 +138,27 @@ public class SigningControllerIT {
     public void signCertificateRequestAdmin() throws Exception {
         mvc.perform(
                 post("/certificates")
-                        .content(validCsrRequestBody)
+                        .content(VALID_CSR_REQUEST_BODY)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
 
         then(signingService).should(never()).tentativelySignCertificate(Matchers.any(), anyString(), anyString());
+        then(signingService).should(never()).confirmTentativelySignedCertificate(anyString(), anyString());
     }
 
     @Test
     public void signCertificateRequestUnauthenticated() throws Exception {
         mvc.perform(
                 post("/certificates")
-                        .content(validCsrRequestBody)
+                        .content(VALID_CSR_REQUEST_BODY)
                         .contentType(AnathMediaType.APPLICATION_VND_ANATH_V1_JSON)
         )
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
 
         then(signingService).should(never()).tentativelySignCertificate(Matchers.any(), anyString(), anyString());
+        then(signingService).should(never()).confirmTentativelySignedCertificate(anyString(), anyString());
     }
 }
