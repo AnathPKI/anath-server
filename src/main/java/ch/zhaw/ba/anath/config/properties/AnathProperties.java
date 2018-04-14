@@ -55,7 +55,7 @@ public class AnathProperties {
      */
     private int crlValidity = 30;
     private Authentication authentication = new Authentication();
-    private Confirmation confirmation;
+    private Confirmation confirmation = new Confirmation();
 
     @Data
     public static class Authentication {
