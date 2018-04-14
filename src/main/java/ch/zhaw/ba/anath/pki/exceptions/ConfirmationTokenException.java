@@ -27,37 +27,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.config.spring;
+package ch.zhaw.ba.anath.pki.exceptions;
 
-import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
-import ch.zhaw.ba.anath.pki.services.ConfirmationKey;
-import ch.zhaw.ba.anath.pki.utilities.TokenCreator;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
+import ch.zhaw.ba.anath.AnathException;
 
 /**
  * @author Rafael Ostertag
  */
-@Profile("confirm")
-@Configuration
-public class ConfirmationBeansConfiguration {
-    @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory();
-    }
-
-    @Bean
-    public RedisTemplate<ConfirmationKey, CertificateEntity> redisTemplate() {
-        RedisTemplate<ConfirmationKey, CertificateEntity> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
-        return template;
-    }
-
-    @Bean
-    public TokenCreator tokenCreator() {
-        return new TokenCreator();
+public class ConfirmationTokenException extends AnathException {
+    public ConfirmationTokenException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

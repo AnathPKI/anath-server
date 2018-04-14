@@ -37,8 +37,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Rafael Ostertag
  */
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-public class SigningServiceException extends AnathException {
-    public SigningServiceException(String message) {
+public class SigningException extends AnathException {
+    public SigningException(String message) {
         super(message);
     }
 }

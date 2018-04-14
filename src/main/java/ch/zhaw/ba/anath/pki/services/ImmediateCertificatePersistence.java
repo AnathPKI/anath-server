@@ -54,6 +54,7 @@ public class ImmediateCertificatePersistence implements ConfirmableCertificatePe
 
     public ImmediateCertificatePersistence(CertificateRepository certificateRepository) {
         this.certificateRepository = certificateRepository;
+        log.info("Immediate Certificate Persistence Layer initialized");
     }
 
     @Override

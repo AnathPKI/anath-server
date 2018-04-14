@@ -38,7 +38,7 @@ import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
-import ch.zhaw.ba.anath.pki.exceptions.SigningServiceException;
+import ch.zhaw.ba.anath.pki.exceptions.SigningException;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -138,7 +138,7 @@ public class SigningService {
      *
      * @throws CertificateAlreadyExistsException when a non-revoked, non-expired for the given subject already
      *                                           exists, or the serial number is taken.
-     * @throws SigningServiceException           if no default certificate use can be found.
+     * @throws SigningException           if no default certificate use can be found.
      */
 
     public String tentativelySignCertificate(CertificateSigningRequest certificateSigningRequest,
@@ -174,7 +174,7 @@ public class SigningService {
             return pemCertificateReader.certificate();
         } catch (IOException e) {
             log.error("Error reading certificate from PEM: {}", e.getMessage());
-            throw new SigningServiceException("Error reading certificate");
+            throw new SigningException("Error reading certificate");
         }
     }
 
@@ -219,7 +219,7 @@ public class SigningService {
             final Optional<UseEntity> defaultUseOptional = useRepository.findOne(UseEntity.DEFAULT_USE);
             return defaultUseOptional.orElseThrow(() -> {
                 log.error("Default use '{}' not found", UseEntity.DEFAULT_USE);
-                return new SigningServiceException("Default use not found");
+                return new SigningException("Default use not found");
             });
         });
     }
@@ -237,7 +237,7 @@ public class SigningService {
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
             log.error("Cannot write certificate to byte array: {}", e.getMessage());
-            throw new SigningServiceException("Cannot store certificate");
+            throw new SigningException("Cannot store certificate");
         }
     }
 }

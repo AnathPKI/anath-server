@@ -27,37 +27,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.config.spring;
+package ch.zhaw.ba.anath.pki.services;
 
-import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
-import ch.zhaw.ba.anath.pki.services.ConfirmationKey;
-import ch.zhaw.ba.anath.pki.utilities.TokenCreator;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
+import lombok.Value;
+
+import java.io.Serializable;
 
 /**
+ * Class used as key in Redis when using confirmation.
+ *
  * @author Rafael Ostertag
  */
-@Profile("confirm")
-@Configuration
-public class ConfirmationBeansConfiguration {
-    @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory();
-    }
-
-    @Bean
-    public RedisTemplate<ConfirmationKey, CertificateEntity> redisTemplate() {
-        RedisTemplate<ConfirmationKey, CertificateEntity> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
-        return template;
-    }
-
-    @Bean
-    public TokenCreator tokenCreator() {
-        return new TokenCreator();
-    }
+@Value
+public class ConfirmationKey implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private final String token;
+    private final String userId;
 }
