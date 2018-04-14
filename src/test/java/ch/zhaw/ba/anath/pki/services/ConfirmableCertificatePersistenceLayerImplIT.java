@@ -33,6 +33,7 @@ import ch.zhaw.ba.anath.pki.core.exceptions.PKIException;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
+import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateNotFoundException;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import org.junit.Before;
@@ -121,7 +122,7 @@ public class ConfirmableCertificatePersistenceLayerImplIT {
     }
 
     @Test
-    public void store() {
+    public void storeAndConfirm() {
         final CertificateEntity certificateEntity = makeTestCertificateEntity();
         final String confirmationToken = confirmableCertificatePersistenceLayer.store(certificateEntity);
 
@@ -136,8 +137,31 @@ public class ConfirmableCertificatePersistenceLayerImplIT {
         entityManager.flush();
     }
 
+    @Test(expected = CertificateAlreadyExistsException.class)
+    public void storeAndConfirmNonUniqueCertificate() {
+        final CertificateEntity certificateEntity = makeTestCertificateEntity();
+        certificateEntity.setNotValidAfter(TestHelper.timeInFuture());
+        certificateEntity.setNotValidBefore(TestHelper.timeInPast());
+
+        entityManager.persist(certificateEntity);
+        entityManager.flush();
+        entityManager.clear();
+
+        final String confirmationToken = confirmableCertificatePersistenceLayer.store(certificateEntity);
+
+        final ConfirmationKey expectedConfirmationKey = new ConfirmationKey(confirmationToken, TEST_USER_ID);
+        then(opsForValueMock).should().set(expectedConfirmationKey, certificateEntity, 60, TimeUnit.MINUTES);
+
+        given(opsForValueMock.get(expectedConfirmationKey)).willReturn(certificateEntity);
+
+        final CertificateEntity confirm = confirmableCertificatePersistenceLayer.confirm(confirmationToken,
+                TEST_USER_ID);
+        then(redisTemplate).should().delete(expectedConfirmationKey);
+        entityManager.flush();
+    }
+
     @Test
-    public void storeWithNonExistingUse() {
+    public void storeAndConfirmWithNonExistingUse() {
         final CertificateEntity certificateEntity = makeTestCertificateEntity();
         certificateEntity.getUse().setUse("does not exist");
         final String confirmationToken = confirmableCertificatePersistenceLayer.store(certificateEntity);
@@ -154,7 +178,7 @@ public class ConfirmableCertificatePersistenceLayerImplIT {
     }
 
     @Test(expected = PKIException.class)
-    public void storeWithNonExistingUseAndNoDefaultUseExisting() {
+    public void storeAndConfirmWithNonExistingUseAndNoDefaultUseExisting() {
         // Drop the default use 'plain', the code must panic and throw an exception when no default use is found.
         useRepository.deleteByUse("plain");
         entityManager.flush();

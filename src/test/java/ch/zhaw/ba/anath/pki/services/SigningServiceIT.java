@@ -200,16 +200,7 @@ public class SigningServiceIT extends CertificateAuthorityInitializer {
 
         flushAndClear();
 
-        final Certificate certificate;
-        try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
-            final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
-                    PEMCertificateSigningRequestReader(csr);
-            final CertificateSigningRequest certificateSigningRequest = pemCertificateSigningRequestReader
-                    .certificationRequest();
-            String token = signingService.tentativelySignCertificate(certificateSigningRequest, TEST_USER_ID,
-                    TEST_CERTIFIACTE_USE_NAME);
-            certificate = signingService.confirmTentativelySignedCertificate(token, TEST_USER_ID);
-        }
+        final Certificate certificate = TestHelper.signAndAddCertificate(signingService, TEST_CERTIFIACTE_USE_NAME);
         assertThat(certificate, is(notNullValue()));
 
         flushAndClear();

@@ -58,15 +58,21 @@ public class ConfirmableCertificatePersistenceLayerImpl implements ConfirmableCe
     private final AnathProperties.Confirmation confirmationConfiguration;
     private final RedisTemplate<ConfirmationKey, CertificateEntity> redisTemplate;
     private final CertificateRepository certificateRepository;
+    private final CertificateUniquenessService certificateUniquenessService;
     private final UseRepository useRepository;
     private final TokenCreator tokenCreator;
 
-    public ConfirmableCertificatePersistenceLayerImpl(AnathProperties anathProperties, RedisTemplate<ConfirmationKey,
-            CertificateEntity> redisTemplate, CertificateRepository certificateRepository, UseRepository
-                                                              useRepository, TokenCreator tokenCreator) {
+    public ConfirmableCertificatePersistenceLayerImpl(
+            AnathProperties anathProperties,
+            RedisTemplate<ConfirmationKey, CertificateEntity> redisTemplate,
+            CertificateRepository certificateRepository,
+            CertificateUniquenessService certificateUniquenessService,
+            UseRepository useRepository,
+            TokenCreator tokenCreator) {
         this.confirmationConfiguration = anathProperties.getConfirmation();
         this.redisTemplate = redisTemplate;
         this.certificateRepository = certificateRepository;
+        this.certificateUniquenessService = certificateUniquenessService;
         this.useRepository = useRepository;
         this.tokenCreator = tokenCreator;
         log.info("Confirmable Certificate Persistence Layer initialized");
@@ -95,6 +101,9 @@ public class ConfirmableCertificatePersistenceLayerImpl implements ConfirmableCe
         final CertificateEntity certificateEntity = redisOperation.get(confirmationKey);
         certificateFoundOrThrow(confirmationKey, certificateEntity);
         redisTemplate.delete(confirmationKey);
+
+        certificateUniquenessService.testCertificateUniquenessInCertificateRepositoryOrThrow(certificateEntity
+                .getSubject());
 
         // Suppose the use has been deleted in the meanwhile, we would not be able to save the entity.
         final CertificateEntity certificateEntityWithExistingUse = guaranteeUseExistence(certificateEntity);

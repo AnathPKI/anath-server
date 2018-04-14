@@ -39,7 +39,6 @@ import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAlreadyExistsException;
 import ch.zhaw.ba.anath.pki.exceptions.SigningException;
-import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,7 +47,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -62,32 +60,32 @@ import java.util.Optional;
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SigningService {
     private final CertificateAuthorityService certificateAuthorityService;
-    private final CertificateRepository certificateRepository;
     private final ConfirmableCertificatePersistenceLayer confirmableCertificatePersistenceLayer;
     private final UseRepository useRepository;
     private final CertificateConstraintProvider certificateConstraintProvider;
     private final SignatureNameProvider signatureNameProvider;
     private final CertificateValidityProvider certificateValidityProvider;
     private final CertificateSerialProvider certificateSerialProvider;
+    private final CertificateUniquenessService certificateUniquenessService;
     private CertificateAuthority certificateAuthority = null;
     private CertificateSigner certificateSigner = null;
 
     public SigningService(CertificateAuthorityService certificateAuthorityService,
-                          CertificateRepository certificateRepository,
                           ConfirmableCertificatePersistenceLayer confirmableCertificatePersistenceLayer,
                           UseRepository useRepository,
                           CertificateConstraintProvider certificateConstraintProvider,
                           SignatureNameProvider signatureNameProvider,
                           CertificateValidityProvider certificateValidityProvider,
-                          CertificateSerialProvider certificateSerialProvider) {
+                          CertificateSerialProvider certificateSerialProvider, CertificateUniquenessService
+                                  certificateUniquenessService) {
         this.certificateAuthorityService = certificateAuthorityService;
-        this.certificateRepository = certificateRepository;
         this.confirmableCertificatePersistenceLayer = confirmableCertificatePersistenceLayer;
         this.useRepository = useRepository;
         this.certificateConstraintProvider = certificateConstraintProvider;
         this.signatureNameProvider = signatureNameProvider;
         this.certificateValidityProvider = certificateValidityProvider;
         this.certificateSerialProvider = certificateSerialProvider;
+        this.certificateUniquenessService = certificateUniquenessService;
     }
 
     /**
@@ -149,8 +147,8 @@ public class SigningService {
         log.info("Sign certificate signing request '{}'", subject);
         final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequest);
 
-        log.info("Test uniqueness of certificate '{}'", certificate.getSubject().toString());
-        testCertificateUniquenessInCertificateRepositoryOrThrow(certificate);
+        log.info("Test uniqueness of certificate '{}'", subject);
+        certificateUniquenessService.testCertificateUniquenessInCertificateRepositoryOrThrow(subject);
 
         log.info("Signed certificate '{}'", subject);
 
@@ -178,24 +176,7 @@ public class SigningService {
         }
     }
 
-    private void testCertificateUniquenessInCertificateRepositoryOrThrow(Certificate certificate) {
-        final List<CertificateEntity> allBySubject = certificateRepository.findAllBySubject(certificate.getSubject()
-                .toString());
-        if (allBySubject.isEmpty()) {
-            return;
-        }
 
-        final boolean hasValidCertificate = allBySubject.stream().anyMatch(CertificateValidityUtils::isValid);
-        if (hasValidCertificate) {
-            // Since we found a certificate with the given subject which is valid, this certificate is not considered
-            // to be unique.
-
-            final String subjectString = certificate.getSubject().toString();
-            log.error("There is already a valid certificate with subject '{}'", subjectString);
-            throw new CertificateAlreadyExistsException(String.format("Valid certificate for '%s' already exists",
-                    subjectString));
-        }
-    }
 
     private String storeCertificate(Certificate certificate, String userId, String use) {
         final UseEntity useEntity = fetchUseEntity(use);

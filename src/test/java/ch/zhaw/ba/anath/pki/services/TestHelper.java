@@ -37,6 +37,7 @@ import ch.zhaw.ba.anath.pki.core.TestConstants;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
 
 /**
  * @author Rafael Ostertag
@@ -44,6 +45,7 @@ import java.io.InputStreamReader;
 public final class TestHelper {
 
     public static final String TEST_USER_ID = "test id";
+    private static final long TEN_SECONDS_IN_MILLIS = 10000L;
 
     private TestHelper() {
         // intentionally empty
@@ -61,5 +63,21 @@ public final class TestHelper {
             certificate = signingService.confirmTentativelySignedCertificate(token, TEST_USER_ID);
         }
         return certificate;
+    }
+
+    static Timestamp timeEvenMoreInPast() {
+        return new Timestamp(System.currentTimeMillis() - TEN_SECONDS_IN_MILLIS - TEN_SECONDS_IN_MILLIS);
+    }
+
+    static Timestamp timeEvenFurtherInFuture() {
+        return new Timestamp(System.currentTimeMillis() + TEN_SECONDS_IN_MILLIS + TEN_SECONDS_IN_MILLIS);
+    }
+
+    static Timestamp timeInPast() {
+        return new Timestamp(System.currentTimeMillis() - TEN_SECONDS_IN_MILLIS);
+    }
+
+    static Timestamp timeInFuture() {
+        return new Timestamp(System.currentTimeMillis() + TEN_SECONDS_IN_MILLIS);
     }
 }
