@@ -97,7 +97,6 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users")
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
@@ -114,7 +113,6 @@ public class UserControllerIT {
     public void getAllAsUser() throws Exception {
         mvc.perform(
                 get("/users")
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
@@ -126,7 +124,6 @@ public class UserControllerIT {
     public void getAllAsUnauthenticated() throws Exception {
         mvc.perform(
                 get("/users")
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())
@@ -143,7 +140,6 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
@@ -183,7 +179,6 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
@@ -231,7 +226,6 @@ public class UserControllerIT {
 
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(authenticated())
@@ -243,7 +237,6 @@ public class UserControllerIT {
     public void getUserUnauthenticated() throws Exception {
         mvc.perform(
                 get("/users/{id}", 1L)
-                        .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
                         .accept(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
         )
                 .andExpect(unauthenticated())

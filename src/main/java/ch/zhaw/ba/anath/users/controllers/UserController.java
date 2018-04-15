@@ -39,6 +39,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -65,7 +66,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
+    @GetMapping(
+            consumes = MediaType.ALL_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Get All Users")
@@ -75,7 +78,10 @@ public class UserController {
         return new Resources<>(all);
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(
+            path = "/{id}",
+            consumes = MediaType.ALL_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and hasPermission(#id,'user','get'))")
     @ApiOperation(value = "Get a User")
@@ -95,7 +101,10 @@ public class UserController {
         return userLinkDto;
     }
 
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(
+            path = "/{id}",
+            consumes = MediaType.ALL_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Delete a User")
