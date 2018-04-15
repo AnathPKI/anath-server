@@ -147,11 +147,11 @@ public class SigningService {
         initializeCertificateSigner();
 
         final String subject = certificateSigningRequest.getSubject().toString();
-        log.info("Sign certificate signing request '{}'", subject);
-        final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequest);
-
         log.info("Test uniqueness of certificate '{}'", subject);
         certificateUniquenessService.testCertificateUniquenessInCertificateRepositoryOrThrow(subject);
+
+        log.info("Sign certificate signing request '{}'", subject);
+        final Certificate certificate = certificateSigner.signCertificate(certificateSigningRequest);
 
         log.info("Signed certificate '{}'", subject);
 
