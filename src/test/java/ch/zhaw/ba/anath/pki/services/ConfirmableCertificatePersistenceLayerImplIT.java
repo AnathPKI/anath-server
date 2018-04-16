@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
+import ch.zhaw.ba.anath.TestHelper;
 import ch.zhaw.ba.anath.pki.core.exceptions.PKIException;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;

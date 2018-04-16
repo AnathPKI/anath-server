@@ -54,7 +54,9 @@ public interface CertificateRepository extends Repository<CertificateEntity, Lon
 
     List<CertificateEntity> findAllByUserIdAndStatus(String userId, CertificateStatus status);
 
-    @Query("select ce from CertificateEntity ce where ce.status = 'REVOKED' order by ce.revocationTime asc")
+    @Query("select ce from CertificateEntity ce where ce.status = 'REVOKED' AND ce.notValidAfter > current_timestamp " +
+            "order by ce" +
+            ".revocationTime asc")
     List<CertificateEntity> findAllRevoked();
 
     void save(CertificateEntity certificateEntity);

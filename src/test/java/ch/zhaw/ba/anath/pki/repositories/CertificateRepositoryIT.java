@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.repositories;
 
+import ch.zhaw.ba.anath.TestHelper;
 import ch.zhaw.ba.anath.pki.core.UuidCertificateSerialProvider;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
@@ -239,6 +240,7 @@ public class CertificateRepositoryIT {
         assertThat(allRevokedEmpty, is(empty()));
 
         final CertificateEntity revokedCertificateEntity1 = makeCertificateEntity();
+        revokedCertificateEntity1.setNotValidAfter(TestHelper.timeInFuture());
         revokedCertificateEntity1.setSubject(TEST_SUBJECT + "another1");
         revokedCertificateEntity1.setSerial(BigInteger.ONE.add(BigInteger.ONE));
         revokedCertificateEntity1.setStatus(CertificateStatus.REVOKED);
@@ -249,6 +251,7 @@ public class CertificateRepositoryIT {
         assertThat(allRevoked, hasSize(1));
 
         final CertificateEntity revokedCertificateEntity2 = makeCertificateEntity();
+        revokedCertificateEntity2.setNotValidAfter(TestHelper.timeInFuture());
         revokedCertificateEntity2.setSubject(TEST_SUBJECT + "another2");
         revokedCertificateEntity2.setSerial(BigInteger.ONE.add(BigInteger.ONE).add(BigInteger.ONE));
         revokedCertificateEntity2.setStatus(CertificateStatus.REVOKED);
@@ -274,5 +277,19 @@ public class CertificateRepositoryIT {
         assertThat(allRevoked.get(0).getSubject(), is(TEST_SUBJECT + "another3"));
         assertThat(allRevoked.get(1).getSubject(), is(TEST_SUBJECT + "another1"));
         assertThat(allRevoked.get(2).getSubject(), is(TEST_SUBJECT + "another2"));
+    }
+
+    @Test
+    public void findAllRevokedDoNotIncludeExpiredRevoked() {
+        final CertificateEntity revokedCertificateEntity1 = makeCertificateEntity();
+        revokedCertificateEntity1.setNotValidAfter(TestHelper.timeInPast());
+        revokedCertificateEntity1.setSubject(TEST_SUBJECT + "another1");
+        revokedCertificateEntity1.setSerial(BigInteger.ONE);
+        revokedCertificateEntity1.setStatus(CertificateStatus.REVOKED);
+        revokedCertificateEntity1.setRevocationTime(new Timestamp(TEST_REVOKE_TIMESTAMP));
+        testEntityManager.persistAndFlush(revokedCertificateEntity1);
+
+        List<CertificateEntity> allRevoked = certificateRepository.findAllRevoked();
+        assertThat(allRevoked, is(empty()));
     }
 }

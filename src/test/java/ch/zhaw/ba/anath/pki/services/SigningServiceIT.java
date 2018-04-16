@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
+import ch.zhaw.ba.anath.TestHelper;
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
 import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;

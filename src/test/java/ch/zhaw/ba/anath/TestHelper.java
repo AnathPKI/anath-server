@@ -27,12 +27,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.services;
+package ch.zhaw.ba.anath;
 
 import ch.zhaw.ba.anath.pki.core.Certificate;
 import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
 import ch.zhaw.ba.anath.pki.core.PEMCertificateSigningRequestReader;
 import ch.zhaw.ba.anath.pki.core.TestConstants;
+import ch.zhaw.ba.anath.pki.services.SigningService;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public final class TestHelper {
         // intentionally empty
     }
 
-    static Certificate signAndAddCertificate(SigningService signingService, String use) throws IOException {
+    public static Certificate signAndAddCertificate(SigningService signingService, String use) throws IOException {
         final Certificate certificate;
         try (InputStreamReader csr = new InputStreamReader(new FileInputStream(TestConstants.CLIENT_CSR_FILE_NAME))) {
             final PEMCertificateSigningRequestReader pemCertificateSigningRequestReader = new
@@ -65,19 +66,19 @@ public final class TestHelper {
         return certificate;
     }
 
-    static Timestamp timeEvenMoreInPast() {
+    public static Timestamp timeEvenMoreInPast() {
         return new Timestamp(System.currentTimeMillis() - TEN_SECONDS_IN_MILLIS - TEN_SECONDS_IN_MILLIS);
     }
 
-    static Timestamp timeEvenFurtherInFuture() {
+    public static Timestamp timeEvenFurtherInFuture() {
         return new Timestamp(System.currentTimeMillis() + TEN_SECONDS_IN_MILLIS + TEN_SECONDS_IN_MILLIS);
     }
 
-    static Timestamp timeInPast() {
+    public static Timestamp timeInPast() {
         return new Timestamp(System.currentTimeMillis() - TEN_SECONDS_IN_MILLIS);
     }
 
-    static Timestamp timeInFuture() {
+    public static Timestamp timeInFuture() {
         return new Timestamp(System.currentTimeMillis() + TEN_SECONDS_IN_MILLIS);
     }
 }
