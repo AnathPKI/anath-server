@@ -62,6 +62,7 @@ public class CertificateExtensionsActions {
      * Apply all {@link CertificateAuthorityExtensionProvider} to a given {@link X509v3CertificateBuilder}.
      *
      * @param certificateBuilder {@link X509v3CertificateBuilder} instance
+     * @param extensionArguments {@link ExtensionArguments} instance.
      *
      * @return {@link X509v3CertificateBuilder} instance
      */
