@@ -97,6 +97,25 @@ public class RevocationServiceIT extends CertificateAuthorityInitializer {
         testCrlNonEmpty();
     }
 
+    @Test
+    public void revokeCertificatesByUser() throws IOException {
+        testWhetherCrlIsEmpty();
+
+        Certificate certificate1 = TestHelper.signAndAddCertificate(signingService, "plain");
+
+        revocationService.revokeAllCertificatesByUser("does not exist", "reason");
+
+        final CertificateResponseDto nonRevokedCertificate = certificateService.getCertificate(certificate1.getSerial
+                ());
+        assertThat(nonRevokedCertificate.getValidity().isExpired(), is(false));
+        assertThat(nonRevokedCertificate.getValidity().isRevoked(), is(false));
+
+        revocationService.revokeAllCertificatesByUser(TestHelper.TEST_USER_ID, "revoked");
+
+        final CertificateResponseDto revokedCertificate = certificateService.getCertificate(certificate1.getSerial());
+        assertThat(revokedCertificate.getValidity().isRevoked(), is(true));
+    }
+
     private void testCrlNonEmpty() {
         final String crlPemEncoded = revocationService.getCrlPemEncoded();
         assertThat(crlPemEncoded, is(notNullValue()));

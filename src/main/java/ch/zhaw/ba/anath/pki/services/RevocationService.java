@@ -120,6 +120,16 @@ public class RevocationService {
         updateCertificateRevocationList();
     }
 
+    public void revokeAllCertificatesByUser(String user, String reason) {
+        final List<CertificateEntity> allByUserWithStatusValid = certificateRepository.findAllByUserIdAndStatus(user,
+                CertificateStatus.VALID);
+
+        allByUserWithStatusValid
+                .stream()
+                .filter(x -> !CertificateValidityUtils.isExpired(x))
+                .forEach(x -> revokeCertificate(x.getSerial(), reason));
+    }
+
     /**
      * Update the Revocation List with all revoked certificates. This method can be called to regenerate the
      * certificate revocation list, when it is nearing it's next update.
