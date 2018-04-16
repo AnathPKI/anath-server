@@ -56,6 +56,7 @@ public class UseService {
 
     private static final String CANNOT_DELETE_PLAIN_USE_MESSAGE = "Cannot delete 'plain' use";
     private static final String CANNOT_UPDATE_PLAIN_USE_MESSAGE = "Must not update 'plain' use";
+    private static final String PLAIN_USE = "plain";
     private final UseRepository useRepository;
 
     public UseService(UseRepository useRepository) {
@@ -102,7 +103,7 @@ public class UseService {
     }
 
     public void delete(String key) {
-        if (key.equals("plain")) {
+        if (key.equals(PLAIN_USE)) {
             log.error(CANNOT_DELETE_PLAIN_USE_MESSAGE);
             throw new UseDeleteException(CANNOT_DELETE_PLAIN_USE_MESSAGE);
         }
@@ -145,7 +146,7 @@ public class UseService {
     }
 
     public UseItemDto updateUse(String key, String newConfiguration) {
-        if (key.equals("plain")) {
+        if (key.equals(PLAIN_USE)) {
             log.error(CANNOT_UPDATE_PLAIN_USE_MESSAGE);
             throw new UseUpdateException(CANNOT_UPDATE_PLAIN_USE_MESSAGE);
         }
