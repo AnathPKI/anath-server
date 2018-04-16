@@ -30,6 +30,7 @@
 package ch.zhaw.ba.anath.users.controllers;
 
 import ch.zhaw.ba.anath.AnathExtensionMediaType;
+import ch.zhaw.ba.anath.pki.services.RevocationService;
 import ch.zhaw.ba.anath.users.dto.*;
 import ch.zhaw.ba.anath.users.services.UserService;
 import io.swagger.annotations.Api;
@@ -61,9 +62,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Api(tags = {"User Management"})
 public class UserController {
     private final UserService userService;
+    private final RevocationService revocationService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, RevocationService revocationService) {
         this.userService = userService;
+        this.revocationService = revocationService;
     }
 
     @GetMapping(
@@ -109,7 +112,11 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @ApiOperation(value = "Delete a User")
     public ResourceSupport deleteUser(@PathVariable long id) {
+        final UserDto userInformation = userService.getUser(id);
+
         userService.deleteUser(id);
+        revocationService.revokeAllCertificatesByUser(userInformation.getEmail(), "User deleted");
+
         final ResourceSupport resourceSupport = new ResourceSupport();
         resourceSupport.add(linkTo(methodOn(UserController.class).getAll()).withRel("list"));
         return resourceSupport;

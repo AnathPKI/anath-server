@@ -30,8 +30,10 @@
 package ch.zhaw.ba.anath.users.controllers;
 
 import ch.zhaw.ba.anath.AnathExtensionMediaType;
+import ch.zhaw.ba.anath.TestHelper;
 import ch.zhaw.ba.anath.TestSecuritySetup;
 import ch.zhaw.ba.anath.pki.repositories.CertificateRepository;
+import ch.zhaw.ba.anath.pki.services.RevocationService;
 import ch.zhaw.ba.anath.users.dto.*;
 import ch.zhaw.ba.anath.users.entities.UserEntity;
 import ch.zhaw.ba.anath.users.repositories.UserRepository;
@@ -52,10 +54,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -80,6 +83,9 @@ public class UserControllerIT {
     private MockMvc mvc;
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private RevocationService revocationService;
 
     @MockBean
     private UserRepository userRepository;
@@ -313,6 +319,10 @@ public class UserControllerIT {
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void deleteUserAsAdmin() throws Exception {
+        final UserDto userDto = new UserDto();
+        userDto.setEmail(TestHelper.TEST_USER_ID);
+        given(userService.getUser(1)).willReturn(userDto);
+
         mvc.perform(
                 delete("/users/{id}", 1)
                         .contentType(AnathExtensionMediaType.APPLICATION_VND_ANATH_EXTENSION_V1_JSON)
@@ -324,6 +334,7 @@ public class UserControllerIT {
                 .andExpect(jsonPath("$.links[0].rel", is("list")))
                 .andExpect(jsonPath("$.links[0].href", is("http://localhost/users")));
         then(userService).should().deleteUser(1L);
+        then(revocationService).should().revokeAllCertificatesByUser(TestHelper.TEST_USER_ID, "User deleted");
     }
 
     @Test
@@ -336,6 +347,7 @@ public class UserControllerIT {
                 .andExpect(authenticated())
                 .andExpect(status().isForbidden());
         then(userService).should(never()).deleteUser(anyLong());
+        then(revocationService).should(never()).revokeAllCertificatesByUser(anyString(), anyString());
     }
 
     @Test
@@ -347,6 +359,7 @@ public class UserControllerIT {
                 .andExpect(unauthenticated())
                 .andExpect(status().isUnauthorized());
         then(userService).should(never()).deleteUser(anyLong());
+        then(revocationService).should(never()).revokeAllCertificatesByUser(anyString(), anyString());
     }
 
     @Test
