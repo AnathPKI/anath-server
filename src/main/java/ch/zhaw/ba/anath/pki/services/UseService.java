@@ -35,6 +35,7 @@ import ch.zhaw.ba.anath.pki.entities.UseEntity;
 import ch.zhaw.ba.anath.pki.exceptions.UseCreationException;
 import ch.zhaw.ba.anath.pki.exceptions.UseDeleteException;
 import ch.zhaw.ba.anath.pki.exceptions.UseNotFoundException;
+import ch.zhaw.ba.anath.pki.exceptions.UseUpdateException;
 import ch.zhaw.ba.anath.pki.repositories.UseRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 public class UseService {
 
     private static final String CANNOT_DELETE_PLAIN_USE_MESSAGE = "Cannot delete 'plain' use";
+    private static final String CANNOT_UPDATE_PLAIN_USE_MESSAGE = "Must not update 'plain' use";
     private final UseRepository useRepository;
 
     public UseService(UseRepository useRepository) {
@@ -143,6 +145,11 @@ public class UseService {
     }
 
     public UseItemDto updateUse(String key, String newConfiguration) {
+        if (key.equals("plain")) {
+            log.error(CANNOT_UPDATE_PLAIN_USE_MESSAGE);
+            throw new UseUpdateException(CANNOT_UPDATE_PLAIN_USE_MESSAGE);
+        }
+
         final UseEntity useEntity = getUseEntityOrThrow(key);
         if (newConfiguration == null) {
             useEntity.setConfig(null);

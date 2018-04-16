@@ -34,6 +34,7 @@ import ch.zhaw.ba.anath.pki.dto.UseItemDto;
 import ch.zhaw.ba.anath.pki.exceptions.UseCreationException;
 import ch.zhaw.ba.anath.pki.exceptions.UseDeleteException;
 import ch.zhaw.ba.anath.pki.exceptions.UseNotFoundException;
+import ch.zhaw.ba.anath.pki.exceptions.UseUpdateException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,5 +143,10 @@ public class UseServiceIT {
     @Test(expected = UseNotFoundException.class)
     public void updateNonExistingUse() {
         useService.updateUse(TEST_USE, "the configuration");
+    }
+
+    @Test(expected = UseUpdateException.class)
+    public void updatePlainUse() {
+        useService.updateUse("plain", "the configuration");
     }
 }
