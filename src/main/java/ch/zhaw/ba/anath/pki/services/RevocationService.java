@@ -120,6 +120,12 @@ public class RevocationService {
         updateCertificateRevocationList();
     }
 
+    /**
+     * Revoke all non-revoked, non-expired certificates for a given user.
+     *
+     * @param user   user id
+     * @param reason revocation reason.
+     */
     public void revokeAllCertificatesByUser(String user, String reason) {
         final List<CertificateEntity> allByUserWithStatusValid = certificateRepository.findAllByUserIdAndStatus(user,
                 CertificateStatus.VALID);
