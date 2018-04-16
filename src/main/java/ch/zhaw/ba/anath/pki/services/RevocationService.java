@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 /**
  * Revoke Certificates and maintain the Certificate Revocation List. Updating the Certificate Revocation List must be
- * done atomitally. Only use the locked operations {@link #cleanAndPersistLocked(CrlEntity)} and
+ * done atomically. Only use the locked operations {@link #cleanAndPersistLocked(CrlEntity)} and
  * {@link #getCrlEntityLocked()} to store and retrieve the CRL.
  *
  * @author Rafael Ostertag
