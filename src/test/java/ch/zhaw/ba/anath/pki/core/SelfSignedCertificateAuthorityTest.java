@@ -64,7 +64,7 @@ public class SelfSignedCertificateAuthorityTest {
                 caNameBuilder,
                 new OneYearValidity(),
                 new UuidCertificateSerialProvider(),
-                new SecureRandomProviderImpl(),
+                new TestNonBlockingSecureRandomProvider(),
                 new Sha512WithRsa(),
                 new Rfc5280CAExtensionsActionsFactory(), 2048);
     }
