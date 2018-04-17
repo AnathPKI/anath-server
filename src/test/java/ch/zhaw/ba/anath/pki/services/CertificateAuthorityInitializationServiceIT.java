@@ -29,10 +29,8 @@
 
 package ch.zhaw.ba.anath.pki.services;
 
-import ch.zhaw.ba.anath.pki.core.Certificate;
-import ch.zhaw.ba.anath.pki.core.PEMCertificateReader;
-import ch.zhaw.ba.anath.pki.core.SelfSignedCANameBuilder;
-import ch.zhaw.ba.anath.pki.core.TestConstants;
+import ch.zhaw.ba.anath.pki.core.*;
+import ch.zhaw.ba.anath.pki.core.interfaces.SecureRandomProvider;
 import ch.zhaw.ba.anath.pki.dto.CreateSelfSignedCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.dto.ImportCertificateAuthorityDto;
 import ch.zhaw.ba.anath.pki.exceptions.CertificateAuthorityAlreadyInitializedException;
@@ -45,6 +43,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -307,5 +307,13 @@ public class CertificateAuthorityInitializationServiceIT {
                 (createSelfSignedCertificateAuthorityDto);
         certificateAuthorityInitializationService.createSelfSignedCertificateAuthority
                 (createSelfSignedCertificateAuthorityDto);
+    }
+
+    @TestConfiguration
+    static class TestNonBlockingSecureRandomProviderConfiguration {
+        @Bean
+        public SecureRandomProvider secureRandomProvider() {
+            return new SelfSignedCertificateAuthorityTest.TestNonBlockingSecureRandomProvider();
+        }
     }
 }
