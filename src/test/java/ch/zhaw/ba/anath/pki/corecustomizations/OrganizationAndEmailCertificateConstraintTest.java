@@ -33,6 +33,8 @@ import ch.zhaw.ba.anath.pki.core.exceptions.CertificateConstraintException;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateConstraintProvider;
 import ch.zhaw.ba.anath.users.dto.UserDto;
 import ch.zhaw.ba.anath.users.services.UserService;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -84,6 +86,49 @@ public class OrganizationAndEmailCertificateConstraintTest {
 
         organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
         // Not throwing an exception is the test
+    }
+
+    @Test
+    public void validateMultiValueSubject() {
+        setUpTestUser(TEST_EMAIL);
+        setUpUserServiceMock(TEST_EMAIL, TEST_NAME);
+
+        final X500NameBuilder x500NameBuilder = new X500NameBuilder();
+        final X500Name subject = x500NameBuilder
+                .addMultiValuedRDN(
+                        new AttributeTypeAndValue[]{
+                                new AttributeTypeAndValue(BCStyle.C, new DERUTF8String("CH")),
+                                new AttributeTypeAndValue(BCStyle.ST, new DERUTF8String("Thurgau")),
+                                new AttributeTypeAndValue(BCStyle.L, new DERUTF8String("Kefikon")),
+                                new AttributeTypeAndValue(BCStyle.O, new DERUTF8String(TEST_ORGANIZATION)),
+                                new AttributeTypeAndValue(BCStyle.OU, new DERUTF8String("dev")),
+                                new AttributeTypeAndValue(BCStyle.CN, new DERUTF8String(TEST_NAME)),
+                                new AttributeTypeAndValue(BCStyle.E, new DERUTF8String(TEST_EMAIL))
+                        }
+                ).build();
+
+        organizationAndEmailCertficateConstraint.validateSubject(subject, issuerName);
+        // Not throwing an exception is the test
+    }
+
+    @Test(expected = CertificateConstraintException.class)
+    public void validateMultiValueSubjectWithMissingCN() {
+        setUpTestUser(TEST_EMAIL);
+        setUpUserServiceMock(TEST_EMAIL, TEST_NAME);
+
+        final X500NameBuilder x500NameBuilder = new X500NameBuilder();
+        final X500Name nonMatchingName = x500NameBuilder
+                .addMultiValuedRDN(
+                        new AttributeTypeAndValue[]{
+                                new AttributeTypeAndValue(BCStyle.C, new DERUTF8String("CH")),
+                                new AttributeTypeAndValue(BCStyle.ST, new DERUTF8String("Thurgau")),
+                                new AttributeTypeAndValue(BCStyle.L, new DERUTF8String("Kefikon")),
+                                new AttributeTypeAndValue(BCStyle.O, new DERUTF8String(TEST_ORGANIZATION)),
+                                new AttributeTypeAndValue(BCStyle.OU, new DERUTF8String("dev")),
+                                new AttributeTypeAndValue(BCStyle.E, new DERUTF8String(TEST_EMAIL))
+                        }
+                ).build();
+        organizationAndEmailCertficateConstraint.validateSubject(nonMatchingName, issuerName);
     }
 
     private void setUpUserServiceMock(String testEmail, String testName) {

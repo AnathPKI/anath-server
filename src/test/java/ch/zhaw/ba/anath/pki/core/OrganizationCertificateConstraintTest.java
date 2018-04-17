@@ -30,6 +30,8 @@
 package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.CertificateConstraintException;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -84,6 +86,62 @@ public class OrganizationCertificateConstraintTest {
                 .addRDN(BCStyle.CN, "Rafael Ostertag")
                 .addRDN(BCStyle.E, "rafi@guengel.ch")
                 .build();
+        new OrganizationCertificateConstraint().validateSubject(nonMatchingName, name1);
+    }
+
+    @Test(expected = CertificateConstraintException.class)
+    public void validateNonMatchingSubjectsMultiValue() {
+        final X500NameBuilder x500NameBuilder = new X500NameBuilder();
+
+        final X500Name nonMatchingName = x500NameBuilder
+                .addRDN(BCStyle.C, "CH")
+                .addRDN(BCStyle.ST, "Thurgau")
+                .addRDN(BCStyle.L, "Kefikon")
+                .addRDN(BCStyle.O, "Rafi")
+                .addRDN(BCStyle.OU, "dev")
+                .addMultiValuedRDN(new AttributeTypeAndValue[]{new AttributeTypeAndValue(BCStyle.O,
+                        new DERUTF8String("Rafael Ostertag"))})
+                .addRDN(BCStyle.CN, "Rafael Ostertag")
+                .addRDN(BCStyle.E, "rafi@guengel.ch")
+                .build();
+        new OrganizationCertificateConstraint().validateSubject(nonMatchingName, name1);
+    }
+
+    @Test
+    public void validateMatchingSubjectsMultiValue() {
+        final X500NameBuilder x500NameBuilder = new X500NameBuilder();
+
+        final X500Name nonMatchingName = x500NameBuilder
+                .addRDN(BCStyle.C, "CH")
+                .addRDN(BCStyle.ST, "Thurgau")
+                .addRDN(BCStyle.L, "Kefikon")
+                .addMultiValuedRDN(new AttributeTypeAndValue[]{new AttributeTypeAndValue(BCStyle.O,
+                        new DERUTF8String("Rafael Ostertag"))})
+                .addRDN(BCStyle.OU, "dev")
+                .addMultiValuedRDN(new AttributeTypeAndValue[]{new AttributeTypeAndValue(BCStyle.O,
+                        new DERUTF8String("Rafael Ostertag"))})
+                .addRDN(BCStyle.CN, "Rafael Ostertag")
+                .addRDN(BCStyle.E, "rafi@guengel.ch")
+                .build();
+        new OrganizationCertificateConstraint().validateSubject(nonMatchingName, name1);
+    }
+
+    @Test
+    public void validateMatchingSubjectsOneMultiValue() {
+        final X500NameBuilder x500NameBuilder = new X500NameBuilder();
+
+        final X500Name nonMatchingName = x500NameBuilder
+                .addMultiValuedRDN(
+                        new AttributeTypeAndValue[]{
+                                new AttributeTypeAndValue(BCStyle.C, new DERUTF8String("CH")),
+                                new AttributeTypeAndValue(BCStyle.ST, new DERUTF8String("Thurgau")),
+                                new AttributeTypeAndValue(BCStyle.L, new DERUTF8String("Kefikon")),
+                                new AttributeTypeAndValue(BCStyle.O, new DERUTF8String("Rafael Ostertag")),
+                                new AttributeTypeAndValue(BCStyle.OU, new DERUTF8String("dev")),
+                                new AttributeTypeAndValue(BCStyle.CN, new DERUTF8String("Rafael Ostertag")),
+                                new AttributeTypeAndValue(BCStyle.E, new DERUTF8String("rafi@guengel.ch"))
+                        }
+                ).build();
         new OrganizationCertificateConstraint().validateSubject(nonMatchingName, name1);
     }
 
