@@ -49,13 +49,6 @@
     <name>anath-server</name>
     <url>https://github.com/AnathPKI/anath-server</url>
 
-    <scm>
-        <connection>scm:git:https://github.com/AnathPKI/anath-server.git</connection>
-        <developerConnection>scm:git:https://github.com/AnathPKI/anath-server.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/AnathPKI/anath-server</url>
-    </scm>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
