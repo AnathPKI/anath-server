@@ -47,29 +47,14 @@
     <packaging>jar</packaging>
 
     <name>anath-server</name>
-    <url>http://maven.apache.org</url>
-
-
+    <url>https://github.com/AnathPKI/anath-server</url>
 
     <scm>
-        <connection>scm:ssh://git@bitbucket.datonus.ch:7999/bapki/anath-server.git</connection>
-        <developerConnection>scm:git:ssh://git@bitbucket.datonus.ch:7999/bapki/anath-server.git</developerConnection>
+        <connection>scm:git:https://github.com/AnathPKI/anath-server.git</connection>
+        <developerConnection>scm:git:https://github.com/AnathPKI/anath-server.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://bitbucket.datonus.ch/projects/BAPKI/repos/anath-server/browse</url>
+        <url>https://github.com/AnathPKI/anath-server</url>
     </scm>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshot.anath-server.nexus.datonus.ch</id>
-            <name>Datonus Nexus</name>
-            <url>http://10.255.2.69:30824/repository/anath-server-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>release.anath-server.nexus.datonus.ch</id>
-            <name>Datonus Nexus</name>
-            <url>http://10.255.2.69:30824/repository/anath-server/</url>
-        </repository>
-    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
