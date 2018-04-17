@@ -31,6 +31,8 @@ package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.SelfSignedCACreationException;
 import ch.zhaw.ba.anath.pki.core.extensions.Rfc5280CAExtensionsActionsFactory;
+import ch.zhaw.ba.anath.pki.core.interfaces.SecureRandomProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +40,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -106,7 +110,7 @@ public class SelfSignedCertificateAuthorityTest {
                 caNameBuilder,
                 new OneYearValidity(),
                 new UuidCertificateSerialProvider(),
-                new SecureRandomProviderImpl(),
+                new TestNonBlockingSecureRandomProvider(),
                 new Sha512WithRsa(),
                 new Rfc5280CAExtensionsActionsFactory(), 1024);
     }
@@ -155,6 +159,20 @@ public class SelfSignedCertificateAuthorityTest {
         } finally {
             caCertificateFile.delete();
             caKeyFile.delete();
+        }
+    }
+
+    @Slf4j
+    public class TestNonBlockingSecureRandomProvider implements SecureRandomProvider {
+
+        @Override
+        public SecureRandom getSecureRandom() {
+            try {
+                log.warn("USE TEST INSECURE PRNG");
+                return SecureRandom.getInstance("NATIVEPRNGNONBLOCKING");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
