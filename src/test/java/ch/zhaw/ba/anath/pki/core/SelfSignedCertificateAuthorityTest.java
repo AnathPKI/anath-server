@@ -163,7 +163,7 @@ public class SelfSignedCertificateAuthorityTest {
     }
 
     @Slf4j
-    public class TestNonBlockingSecureRandomProvider implements SecureRandomProvider {
+    public static class TestNonBlockingSecureRandomProvider implements SecureRandomProvider {
 
         @Override
         public SecureRandom getSecureRandom() {
