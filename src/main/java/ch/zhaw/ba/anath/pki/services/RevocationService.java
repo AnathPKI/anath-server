@@ -56,6 +56,8 @@ import java.util.stream.Collectors;
  * done atomically. Only use the locked operations {@link #cleanAndPersistLocked(CrlEntity)} and
  * {@link #getCrlEntityLocked()} to store and retrieve the CRL.
  *
+ * TODO: Is an application lock realy necessary, can't handle the database this and why using locks in the first place
+ *
  * @author Rafael Ostertag
  */
 @Slf4j
