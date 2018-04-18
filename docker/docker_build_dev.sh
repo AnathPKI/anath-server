@@ -5,6 +5,8 @@
 
 set -ue
 
+IMAGE_TAG=anathpki/server:test
+
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-docker build . -t anath/pki:test
-docker push anath/pki:test
+docker build . -t $IMAGE_TAG
+docker push $IMAGE_TAG
