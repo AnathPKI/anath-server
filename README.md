@@ -1,6 +1,9 @@
 Anath Reference Implementation
 ===
 
+BSc Thesis reference implementation of a self-service PKI.
+ 
+
 Requirements
 ---
 
