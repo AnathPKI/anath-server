@@ -13,18 +13,19 @@ set -eu
 IMAGE_TAG_BASE=anathpki/server
 IMAGE_LATEST_TAG="${IMAGE_TAG_BASE}:latest"
 
+TRAVIS_TAG=${TRAVIS_TAG:-tag expected}
 
-if ! echo "${TRAVIS_BRANCH}" | grep "^v[0-9]+\.[0-9]+\.[0-9]+\$" >/dev/null 2>&1
+if ! echo "${TRAVIS_TAG}" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+\$" >/dev/null 2>&1
 then
     echo 'Tag does not match "^v[0-9]+.[0-9]+.[0-9]+$". Assuming non-release tag and do nothing.'
     # Don't make the job fail. Maybe it's a legit non-release tag
     exit 0
 fi
 
-SEMANTIC_VERSION=${TRAVIS_BRANCH#v}
+SEMANTIC_VERSION=${TRAVIS_TAG#v}
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-IMAGE_TAG="${IMAGE_TAG}:${SEMANTIC_VERSION}"
+IMAGE_TAG="${IMAGE_TAG_BASE}:${SEMANTIC_VERSION}"
 
 echo "## Building image $IMAGE_TAG"
 docker build . -t "${IMAGE_TAG}"
