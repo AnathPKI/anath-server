@@ -14,11 +14,16 @@ script:
   - mvn sonar:sonar
 
 deploy:
-  provider: script
-  script: bash docker/docker_build_dev.sh
-  on:
-    branch: development
-  skip_cleanup: true
+  - provider: script
+    script: bash docker/docker_build_dev.sh
+    on:
+      branch: development
+    skip_cleanup: true
+  - provider: script
+    script: bash docker/docker_build_release.sh
+    on:
+      tags: true
+    skip_cleanup: true
 
 cache:
   directories:
