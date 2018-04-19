@@ -36,7 +36,7 @@ import ch.zhaw.ba.anath.pki.core.interfaces.CertificateWriter;
  *
  * @author Rafael Ostertag
  */
-public class CertificateWriterException extends PKIException {
+public class CertificateWriterException extends PKIException { //NOSONAR
     public CertificateWriterException() {
         super();
     }

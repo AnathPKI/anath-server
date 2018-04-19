@@ -30,13 +30,14 @@
 package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.SelfSignedCACreationException;
+import ch.zhaw.ba.anath.pki.core.extensions.CertificateExtensionsActions;
+import ch.zhaw.ba.anath.pki.core.extensions.CertificateExtensionsActionsFactoryInterface;
+import ch.zhaw.ba.anath.pki.core.extensions.ExtensionArguments;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateSerialProvider;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateValidityProvider;
 import ch.zhaw.ba.anath.pki.core.interfaces.SecureRandomProvider;
 import ch.zhaw.ba.anath.pki.core.interfaces.SignatureNameProvider;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.cert.CertIOException;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -44,9 +45,12 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Create a self-signed, self-issued Certificate and Private Key using RSA.
@@ -60,6 +64,7 @@ public class SelfSignedCertificateAuthority {
     private final CertificateSerialProvider certificateSerialProvider;
     private final SecureRandomProvider secureRandomProvider;
     private final SignatureNameProvider signatureNameProvider;
+    private final CertificateExtensionsActions certificateExtensionsActions;
     private final int keySize;
     private KeyPair keyPair;
     private Certificate certificate;
@@ -69,7 +74,7 @@ public class SelfSignedCertificateAuthority {
      * @param selfSignedCANameBuilder     A prepared {@link SelfSignedCANameBuilder} providing the subject and issuer of
      *                                    the self-signed, self-issued certificate.
      * @param certificateValidityProvider A {@link CertificateValidityProvider} instance providing the temporal
-     *                                    validity period of the self-signed, self-issued certificate.
+     *                                    certificateValidity period of the self-signed, self-issued certificate.
      * @param certificateSerialProvider   A {@link CertificateSerialProvider} instance providing the serial number for
      *                                    the self-signed, self-issued certificate.
      * @param secureRandomProvider        A {@link SecureRandomProvider} instance providing a secure random generator
@@ -77,6 +82,8 @@ public class SelfSignedCertificateAuthority {
      *                                    key material.
      * @param signatureNameProvider       A {@link SignatureNameProvider} instance providing the algorithm name for
      *                                    signing the self-signed, self-issued certificate.
+     * @param certificateExtensionsActions An implementation of
+     * {@link CertificateExtensionsActionsFactoryInterface}.
      * @param keySize                     the key size in bits. Must be greater than {@value #MIN_KEY_SIZE}.
      *
      * @throws SelfSignedCACreationException when key size is smaller than {@value #MIN_KEY_SIZE}.
@@ -85,17 +92,30 @@ public class SelfSignedCertificateAuthority {
                                           CertificateValidityProvider certificateValidityProvider,
                                           CertificateSerialProvider certificateSerialProvider, SecureRandomProvider
                                                   secureRandomProvider, SignatureNameProvider signatureNameProvider,
+                                          CertificateExtensionsActionsFactoryInterface certificateExtensionsActions,
                                           int keySize) {
         this.selfSignedCANameBuilder = selfSignedCANameBuilder;
         this.certificateValidityProvider = certificateValidityProvider;
         this.certificateSerialProvider = certificateSerialProvider;
         this.secureRandomProvider = secureRandomProvider;
         this.signatureNameProvider = signatureNameProvider;
+        this.certificateExtensionsActions = certificateExtensionsActions.getInstance();
+        validateKeySizeOrThrow(keySize);
+
+        this.keySize = keySize;
+    }
+
+    private void validateKeySizeOrThrow(int keySize) {
         if (keySize < MIN_KEY_SIZE) {
             throw new SelfSignedCACreationException(String.format("Key size %d is smaller than minimum key size %d",
                     keySize, MIN_KEY_SIZE));
         }
-        this.keySize = keySize;
+
+        final HashSet<Integer> validKeySizes = new HashSet<>(Arrays.asList(512, 1024, 2048, 4096));
+        if (!validKeySizes.contains(keySize)) {
+            throw new SelfSignedCACreationException(String.format("Key size %d is not in list of allowed key sizes: " +
+                    "%s", keySize, validKeySizes.toString()));
+        }
     }
 
     public CertificateAuthority getCertificateAuthority() {
@@ -117,21 +137,26 @@ public class SelfSignedCertificateAuthority {
     private void selfSignPublicKey() {
         assert keyPair != null;
 
+        final X500Name issuer = selfSignedCANameBuilder.toX500Name();
+        final X500Name subject = selfSignedCANameBuilder.toX500Name();
+        final BigInteger serial = certificateSerialProvider.serial();
+
+        final ExtensionArguments extensionArguments = new ExtensionArguments();
+        extensionArguments.setCertificateAuthority(null);
+        extensionArguments.setSubjectName(subject);
+        extensionArguments.setSubjectSerial(serial);
+        extensionArguments.setSubjectKeyPair(keyPair);
+
         final X509v3CertificateBuilder x509v3CertificateBuilder = new JcaX509v3CertificateBuilder(
-                selfSignedCANameBuilder.toX500Name(),
-                certificateSerialProvider.serial(),
+                issuer,
+                serial,
                 certificateValidityProvider.from(),
                 certificateValidityProvider.to(),
-                selfSignedCANameBuilder.toX500Name(),
+                subject,
                 keyPair.getPublic()
         );
 
-        final BasicConstraints basicConstraints = new BasicConstraints(true);
-        try {
-            x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, basicConstraints);
-        } catch (CertIOException e) {
-            throw new SelfSignedCACreationException("Cannot add basic constraint to certificate: " + e.getMessage(), e);
-        }
+        certificateExtensionsActions.apply(x509v3CertificateBuilder, extensionArguments);
 
         final X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(initializeContentSigner());
         this.certificate = new Certificate(x509CertificateHolder);

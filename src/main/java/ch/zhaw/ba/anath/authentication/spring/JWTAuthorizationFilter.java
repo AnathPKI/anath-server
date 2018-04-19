@@ -29,12 +29,17 @@
 
 package ch.zhaw.ba.anath.authentication.spring;
 
-import ch.zhaw.ba.anath.AnathException;
+import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -42,16 +47,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * @author Rafael Ostertag
  */
+@Slf4j
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+    private final UserDetailsService userDetailsService;
     private final AnathProperties.Authentication.JWT jwtProperties;
 
-    public JWTAuthorizationFilter(AuthenticationManager authManager, AnathProperties anathProperties) {
+    public JWTAuthorizationFilter(AuthenticationManager authManager, UserDetailsService userDetailsService,
+                                  AnathProperties anathProperties) {
         super(authManager);
+        this.userDetailsService = userDetailsService;
         this.jwtProperties = anathProperties.getAuthentication().getJwt();
     }
 
@@ -66,30 +75,35 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
+        Optional<UsernamePasswordAuthenticationToken> authentication = getAuthentication(req);
+        authentication.ifPresent(x -> SecurityContextHolder.getContext().setAuthentication(x));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(req, res);
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+    private Optional<UsernamePasswordAuthenticationToken> getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(JWTConstants.JWT_HEADER);
         if (token != null) {
-            if (jwtProperties.getSecret() == null) {
-                throw new AnathException("JWT Secret not set");
-            }
-            final byte[] secret = jwtProperties.getSecret().getBytes();
-            String user = Jwts.parser()
-                    .setSigningKey(secret)
-                    .parseClaimsJws(token.replace(JWTConstants.TOKEN_PREFIX, ""))
-                    .getBody()
-                    .getSubject();
+            final byte[] secret = AnathSecurityHelper.getJwtSecretAsByteArrayOrThrow(jwtProperties);
+            try {
+                String user = Jwts.parser()
+                        .setSigningKey(secret)
+                        .parseClaimsJws(token.replace(JWTConstants.TOKEN_PREFIX, ""))
+                        .getBody()
+                        .getSubject();
 
-            if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                if (user != null) {
+                    final UserDetails userDetails = userDetailsService.loadUserByUsername(user);
+                    return Optional.of(new UsernamePasswordAuthenticationToken(userDetails, "",
+                            userDetails.getAuthorities()));
+                }
+            } catch (ExpiredJwtException e) {
+                log.error("The JWT presented is expired", e);
+            } catch (JwtException e) {
+                log.error("JWT exception: {}", e.getMessage());
             }
-            return null;
+            return Optional.empty();
         }
-        return null;
+        return Optional.empty();
     }
 }

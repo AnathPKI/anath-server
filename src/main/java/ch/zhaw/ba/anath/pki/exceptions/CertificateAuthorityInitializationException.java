@@ -30,12 +30,19 @@
 package ch.zhaw.ba.anath.pki.exceptions;
 
 import ch.zhaw.ba.anath.AnathException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author Rafael Ostertag
  */
+@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class CertificateAuthorityInitializationException extends AnathException {
     public CertificateAuthorityInitializationException(String message) {
         super(message);
+    }
+
+    public CertificateAuthorityInitializationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

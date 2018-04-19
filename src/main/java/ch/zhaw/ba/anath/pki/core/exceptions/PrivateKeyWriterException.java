@@ -32,7 +32,7 @@ package ch.zhaw.ba.anath.pki.core.exceptions;
 /**
  * @author Rafael Ostertag
  */
-public class PrivateKeyWriterException extends PKIException {
+public class PrivateKeyWriterException extends PKIException { //NOSONAR
     public PrivateKeyWriterException() {
         super();
     }

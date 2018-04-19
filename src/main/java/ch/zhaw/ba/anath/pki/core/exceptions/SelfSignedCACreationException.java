@@ -32,7 +32,7 @@ package ch.zhaw.ba.anath.pki.core.exceptions;
 /**
  * @author Rafael Ostertag
  */
-public class SelfSignedCACreationException extends PKIException {
+public class SelfSignedCACreationException extends PKIException { //NOSONAR
     public SelfSignedCACreationException(String message) {
         super(message);
     }

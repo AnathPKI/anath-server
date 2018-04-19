@@ -30,6 +30,9 @@
 package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.SelfSignedCACreationException;
+import ch.zhaw.ba.anath.pki.core.extensions.Rfc5280CAExtensionsActionsFactory;
+import ch.zhaw.ba.anath.pki.core.interfaces.SecureRandomProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,6 +40,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -59,9 +64,9 @@ public class SelfSignedCertificateAuthorityTest {
                 caNameBuilder,
                 new OneYearValidity(),
                 new UuidCertificateSerialProvider(),
-                new SecureRandomProviderImpl(),
+                new TestNonBlockingSecureRandomProvider(),
                 new Sha512WithRsa(),
-                2048);
+                new Rfc5280CAExtensionsActionsFactory(), 2048);
     }
 
     @Test
@@ -90,7 +95,12 @@ public class SelfSignedCertificateAuthorityTest {
 
     @Test(expected = SelfSignedCACreationException.class)
     public void keyBitSizeBelow1024() {
-        new SelfSignedCertificateAuthority(null, null, null, null, null, 512);
+        new SelfSignedCertificateAuthority(null, null, null, null, null, new Rfc5280CAExtensionsActionsFactory(), 512);
+    }
+
+    @Test(expected = SelfSignedCACreationException.class)
+    public void keyBitSizeNotInList() {
+        new SelfSignedCertificateAuthority(null, null, null, null, null, new Rfc5280CAExtensionsActionsFactory(), 1025);
     }
 
     @Test
@@ -100,9 +110,9 @@ public class SelfSignedCertificateAuthorityTest {
                 caNameBuilder,
                 new OneYearValidity(),
                 new UuidCertificateSerialProvider(),
-                new SecureRandomProviderImpl(),
+                new TestNonBlockingSecureRandomProvider(),
                 new Sha512WithRsa(),
-                1024);
+                new Rfc5280CAExtensionsActionsFactory(), 1024);
     }
 
     @Test
@@ -116,10 +126,11 @@ public class SelfSignedCertificateAuthorityTest {
                         (caCertificateFile))
         ) {
             selfSignedCertificateAuthority.create();
-            final PEMCaWriter pemCaWriter = new PEMCaWriter(new PEMCertificateWriter(caCertificateWriter), new
+            final PEMCertificateAuthorityWriter pemCertificateAuthorityWriter = new PEMCertificateAuthorityWriter(new
+                    PEMCertificateWriter(caCertificateWriter), new
                     PEMPrivateKeyWriter(caKeyWriter));
 
-            pemCaWriter.writeCA(selfSignedCertificateAuthority.getCertificateAuthority());
+            pemCertificateAuthorityWriter.writeCA(selfSignedCertificateAuthority.getCertificateAuthority());
 
             final Process exec = Runtime.getRuntime().exec(
                     new String[]{
@@ -148,6 +159,20 @@ public class SelfSignedCertificateAuthorityTest {
         } finally {
             caCertificateFile.delete();
             caKeyFile.delete();
+        }
+    }
+
+    @Slf4j
+    public static class TestNonBlockingSecureRandomProvider implements SecureRandomProvider {
+
+        @Override
+        public SecureRandom getSecureRandom() {
+            try {
+                log.warn("USE TEST INSECURE PRNG");
+                return SecureRandom.getInstance("NATIVEPRNGNONBLOCKING");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

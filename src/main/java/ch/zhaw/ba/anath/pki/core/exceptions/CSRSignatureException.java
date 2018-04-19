@@ -32,7 +32,7 @@ package ch.zhaw.ba.anath.pki.core.exceptions;
 /**
  * @author Rafael Ostertag
  */
-public class CSRSignatureException extends PKIException {
+public class CSRSignatureException extends PKIException { //NOSONAR
     public CSRSignatureException(String message) {
         super(message);
     }

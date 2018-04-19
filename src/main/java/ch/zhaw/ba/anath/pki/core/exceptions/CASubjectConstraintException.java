@@ -37,7 +37,7 @@ import ch.zhaw.ba.anath.pki.core.SelfSignedCANameBuilder;
  * @author Rafael Ostertag
  * @see SelfSignedCANameBuilder
  */
-public class CASubjectConstraintException extends PKIException {
+public class CASubjectConstraintException extends PKIException { //NOSONAR
     public CASubjectConstraintException(String message) {
         super(message);
     }

@@ -30,15 +30,17 @@
 package ch.zhaw.ba.anath.pki.repositories;
 
 import ch.zhaw.ba.anath.pki.entities.UseEntity;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,11 +54,12 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@ActiveProfiles("tests")
 @TestPropertySource(properties = {
         "spring.datasource.platform=h2"
 })
 @Transactional
-public class UseRepositoryTest {
+public class UseRepositoryIT {
     @Autowired
     private TestEntityManager testEntityManager;
 
@@ -129,4 +132,23 @@ public class UseRepositoryTest {
         testEntityManager.flush();
         testEntityManager.clear();
     }
+
+    @Test
+    public void delete() {
+        final UseEntity useEntity = new UseEntity();
+
+        useEntity.setConfig(ArrayUtils.toObject("abc".getBytes()));
+        useEntity.setUse("openvpn");
+
+        testEntityManager.persistAndFlush(useEntity);
+
+        useRepository.deleteByUse("openvpn");
+
+        testEntityManager.flush();
+        testEntityManager.clear();
+
+        final UseEntity actual = testEntityManager.find(UseEntity.class, "openvpn");
+        assertThat(actual, is(nullValue()));
+    }
+
 }

@@ -105,22 +105,21 @@ public class CertificateSigner {
     /**
      * Sign the certification request with the Certificate Authority's private key.
      *
-     * @param certificateSigningRequestReader {@link CertificateSigningRequestReader} instance to be signed.
+     * @param certificateSigningRequest {@link CertificateSigningRequestReader} instance to be signed.
      *
      * @return {@link Certificate} instance.
      *
      * @throws CertificateConstraintException when certificate constraints are not met.
      */
-    public Certificate signCertificate(CertificateSigningRequestReader certificateSigningRequestReader) {
+    public Certificate signCertificate(CertificateSigningRequest certificateSigningRequest) {
         final X500Name issuerName = certificateAuthority.getCASubjectName();
 
-        certificateConstraintProvider.validateSubject(certificateSigningRequestReader.certificationRequest()
-                .getSubject(), issuerName);
+        certificateConstraintProvider.validateSubject(certificateSigningRequest.getSubject(), issuerName);
 
         final BigInteger serial = certificateSerialProvider.serial();
         final Date from = validityProvider.from();
         final Date to = validityProvider.to();
-        final X500Name subject = getNameFromCertificateSigningRequest(certificateSigningRequestReader);
+        final X500Name subject = certificateSigningRequest.getSubject();
 
         final X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(
                 issuerName,
@@ -128,7 +127,7 @@ public class CertificateSigner {
                 from,
                 to,
                 subject,
-                getSubjectPublicKeyInfoFromCertificateSigningRequest(certificateSigningRequestReader)
+                getSubjectPublicKeyInfoFromCertificateSigningRequest(certificateSigningRequest)
         );
         setBasicConstraints(x509v3CertificateBuilder);
         final X509CertificateHolder certificateHolder = x509v3CertificateBuilder.build(contentSigner);
@@ -146,13 +145,8 @@ public class CertificateSigner {
         }
     }
 
-    private SubjectPublicKeyInfo getSubjectPublicKeyInfoFromCertificateSigningRequest(CertificateSigningRequestReader
-                                                                                              pemCertificateSigningRequestReader) {
-        return pemCertificateSigningRequestReader.certificationRequest().getSubjectPublicKeyInfo();
-    }
-
-    private X500Name getNameFromCertificateSigningRequest(CertificateSigningRequestReader
-                                                                  pemCertificateSigningRequestReader) {
-        return pemCertificateSigningRequestReader.certificationRequest().getSubject();
+    private SubjectPublicKeyInfo getSubjectPublicKeyInfoFromCertificateSigningRequest(CertificateSigningRequest
+                                                                                              certificateSigningRequest) {
+        return certificateSigningRequest.getPkcs10CertificationRequest().getSubjectPublicKeyInfo();
     }
 }

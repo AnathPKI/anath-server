@@ -43,4 +43,6 @@ public interface SecureRepository extends Repository<SecureEntity, Long> {
     Optional<SecureEntity> findOneByKey(String key);
 
     void save(SecureEntity entity);
+
+    void deleteByKey(String key);
 }

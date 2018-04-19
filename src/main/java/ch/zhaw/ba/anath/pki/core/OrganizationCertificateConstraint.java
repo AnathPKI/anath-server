@@ -31,12 +31,17 @@ package ch.zhaw.ba.anath.pki.core;
 
 import ch.zhaw.ba.anath.pki.core.exceptions.CertificateConstraintException;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateConstraintProvider;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 
 /**
  * Test if the Organization of the Subject matches the Issuer organization. Additionally, test if the Common Name is
  * set.
+ *
+ * Multi value RDN is supported on the subject.
  *
  * @author Rafael Ostertag
  */
@@ -48,19 +53,59 @@ public class OrganizationCertificateConstraint implements CertificateConstraintP
     }
 
     private void doOrganizationsMatchOrThrow(X500Name subjectName, X500Name issuerName) {
-        final String subjectOrganizationName = subjectName.getRDNs(BCStyle.O)[0].getFirst().getValue().toString();
         final String issuerOrganizationName = issuerName.getRDNs(BCStyle.O)[0].getFirst().getValue().toString();
-
-        if (!subjectOrganizationName.equals(issuerOrganizationName)) {
-            throw new CertificateConstraintException(String.format("Subject's Organization '%s' does not match " +
-                            "Issuer's Organization '%s'",
-                    subjectOrganizationName, issuerOrganizationName));
-        }
+        matchesOidValueInRdnOrThrow(
+                subjectName,
+                BCStyle.O,
+                issuerOrganizationName,
+                String.format("Subject's Organization does not match Issuer's Organization '%s'",
+                        issuerOrganizationName));
     }
 
     private void organizationSetOrThrow(X500Name subjectName) {
-        if (subjectName.getRDNs(BCStyle.O).length != 1) {
-            throw new CertificateConstraintException("Organization not set");
+        existsOidInRdnOrThrow(subjectName, BCStyle.O, "Organization not set");
+    }
+
+    /**
+     * Test if a given OID exists in a X500 name. If the OID does not exist, throw a
+     * {@link CertificateConstraintException} with a provided message.
+     *
+     * @param x500Name         the test subject
+     * @param oid              {@link ASN1ObjectIdentifier} to test
+     * @param exceptionMessage message of {@link CertificateConstraintException} if the OID is not found in the test
+     *                         subject.
+     */
+    protected void existsOidInRdnOrThrow(X500Name x500Name, ASN1ObjectIdentifier oid, String exceptionMessage) {
+        if (x500Name.getRDNs(oid).length == 0) {
+            throw new CertificateConstraintException(exceptionMessage);
+        }
+    }
+
+    /**
+     * Test if a given value matches the value of the provided OID in a X500 name. If the value of the OID does not
+     * match, throw a {@link CertificateConstraintException} with the provided message.
+     * <p>
+     * This method has limited support for multivalu
+     *
+     * @param x500Name         the test subject.
+     * @param oid              {@link ASN1ObjectIdentifier} to match against the value
+     * @param expectedValue    expected value of the OID
+     * @param exceptionMessage message of {@link CertificateConstraintException} if the OID value does not match.
+     */
+    protected void matchesOidValueInRdnOrThrow(X500Name x500Name, ASN1ObjectIdentifier oid, String expectedValue, String
+            exceptionMessage) {
+        final RDN[] rdnsHavingOid = x500Name.getRDNs(oid);
+        if (rdnsHavingOid.length == 0) {
+            throw new CertificateConstraintException(exceptionMessage);
+        }
+
+        for (RDN rdn : rdnsHavingOid) {
+            for (AttributeTypeAndValue attributeTypeAndValue : rdn.getTypesAndValues()) {
+                if (attributeTypeAndValue.getType().equals(oid) &&
+                        !attributeTypeAndValue.getValue().toString().equals(expectedValue)) {
+                    throw new CertificateConstraintException(exceptionMessage);
+                }
+            }
         }
     }
 }

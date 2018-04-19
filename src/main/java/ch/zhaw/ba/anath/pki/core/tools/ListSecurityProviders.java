@@ -50,8 +50,13 @@ public class ListSecurityProviders {
         System.out.println();//NOSONAR
 
         System.out.println("Ciphers:");//NOSONAR
-
         for (String name : Security.getAlgorithms("cipher").stream().sorted().collect(Collectors.toList())) {
+            System.out.println(name);//NOSONAR
+        }
+        System.out.println();//NOSONAR
+
+        System.out.println("Random:");//NOSONAR
+        for (String name : Security.getAlgorithms("securerandom").stream().sorted().collect(Collectors.toList())) {
             System.out.println(name);//NOSONAR
         }
         System.out.println();//NOSONAR

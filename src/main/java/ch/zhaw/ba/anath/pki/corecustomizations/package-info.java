@@ -27,29 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.core;
-
-import ch.zhaw.ba.anath.pki.core.interfaces.CAWriter;
-import ch.zhaw.ba.anath.pki.core.interfaces.CertificateWriter;
-import ch.zhaw.ba.anath.pki.core.interfaces.PrivateKeyWriter;
-
 /**
- * Write a given {@link CertificateAuthority} PEM encoded to persistent storage.
+ * Interface PKI core interface implementations using Spring facilities.
  *
  * @author Rafael Ostertag
  */
-public final class PEMCaWriter implements CAWriter {
-    private final CertificateWriter certificateWriter;
-    private final PrivateKeyWriter privateKeyWriter;
-
-    public PEMCaWriter(CertificateWriter certificateWriter, PrivateKeyWriter privateKeyWriter) {
-        this.certificateWriter = certificateWriter;
-        this.privateKeyWriter = privateKeyWriter;
-    }
-
-    @Override
-    public void writeCA(CertificateAuthority certificateAuthority) {
-        certificateWriter.writeCertificate(certificateAuthority.getCertificate());
-        privateKeyWriter.writePrivateKey(certificateAuthority.getPrivateKey());
-    }
-}
+package ch.zhaw.ba.anath.pki.corecustomizations;

@@ -34,13 +34,7 @@ import ch.zhaw.ba.anath.pki.core.exceptions.CertificateSigningRequestReaderExcep
 import ch.zhaw.ba.anath.pki.core.exceptions.PKIException;
 import ch.zhaw.ba.anath.pki.core.interfaces.CertificateSigningRequestReader;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.bouncycastle.pkcs.PKCSException;
-import org.bouncycastle.pkcs.bc.BcPKCS10CertificationRequest;
 
 import java.io.Reader;
 
@@ -50,7 +44,7 @@ import java.io.Reader;
  * @author Rafael Ostertag
  */
 public final class PEMCertificateSigningRequestReader implements CertificateSigningRequestReader {
-    private final PKCS10CertificationRequest certificationRequest;
+    private final CertificateSigningRequest certificationRequest;
 
     public PEMCertificateSigningRequestReader(Reader csr) {
         certificationRequest = readCertificateRequestFromPEMStream(csr);
@@ -65,18 +59,14 @@ public final class PEMCertificateSigningRequestReader implements CertificateSign
      *
      * @throws CSRSignatureException when signature verification fails.
      */
-    private PKCS10CertificationRequest readCertificateRequestFromPEMStream(Reader csrReader) {
+    private CertificateSigningRequest readCertificateRequestFromPEMStream(Reader csrReader) {
         try (PEMParser pemParser = new PEMParser(csrReader)) {
             final Object pemObject = pemParser.readObject();
             if (!(pemObject instanceof PKCS10CertificationRequest)) {
                 throw new CertificateSigningRequestReaderException("Cannot read certificate request from PEM");
             }
 
-            final PKCS10CertificationRequest csr = (PKCS10CertificationRequest) pemObject;
-
-            verifySignatureOrThrow(csr);
-
-            return csr;
+            return new CertificateSigningRequest((PKCS10CertificationRequest) pemObject);
         } catch (PKIException e) {
             throw e;
         } catch (Exception e) {
@@ -84,29 +74,10 @@ public final class PEMCertificateSigningRequestReader implements CertificateSign
         }
     }
 
-    private void verifySignatureOrThrow(PKCS10CertificationRequest csr) {
-        BcPKCS10CertificationRequest bcPKCS10CertificationRequest = new BcPKCS10CertificationRequest(csr);
 
-        try {
-            ContentVerifierProvider contentVerifierProvider = new BcRSAContentVerifierProviderBuilder(
-                    new DefaultDigestAlgorithmIdentifierFinder()
-            ).build(bcPKCS10CertificationRequest.getPublicKey());
-
-            boolean isSignatureValid = csr.isSignatureValid(contentVerifierProvider);
-            if (!isSignatureValid) {
-                throw new CSRSignatureException(String.format("Error verifying signature on CSR for %s", csr
-                        .getSubject()
-                        .toString()));
-            }
-        } catch (OperatorCreationException e) {
-            throw new CertificateSigningRequestReaderException("Cannot verify signature of CSR", e);
-        } catch (PKCSException e) {
-            throw new CertificateSigningRequestReaderException("Cannot extract public key from CSR", e);
-        }
-    }
 
     @Override
-    public PKCS10CertificationRequest certificationRequest() {
+    public CertificateSigningRequest certificationRequest() {
         return certificationRequest;
     }
 }

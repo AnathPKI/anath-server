@@ -1,0 +1,4 @@
+#!/bin/sh
+
+mvn dependency:list | awk '/:compile$/ { split($2,ar,":"); print "\\item", ar[1] "." ar[2], ar[4], "(" ar[5] ")"  }' | sort -u
+mvn dependency:list | awk '/:test$/ { split($2,ar,":"); print "\\item", ar[1] "." ar[2], ar[4], "(" ar[5] ")"  }' | sort -u

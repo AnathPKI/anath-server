@@ -29,16 +29,16 @@
 
 package ch.zhaw.ba.anath.authentication.spring;
 
-import ch.zhaw.ba.anath.AnathException;
+import ch.zhaw.ba.anath.authentication.AnathSecurityHelper;
 import ch.zhaw.ba.anath.authentication.LoginDto;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
+import ch.zhaw.ba.anath.exceptions.AnathAuthenticationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -71,7 +71,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req,
-                                                HttpServletResponse res) throws AuthenticationException {
+                                                HttpServletResponse res) {
         try {
             final LoginDto credentials = OBJECT_MAPPER.readValue(req.getInputStream(), LoginDto.class);
 
@@ -82,7 +82,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                             new ArrayList<>())
             );
         } catch (IOException e) {
-            throw new AnathException(e);
+            throw new AnathAuthenticationException("Cannot read document", e);
         }
     }
 
@@ -93,10 +93,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication auth) {
 
         final long expirationTime = convertMinutesToMillis(jwtProperties.getExpirationTime());
-        if (jwtProperties.getSecret() == null) {
-            throw new AnathException("JWT Secret not set");
-        }
-        final byte[] secret = jwtProperties.getSecret().getBytes();
+
+        final byte[] secret = AnathSecurityHelper.getJwtSecretAsByteArrayOrThrow(jwtProperties);
         String token = Jwts.builder()
                 .setSubject(((User) auth.getPrincipal()).getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))

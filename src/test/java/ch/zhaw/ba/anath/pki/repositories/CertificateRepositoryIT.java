@@ -29,6 +29,7 @@
 
 package ch.zhaw.ba.anath.pki.repositories;
 
+import ch.zhaw.ba.anath.TestHelper;
 import ch.zhaw.ba.anath.pki.core.UuidCertificateSerialProvider;
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +51,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -60,11 +63,15 @@ import static org.hamcrest.core.Is.is;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@ActiveProfiles("tests")
 @TestPropertySource(properties = {
         "spring.datasource.platform=h2"
 })
 @Transactional
-public class CertificateRepositoryTest {
+public class CertificateRepositoryIT {
+    public static final String TEST_SUBJECT = "subject";
+    public static final String TEST_USER_ID = "user_id";
+    public static final long TEST_REVOKE_TIMESTAMP = 1000000L;
     private final UuidCertificateSerialProvider uuidCertificateSerialProvider = new UuidCertificateSerialProvider();
     @Autowired
     private TestEntityManager testEntityManager;
@@ -112,7 +119,7 @@ public class CertificateRepositoryTest {
         testEntityManager.persistAndFlush(certificateEntity2);
         testEntityManager.persistAndFlush(certificateEntity3);
 
-        final List<CertificateEntity> all = certificateRepository.findAllByUserId("user_id");
+        final List<CertificateEntity> all = certificateRepository.findAllByUserId(TEST_USER_ID);
         assertThat(all, hasSize(2));
 
         final List<CertificateEntity> onlyOne = certificateRepository.findAllByUserId("another user id");
@@ -132,13 +139,13 @@ public class CertificateRepositoryTest {
         testEntityManager.persistAndFlush(certificateEntity1);
         testEntityManager.persistAndFlush(certificateEntity2);
 
-        final List<CertificateEntity> revoked = certificateRepository.findAllByUserIdAndStatus("user_id",
+        final List<CertificateEntity> revoked = certificateRepository.findAllByUserIdAndStatus(TEST_USER_ID,
                 CertificateStatus.REVOKED);
 
         assertThat(revoked, hasSize(1));
         assertThat(revoked.get(0), is(equalTo(certificateEntity1)));
 
-        final List<CertificateEntity> valid = certificateRepository.findAllByUserIdAndStatus("user_id",
+        final List<CertificateEntity> valid = certificateRepository.findAllByUserIdAndStatus(TEST_USER_ID,
                 CertificateStatus.VALID);
 
         assertThat(valid, hasSize(1));
@@ -177,10 +184,10 @@ public class CertificateRepositoryTest {
         certificateEntity.setSerial(uuidCertificateSerialProvider.serial());
         certificateEntity.setNotValidBefore(nowTimestamp());
         certificateEntity.setNotValidAfter(nowTimestamp());
-        certificateEntity.setSubject("subject");
+        certificateEntity.setSubject(TEST_SUBJECT);
         certificateEntity.setX509PEMCertificate(new byte[]{'a'});
         certificateEntity.setStatus(CertificateStatus.VALID);
-        certificateEntity.setUserId("user_id");
+        certificateEntity.setUserId(TEST_USER_ID);
 
         final UseEntity useEntity = new UseEntity();
         useEntity.setUse(UseEntity.DEFAULT_USE);
@@ -219,5 +226,70 @@ public class CertificateRepositoryTest {
 
         allBySubject = certificateRepository.findAllBySubject("should not exist");
         assertThat(allBySubject, hasSize(0));
+    }
+
+    @Test
+    public void findAllRevoked() {
+        List<CertificateEntity> allRevokedEmpty = certificateRepository.findAllRevoked();
+        assertThat(allRevokedEmpty, is(empty()));
+
+        final CertificateEntity nonRevokedEntity = makeCertificateEntity();
+        testEntityManager.persistAndFlush(nonRevokedEntity);
+
+        allRevokedEmpty = certificateRepository.findAllRevoked();
+        assertThat(allRevokedEmpty, is(empty()));
+
+        final CertificateEntity revokedCertificateEntity1 = makeCertificateEntity();
+        revokedCertificateEntity1.setNotValidAfter(TestHelper.timeInFuture());
+        revokedCertificateEntity1.setSubject(TEST_SUBJECT + "another1");
+        revokedCertificateEntity1.setSerial(BigInteger.ONE.add(BigInteger.ONE));
+        revokedCertificateEntity1.setStatus(CertificateStatus.REVOKED);
+        revokedCertificateEntity1.setRevocationTime(new Timestamp(TEST_REVOKE_TIMESTAMP));
+        testEntityManager.persistAndFlush(revokedCertificateEntity1);
+
+        List<CertificateEntity> allRevoked = certificateRepository.findAllRevoked();
+        assertThat(allRevoked, hasSize(1));
+
+        final CertificateEntity revokedCertificateEntity2 = makeCertificateEntity();
+        revokedCertificateEntity2.setNotValidAfter(TestHelper.timeInFuture());
+        revokedCertificateEntity2.setSubject(TEST_SUBJECT + "another2");
+        revokedCertificateEntity2.setSerial(BigInteger.ONE.add(BigInteger.ONE).add(BigInteger.ONE));
+        revokedCertificateEntity2.setStatus(CertificateStatus.REVOKED);
+        revokedCertificateEntity2.setRevocationTime(new Timestamp(TEST_REVOKE_TIMESTAMP + TEST_REVOKE_TIMESTAMP));
+        testEntityManager.persistAndFlush(revokedCertificateEntity2);
+
+        allRevoked = certificateRepository.findAllRevoked();
+        assertThat(allRevoked, hasSize(2));
+        assertThat(allRevoked.get(0).getSubject(), is(TEST_SUBJECT + "another1"));
+        assertThat(allRevoked.get(1).getSubject(), is(TEST_SUBJECT + "another2"));
+
+        final CertificateEntity revokedCertificateEntity3 = makeCertificateEntity();
+        revokedCertificateEntity3.setSubject(TEST_SUBJECT + "another3");
+        revokedCertificateEntity3.setSerial(BigInteger.ONE.add(BigInteger.ONE).add(BigInteger.ONE).add(BigInteger.ONE));
+        revokedCertificateEntity3.setStatus(CertificateStatus.REVOKED);
+        // intentionally don't set the revocation time. The certificate has revoked status, thus the application must
+        // handle such broken revocations.
+        revokedCertificateEntity3.setRevocationTime(null);
+        testEntityManager.persistAndFlush(revokedCertificateEntity3);
+
+        allRevoked = certificateRepository.findAllRevoked();
+        assertThat(allRevoked, hasSize(3));
+        assertThat(allRevoked.get(0).getSubject(), is(TEST_SUBJECT + "another3"));
+        assertThat(allRevoked.get(1).getSubject(), is(TEST_SUBJECT + "another1"));
+        assertThat(allRevoked.get(2).getSubject(), is(TEST_SUBJECT + "another2"));
+    }
+
+    @Test
+    public void findAllRevokedDoNotIncludeExpiredRevoked() {
+        final CertificateEntity revokedCertificateEntity1 = makeCertificateEntity();
+        revokedCertificateEntity1.setNotValidAfter(TestHelper.timeInPast());
+        revokedCertificateEntity1.setSubject(TEST_SUBJECT + "another1");
+        revokedCertificateEntity1.setSerial(BigInteger.ONE);
+        revokedCertificateEntity1.setStatus(CertificateStatus.REVOKED);
+        revokedCertificateEntity1.setRevocationTime(new Timestamp(TEST_REVOKE_TIMESTAMP));
+        testEntityManager.persistAndFlush(revokedCertificateEntity1);
+
+        List<CertificateEntity> allRevoked = certificateRepository.findAllRevoked();
+        assertThat(allRevoked, is(empty()));
     }
 }

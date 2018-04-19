@@ -30,10 +30,13 @@
 package ch.zhaw.ba.anath.pki.exceptions;
 
 import ch.zhaw.ba.anath.AnathException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author Rafael Ostertag
  */
+@ResponseStatus(HttpStatus.CONFLICT)
 public class CertificateAlreadyExistsException extends AnathException {
 
     public CertificateAlreadyExistsException(String message) {

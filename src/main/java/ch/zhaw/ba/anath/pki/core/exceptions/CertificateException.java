@@ -36,7 +36,7 @@ import ch.zhaw.ba.anath.pki.core.Certificate;
  *
  * @author Rafael Ostertag
  */
-public class CertificateException extends PKIException {
+public class CertificateException extends PKIException { //NOSONAR
     public CertificateException(String message) {
         super(message);
     }

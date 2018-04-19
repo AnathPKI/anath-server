@@ -29,7 +29,9 @@
 
 package ch.zhaw.ba.anath.pki.core.interfaces;
 
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import ch.zhaw.ba.anath.pki.core.CertificateSigningRequest;
+import ch.zhaw.ba.anath.pki.core.exceptions.CSRSignatureException;
+import ch.zhaw.ba.anath.pki.core.exceptions.CertificateSigningRequestReaderException;
 
 /**
  * Read a PKCS#10 certificate signing request.
@@ -40,10 +42,10 @@ public interface CertificateSigningRequestReader {
     /**
      * Get PKCS#10 certificate signing request.
      *
-     * @return {@link PKCS10CertificationRequest} instance.
+     * @return {@link CertificateSigningRequest} instance.
      *
-     * @throws ch.zhaw.ba.anath.pki.core.exceptions.CertificateSigningRequestReaderException upon errors.
-     * @throws ch.zhaw.ba.anath.pki.core.exceptions.CSRSignatureException                    upon invalid signature.
+     * @throws CertificateSigningRequestReaderException upon errors.
+     * @throws CSRSignatureException                    upon invalid signature.
      */
-    PKCS10CertificationRequest certificationRequest();
+    CertificateSigningRequest certificationRequest();
 }
