@@ -14,7 +14,7 @@ IMAGE_TAG_BASE=anathpki/server
 IMAGE_LATEST_TAG="${IMAGE_TAG_BASE}:latest"
 
 
-if ! echo "${TRAVIS_BRANCH}" | grep "^v[0-9]+\.[0-9]+\.[0-9]+\$" >/dev/null 2>&1
+if ! echo "${TRAVIS_BRANCH}" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+\$" >/dev/null 2>&1
 then
     echo 'Tag does not match "^v[0-9]+.[0-9]+.[0-9]+$". Assuming non-release tag and do nothing.'
     # Don't make the job fail. Maybe it's a legit non-release tag
