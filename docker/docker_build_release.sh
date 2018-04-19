@@ -25,7 +25,7 @@ fi
 SEMANTIC_VERSION=${TRAVIS_TAG#v}
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-IMAGE_TAG="${IMAGE_TAG}:${SEMANTIC_VERSION}"
+IMAGE_TAG="${IMAGE_TAG_BASE}:${SEMANTIC_VERSION}"
 
 echo "## Building image $IMAGE_TAG"
 docker build . -t "${IMAGE_TAG}"
