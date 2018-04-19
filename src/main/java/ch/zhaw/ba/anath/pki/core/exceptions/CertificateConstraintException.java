@@ -34,7 +34,7 @@ package ch.zhaw.ba.anath.pki.core.exceptions;
  *
  * @author Rafael Ostertag
  */
-public class CertificateConstraintException extends PKIException {
+public class CertificateConstraintException extends PKIException { //NOSONAR
     public CertificateConstraintException(String message) {
         super(message);
     }

@@ -32,7 +32,7 @@ package ch.zhaw.ba.anath.pki.core.exceptions;
 /**
  * @author Rafael Ostertag
  */
-public class CertificateAuthorityReaderException extends PKIException {
+public class CertificateAuthorityReaderException extends PKIException { //NOSONAR
 
     public CertificateAuthorityReaderException() {
         super();

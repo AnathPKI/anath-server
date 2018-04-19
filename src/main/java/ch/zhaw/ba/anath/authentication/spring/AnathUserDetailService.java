@@ -29,22 +29,57 @@
 
 package ch.zhaw.ba.anath.authentication.spring;
 
+import ch.zhaw.ba.anath.users.entities.UserEntity;
+import ch.zhaw.ba.anath.users.repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Rafael Ostertag
  */
 @Service
+@Slf4j
+@Transactional(transactionManager = "userTransactionManager")
 public class AnathUserDetailService implements UserDetailsService {
+    private final UserRepository userRepository;
+
+    public AnathUserDetailService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new User("rafi", "$argon2i$v=19$m=128000,t=40," +
-                "p=4$cMtaX0OSd4G0rfeAItgQ9w$XvgV1jZ6cHH3FBZwM8KutOHwExZbkO7LMCpjikA2Xg4", Collections.emptyList());
+    public UserDetails loadUserByUsername(String username) {
+        final Optional<UserEntity> optionalUserEntity = userRepository.findOneByEmail(username);
+        final UserEntity userEntity = optionalUserEntity.orElseThrow(() -> {
+            log.error("User '{}' not found in user database", username);
+            return new UsernameNotFoundException("User not found in database");
+        });
+
+        return userEntityToUser(userEntity);
+    }
+
+    private UserDetails userEntityToUser(UserEntity userEntity) {
+        Set<SimpleGrantedAuthority> grantedAuthorities = new HashSet<>();
+
+        if (userEntity.getAdmin()) {
+            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
+        return new User(userEntity.getEmail(),
+                userEntity.getPassword(),
+                Collections.unmodifiableSet(grantedAuthorities));
     }
 }

@@ -76,7 +76,7 @@ public class Certificate {
         try {
             return certificateHolder.getEncoded();
         } catch (IOException e) {
-            throw new CertificateException("Error getting certificate", e);
+            throw new CertificateException("Error getting encoded certificate", e);
         }
     }
 }

@@ -46,7 +46,16 @@ public class AnathProperties {
      * The secret key used to encrypt data in the {@link ch.zhaw.ba.anath.pki.services.SecureStoreService}.
      */
     private String secretKey;
+    /**
+     * Validity of certificates in days.
+     */
+    private int certificateValidity = 180;
+    /**
+     * Validity of CRL in days
+     */
+    private int crlValidity = 30;
     private Authentication authentication = new Authentication();
+    private Confirmation confirmation = new Confirmation();
 
     @Data
     public static class Authentication {
@@ -62,7 +71,7 @@ public class AnathProperties {
             /**
              * Expiration time in minutes.
              */
-            private int expirationTime = 480;
+            private int expirationTime = 60;
         }
 
         /**
@@ -114,5 +123,16 @@ public class AnathProperties {
              */
             private int parallelism = 4;
         }
+    }
+
+    @Data
+    public static class Confirmation {
+        /**
+         * Token validity in minutes
+         */
+        private int tokenValidity = 60;
+        private String mailServer = "localhost";
+        private int mailPort = 25;
+        private String sender = "rafi@guengel.ch";
     }
 }

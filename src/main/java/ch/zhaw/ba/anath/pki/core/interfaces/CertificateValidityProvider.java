@@ -34,6 +34,9 @@ import java.util.Date;
 /**
  * Validity duration of a certificate. Used when signing public keys.
  *
+ * The implementation must make sure, that a CertificateValidityProvider may be instantiated only once, but has to
+ * provide sensible validity for certificates during the entire runtime of the application.
+ *
  * @author Rafael Ostertag
  */
 public interface CertificateValidityProvider {

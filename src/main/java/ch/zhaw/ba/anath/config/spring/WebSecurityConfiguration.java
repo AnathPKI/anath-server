@@ -34,6 +34,8 @@ import ch.zhaw.ba.anath.authentication.spring.JWTAuthorizationFilter;
 import ch.zhaw.ba.anath.config.properties.AnathProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -41,10 +43,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 /**
  * @author Rafael Ostertag
@@ -68,28 +72,62 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
+    /**
+     * Setup endpoint security. It does not add any filters or session management. It has been factored out, so that
+     * it can be used for tests.
+     *
+     * @param httpSecurity {@link HttpSecurity} instance
+     *
+     * @return {@link HttpSecurity} instance.
+     *
+     * @throws Exception on error
+     */
+    public static HttpSecurity setupSecurity(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
                 .cors()
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/login/jwt").anonymous()
-                .anyRequest().authenticated()
-                .and()
+                // Allow retrieval of plain certificates. But for the love of god, make sure that only pem
+                // certificates can be retrieved by unauthenticated users.
+                .antMatchers(HttpMethod.GET, "/certificates/*").permitAll()
+                // Allow retrieval of CRL
+                .antMatchers(HttpMethod.GET, "/crl.pem").permitAll()
+                // Allow retrieval of CA certificate
+                .antMatchers(HttpMethod.GET, "/ca.pem").permitAll()
+                // Allow preflight checks
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Allow swagger
+                .antMatchers(HttpMethod.GET, "/swagger-resources/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/v2/api-docs/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
+                .antMatchers(HttpMethod.GET, "/webjars/springfox-swagger-ui/**").permitAll()
+                .anyRequest().authenticated();
+        return httpSecurity;
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        setupSecurity(http)
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(), anathProperties))
-                .addFilter(new JWTAuthorizationFilter(authenticationManager(), anathProperties))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager(), userDetailsService, anathProperties))
                 // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login/jwt"));
+                .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        final CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.applyPermitDefaultValues();
+        corsConfiguration.setAllowCredentials(true);
+        // Required for angular.
+        corsConfiguration.setExposedHeaders(Arrays.asList("Authorization"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "PUT", "POST", "DELETE", "OPTIONS"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+        source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
 }

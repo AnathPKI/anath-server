@@ -46,4 +46,6 @@ public interface UseRepository extends Repository<UseEntity, String> {
     List<UseEntity> findAll();
 
     void save(UseEntity useEntity);
+
+    void deleteByUse(String use);
 }

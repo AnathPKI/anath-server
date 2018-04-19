@@ -1,0 +1,36 @@
+sudo: required
+language: java
+services:
+  - docker
+
+addons:
+  sonarcloud:
+    organization: anath
+    token:
+      secure: KYQSPp/O4nL3TzN9qpooNfcamHfIlb59oV6EHryMSr6zjoYa4CtcHGEOw2YSshxxdRa5pmYxf4RM59LHCQcvSzuZE+DSxCkn931Zy5YNIjsTgPVypIg2rUmmk1C4LBoEzLqBgBUuTSo0+p8H3Mf3YnCTKO2NEwAXibv1co4oFS6RBdmx6NYSvpTI54yj35Ej+iVFW9JYVTvbnEplpeEM/UNo5pXoNHJXsfQ1aykVLsW+wo9tPWa5YIjh/mWFC5e2ADHvxZKPT+oZhnjXN7g5NLV4gH5d3A6uLi/nEAsrCWgPyMFmbp70DUjZws6Xgt6XtKmYlRZIlsS60wMPXlTnnVTTb2/boTnnHLcMMLvrglE91g+CMs+1rLpV/ToKmEM3qLS2zPfW0DElxdMe1WfL4y9aeOjkuTsa5a7N3arhd25VeSksZGa0FOVrM1B+DDVicgd1ig75FZus0fAeQ/pTzi5NbUicMy6C+kbxmgdypSrMKizIhMet6Wx93+qEUTVvXRiQp1rJ8u5x1b8kHKmMGyXnfPMDUAHU4BbTpZzCDysdMzGuzvA4+o5H3MqPYOt6ZjwJe3DOmp/6cZpy8fgq11m9R2vHN1YO++yjPA4m4jfhk44HHutH68NOYlddt0EKNujL3xydXQxtWoSsYn79ST7egd5/8ROisBAWLlLqXfY=
+
+script:
+  - mvn verify -B
+  - mvn sonar:sonar
+
+deploy:
+  - provider: script
+    script: bash docker/docker_build_dev.sh
+    on:
+      branch: development
+    skip_cleanup: true
+  - provider: script
+    script: bash docker/docker_build_release.sh
+    on:
+      tags: true
+    skip_cleanup: true
+
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
+env:
+  global:
+  - secure: MO9OWqzgZeltphHAs/zFO/gUKc8LO/aWAyu8RRC4nD+DNqxNQ+ZD0J9AuLGhaWsHIcY62eluIapqqFbLOc0sOw/4/IaWAeTuJxZ80EiNsUxK4koz84HBb4pitPajYSK72dZlRyNUJdFPro4C2PgSF3XZoVZ0Nw4kkF8Yf7E1wlBdwmCbLEeV+hVA/3dYpAe3hGRlEFJNDD8hFSOW/SesPVbl5XQTXv+GhryCD93q6/enilLvgJ2r6Tuwr6bPlSwjGWfXLh66by/+/zdEXe9AnyYvKpSRiu+k9+s65dXix5hPS5KZu45NiFBhU/rC0aP/hyCdJf2TmfZ/g4Hau/lbgzM6gKW3qyHjDIoPckeilq+XGaJhxSAvG/9vQFpub+6nQAcS1K7lLW8uLxthKwFsOuxN8+67kvGLQBRRxHJ0aeZQxVZhyaSxmrvQo5XgsrBEh+VgiPCJhmSpiPRSU4gBoWDKOiTl9Fw/yrBeHZ4/VxkgH1Edbir4uZ1tcsGh143n1pkvU7h5rEMTqm18pTtyYIBXUxXAjteN1QfFM6hq1KUDAemrgzfyEpzm+JlOogA3eRHxaPSXrk/s8gznzFjlYO/MXOg2iGg/Lc0PE5m7sYExWfdBLR7QxDw7qPv/pzLx4WXpj+lobTKdrbdT5hk4H49zv8zhQY21Jufbon68AbE=
+  # Docker hub user
+  - secure: L0XSDuKFOEnx4oONSrUXF9dv4m4rxTGO/PMppv3nmGNq+nBLyYJjPrYgXC/fHdQsIKTjAwzNvRkBV1lf0Hk9RYzHSF0hNngpwYIAVinh3ufo4w0uDI1knlK4UyyyafV3O/Ja49e4yWgDxGXcj3zJWJs08GFvVum+9OvRq2Y1w331XceETNuQ/O5lFSscZLqeav/Lsjvqy+BTotaLQQdB8Pqzu2T4771UJxNZk300YxsimLuQVdeZXspwF3RX68qb2KXM+LgD9203mOg2el5YHsBD4e3w7ECfw5ZRC/jJIDQYdYp0i91l3kIhkCQsTYD5O1jGsFqjHnmJrZtOfZmSuxkRB3LUrsb46IDxqfZBGiHVyFfR3y6fXDtoBIVKDorGy9wtGoa0pXbwd0hJ3j3616gUXrZ/mHy3YdijUgzfQMceY/7zUOy49mzNIBlPzkR5PQJdeR9uuEfEJEOKtXt/fmFFU+JU9k07KljzMeAoNy0gDnr4QN9AcwrB1LbSSzMFlFABe1j/zKxmsx0tW4YXRBzdBJ3hIHjRvj4xulr0mUnDj+V2n6ZJdoWIpVwvNkWFxp9dLr1+HJNIa/5J3etbE3Aa4DVK7ncVl+W3aE/3Lp82+Z3c7EET3t5lphkUJZ7ygQ58hZFB5bq4F6RA53kRB+pcwgm3pzAxrST5ISbCvkw=

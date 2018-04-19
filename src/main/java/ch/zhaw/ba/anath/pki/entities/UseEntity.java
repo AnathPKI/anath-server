@@ -36,15 +36,18 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 /**
+ * The use of a certificate. This entity is serializable in order to be stored in redis when confirm profile is active.
  * @author Rafael Ostertag
  */
 @Entity
 @Table(name = "certificate_uses")
 @Data
 @EqualsAndHashCode(of = {"use"})
-public class UseEntity {
+public class UseEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
     public static final String DEFAULT_USE = "plain";
     @Id
     @Column(name = "certificate_use")

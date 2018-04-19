@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,11 +51,12 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@ActiveProfiles("tests")
 @TestPropertySource(properties = {
         "spring.datasource.platform=h2"
 })
 @Transactional
-public class SecureRepositoryTest {
+public class SecureRepositoryIT {
     @Autowired
     private TestEntityManager testEntityManager;
 
@@ -70,12 +72,15 @@ public class SecureRepositoryTest {
         secureEntity.setKey("the key");
 
         secureRepository.save(secureEntity);
-
-        testEntityManager.clear();
-        testEntityManager.flush();
+        flushAndClear();
 
         final Optional<SecureEntity> one = secureRepository.findOne(secureEntity.getId());
         assertThat(one.isPresent(), is(true));
+    }
+
+    private void flushAndClear() {
+        testEntityManager.flush();
+        testEntityManager.clear();
     }
 
     @Test
@@ -108,7 +113,24 @@ public class SecureRepositoryTest {
 
         secureEntity.setId(null);
         secureRepository.save(secureEntity);
-
         testEntityManager.flush();
+    }
+
+    @Test
+    public void deleteByKey() {
+        final SecureEntity secureEntity = new SecureEntity();
+        secureEntity.setAlgorithm("algo");
+        secureEntity.setData(new byte[]{1, 2});
+        secureEntity.setIV(new byte[]{2, 3});
+        secureEntity.setKey("the key");
+
+        secureRepository.save(secureEntity);
+        flushAndClear();
+
+        secureRepository.deleteByKey("the key");
+        flushAndClear();
+
+        final Optional<SecureEntity> secureEntityOptional = secureRepository.findOneByKey("the key");
+        assertThat(secureEntityOptional.isPresent(), is(false));
     }
 }

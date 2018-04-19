@@ -33,11 +33,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
 /**
- * X.509 Certificate Entity.
+ * X.509 Certificate Entity. This entity is serializable in order to be stored in redis when confirm profile is active.
  *
  * @author Rafael Ostertag
  */
@@ -45,9 +46,11 @@ import java.sql.Timestamp;
 @Table(name = "certificates")
 @Data
 @EqualsAndHashCode(of = "id")
-public class CertificateEntity {
+public class CertificateEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "serial_number", unique = true, nullable = false, precision = 48, scale = 0)
@@ -67,6 +70,12 @@ public class CertificateEntity {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private CertificateStatus status;
+
+    @Column(name = "revocation_reason", nullable = true)
+    private String revocationReason;
+
+    @Column(name = "revocation_time", nullable = true)
+    private Timestamp revocationTime;
 
     @Column(name = "user_id", nullable = false)
     private String userId;

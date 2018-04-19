@@ -31,6 +31,7 @@ package ch.zhaw.ba.anath.pki.repositories;
 
 import ch.zhaw.ba.anath.pki.entities.CertificateEntity;
 import ch.zhaw.ba.anath.pki.entities.CertificateStatus;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
 import java.math.BigInteger;
@@ -52,6 +53,11 @@ public interface CertificateRepository extends Repository<CertificateEntity, Lon
     List<CertificateEntity> findAllByUserId(String userId);
 
     List<CertificateEntity> findAllByUserIdAndStatus(String userId, CertificateStatus status);
+
+    @Query("select ce from CertificateEntity ce where ce.status = 'REVOKED' AND ce.notValidAfter > current_timestamp " +
+            "order by ce" +
+            ".revocationTime asc")
+    List<CertificateEntity> findAllRevoked();
 
     void save(CertificateEntity certificateEntity);
 }

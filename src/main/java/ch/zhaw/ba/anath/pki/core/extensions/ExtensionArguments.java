@@ -27,15 +27,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ch.zhaw.ba.anath.pki.exceptions;
+package ch.zhaw.ba.anath.pki.core.extensions;
 
-import ch.zhaw.ba.anath.AnathException;
+import ch.zhaw.ba.anath.pki.core.CertificateAuthority;
+import lombok.Getter;
+import lombok.Setter;
+import org.bouncycastle.asn1.x500.X500Name;
+
+import java.math.BigInteger;
+import java.security.KeyPair;
 
 /**
+ * Arguments passed to  {@link CertificateAuthorityExtensionProvider}
+ *
  * @author Rafael Ostertag
  */
-public class SigningServiceException extends AnathException {
-    public SigningServiceException(String message) {
-        super(message);
-    }
+@Getter
+@Setter
+public class ExtensionArguments {
+    private KeyPair subjectKeyPair;
+    private X500Name subjectName;
+    private BigInteger subjectSerial;
+
+    private CertificateAuthority certificateAuthority;
 }
