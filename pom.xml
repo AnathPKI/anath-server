@@ -42,7 +42,7 @@
 
     <groupId>ch.zhaw.ba</groupId>
     <artifactId>anath-server</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
