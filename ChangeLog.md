@@ -1,4 +1,4 @@
-SNAPSHOT
+1.0.1
 ===
 
 * Allow unauthenticated access to `/public/**`.
