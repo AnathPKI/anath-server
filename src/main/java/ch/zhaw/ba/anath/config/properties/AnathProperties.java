@@ -134,6 +134,6 @@ public class AnathProperties {
         private int tokenValidity = 60;
         private String mailServer = "localhost";
         private int mailPort = 25;
-        private String sender = "rafi@guengel.ch";
+        private String sender = "anath@localhost.localdomain";
     }
 }

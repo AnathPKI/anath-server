@@ -1,6 +1,8 @@
 SNAPSHOT
 ===
 
+* Changed the default sender address to `anath@localhost.localdomain` for confirmation mails.
+
 1.0.2
 ===
 
