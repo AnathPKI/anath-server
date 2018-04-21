@@ -1,6 +1,8 @@
 SNAPSHOT
 ===
 
+* Use Spring Boot 1.5.12.RELEASE.
+
 1.0.1
 ===
 
