@@ -10,9 +10,8 @@ addons:
       secure: KYQSPp/O4nL3TzN9qpooNfcamHfIlb59oV6EHryMSr6zjoYa4CtcHGEOw2YSshxxdRa5pmYxf4RM59LHCQcvSzuZE+DSxCkn931Zy5YNIjsTgPVypIg2rUmmk1C4LBoEzLqBgBUuTSo0+p8H3Mf3YnCTKO2NEwAXibv1co4oFS6RBdmx6NYSvpTI54yj35Ej+iVFW9JYVTvbnEplpeEM/UNo5pXoNHJXsfQ1aykVLsW+wo9tPWa5YIjh/mWFC5e2ADHvxZKPT+oZhnjXN7g5NLV4gH5d3A6uLi/nEAsrCWgPyMFmbp70DUjZws6Xgt6XtKmYlRZIlsS60wMPXlTnnVTTb2/boTnnHLcMMLvrglE91g+CMs+1rLpV/ToKmEM3qLS2zPfW0DElxdMe1WfL4y9aeOjkuTsa5a7N3arhd25VeSksZGa0FOVrM1B+DDVicgd1ig75FZus0fAeQ/pTzi5NbUicMy6C+kbxmgdypSrMKizIhMet6Wx93+qEUTVvXRiQp1rJ8u5x1b8kHKmMGyXnfPMDUAHU4BbTpZzCDysdMzGuzvA4+o5H3MqPYOt6ZjwJe3DOmp/6cZpy8fgq11m9R2vHN1YO++yjPA4m4jfhk44HHutH68NOYlddt0EKNujL3xydXQxtWoSsYn79ST7egd5/8ROisBAWLlLqXfY=
 
 script:
-   - mvn package -B
-#  - mvn verify -B
-#  - mvn sonar:sonar
+  - mvn verify -B
+  - mvn sonar:sonar
 
 after_deploy:
   - curl -L -o trigger-build 'https://dl.bintray.com/anathpki/anath-buildtools/v1.0.0/trigger-build'
@@ -23,8 +22,7 @@ deploy:
   - provider: script
     script: bash docker/docker_build_dev.sh
     on:
-# FIXME: set back to development when done
-      branch: trigger_demo_build
+      branch: development
     skip_cleanup: true
   - provider: script
     script: bash docker/docker_build_release.sh
