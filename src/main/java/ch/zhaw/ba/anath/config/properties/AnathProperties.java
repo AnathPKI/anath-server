@@ -75,7 +75,7 @@ public class AnathProperties {
         }
 
         /**
-         * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+         * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet (April 2018)
          *
          * <pre>
          *     Configuration to define Argon2 options
@@ -88,7 +88,7 @@ public class AnathProperties {
         public static class Argon2 {
 
             /**
-             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet (April 2018)
              *
              * <pre>
              *     Number of iterations, here adapted to take at least 2 seconds
@@ -107,15 +107,16 @@ public class AnathProperties {
              */
             private int iterations = 40;
             /**
-             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet (April 2018)
              *
              * <pre>
              *     The memory usage of 2^N KiB, here set to recommended value from Issue n°9 of PHC project (128 MB)
+             *     (April 2018)
              * </pre>
              */
             private int memory = 128000;
             /**
-             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+             * Configuration taken from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet (April 2018)
              *
              * <pre>
              *     Parallelism to N threads here set to recommended value from Issue n°9 of PHC project
@@ -133,6 +134,6 @@ public class AnathProperties {
         private int tokenValidity = 60;
         private String mailServer = "localhost";
         private int mailPort = 25;
-        private String sender = "rafi@guengel.ch";
+        private String sender = "anath@localhost.localdomain";
     }
 }

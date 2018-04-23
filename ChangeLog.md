@@ -1,3 +1,10 @@
+1.0.3
+===
+
+* Changed the default sender address to `anath@localhost.localdomain` for confirmation mails.
+* Respect `spring.redis.*` properties.
+* Respect `ch.zhaw.ba.anath.confirmation.mail-port` property.
+
 1.0.2
 ===
 

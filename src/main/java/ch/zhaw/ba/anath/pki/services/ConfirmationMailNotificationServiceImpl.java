@@ -61,6 +61,8 @@ public class ConfirmationMailNotificationServiceImpl implements ConfirmationNoti
         this.anathProperties = anathProperties;
         final Properties defaultSessionProperties = new Properties(System.getProperties());
         defaultSessionProperties.setProperty("mail.smtp.host", anathProperties.getConfirmation().getMailServer());
+        defaultSessionProperties.setProperty("mail.smtp.port",
+                String.valueOf(anathProperties.getConfirmation().getMailPort()));
 
         mailSession = Session.getDefaultInstance(defaultSessionProperties);
 
