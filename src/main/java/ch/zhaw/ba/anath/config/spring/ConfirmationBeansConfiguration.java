@@ -45,14 +45,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Configuration
 public class ConfirmationBeansConfiguration {
     @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory();
-    }
-
-    @Bean
-    public RedisTemplate<ConfirmationKey, CertificateEntity> redisTemplate() {
+    public RedisTemplate<ConfirmationKey, CertificateEntity> redisTemplate(JedisConnectionFactory
+                                                                                       jedisConnectionFactory) {
         RedisTemplate<ConfirmationKey, CertificateEntity> template = new RedisTemplate<>();
-        template.setConnectionFactory(jedisConnectionFactory());
+        template.setConnectionFactory(jedisConnectionFactory);
         return template;
     }
 
