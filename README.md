@@ -11,6 +11,13 @@ Requirements
 * PostgreSQL 9 or later
 * Maven
 * Redis (optional)
+* Docker (optional)
+
+Build Docker Image
+---
+
+    mvn clean verify
+    docker build -t anathpki/server:test .
 
 Start Server in Staging Mode Without Redis
 ---
