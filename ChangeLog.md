@@ -1,4 +1,4 @@
-SNAPSHOT
+1.0.4
 ===
 
 * Make initial admin creation stand out in log.
