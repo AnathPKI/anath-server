@@ -16,7 +16,9 @@ Requirements
 Build Docker Image
 ---
 
-    mvn clean verify
+When docker is installed and running, a docker image can be built locally:
+
+    mvn clean package
     docker build -t anathpki/server:test .
 
 Start Server in Staging Mode Without Redis
