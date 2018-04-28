@@ -11,4 +11,4 @@ JAVA_OPTS=${JAVA_OPTS:-}
 JAR="-jar application.jar"
 
 
-${JAVA} ${JAVA_OPTS} ${JAR}
+exec ${JAVA} ${JAVA_OPTS} ${JAR}

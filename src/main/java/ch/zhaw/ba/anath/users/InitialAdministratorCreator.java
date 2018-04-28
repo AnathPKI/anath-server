@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Rafael Ostertag
+ * Copyright (c) 2018, Rafael Ostertag, Martin Wittwer
  * All rights reserved.
  *
  * Redistribution and  use in  source and binary  forms, with  or without
@@ -55,6 +55,9 @@ import java.util.UUID;
 @Transactional(transactionManager = "userTransactionManager")
 @Slf4j
 public class InitialAdministratorCreator {
+    private static final int ASSUMED_LINE_LENGTH = 78;
+    private static final char NULL_CHARACTER = '\0';
+    private static final char EYE_CATCHER_CHARACTER = '>';
     private final UserRepository userRepository;
     private final ApplicationContext applicationContext;
     private final PasswordEncoder passwordEncoder;
@@ -93,7 +96,15 @@ public class InitialAdministratorCreator {
         initialAdminUser.setPassword(passwordEncoder.encode(initialPassword));
 
         userRepository.save(initialAdminUser);
-        log.info("Created initial administrator with user name '{}' and password '{}'", initialAdminUser.getEmail(),
-                initialPassword);
+
+        final String eyeCatcher = new String(new char[ASSUMED_LINE_LENGTH])
+                .replace(NULL_CHARACTER, EYE_CATCHER_CHARACTER);
+        final String logMessage = "\n" +
+                eyeCatcher +
+                "\n\n" +
+                "Created initial administrator\n\tusername: {}\n\tpassword: {}" +
+                "\n\n" +
+                eyeCatcher;
+        log.info(logMessage, initialAdminUser.getEmail(), initialPassword);
     }
 }
