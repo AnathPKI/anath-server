@@ -104,7 +104,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
                 .antMatchers(HttpMethod.GET, "/webjars/springfox-swagger-ui/**").permitAll()
                 // Allow access to public, used when building a combined server client docker image
-                .antMatchers(HttpMethod.GET, "/public").permitAll()
+                .antMatchers(HttpMethod.GET, "/public/**").permitAll()
                 .anyRequest().authenticated();
         return httpSecurity;
     }
