@@ -1,6 +1,8 @@
 SNAPSHOT
 ===
 
+* Use proper Ant path matcher for `/public` allowing to retrieve all files and subdirectories.
+
 1.0.4
 ===
 
