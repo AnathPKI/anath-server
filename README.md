@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/AnathPKI/anath-server.svg?branch=master)](https://travis-ci.org/AnathPKI/anath-server) [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ch.zhaw.ba%3Aanath-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=ch.zhaw.ba%3Aanath-server)
+
 Anath Reference Implementation
 ===
 
