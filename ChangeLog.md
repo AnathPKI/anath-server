@@ -1,4 +1,4 @@
-SNAPSHOT
+1.0.6
 ===
 
 * Send correct `Content-Type` when clients retrieve PEM encoded certificates and CRL.
