@@ -37,10 +37,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -99,8 +96,12 @@ public class CertificatesController {
     )
     @ResponseStatus(HttpStatus.OK)
     public HttpEntity<String> getPlainPemCertificate(@PathVariable BigInteger serial) {
+        final String filename = serial.toString() + PkixMediaType.X509_CERTIFICATE_FILE_EXTENSION;
         return ResponseEntity
-                .ok(certificateService.getPlainPEMEncodedCertificate(serial));
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, PkixMediaType.APPLICATION_PKIX_CERT_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename))
+                .body(certificateService.getPlainPEMEncodedCertificate(serial));
 
     }
 

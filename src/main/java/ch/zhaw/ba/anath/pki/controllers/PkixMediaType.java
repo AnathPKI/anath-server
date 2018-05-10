@@ -40,6 +40,8 @@ public final class PkixMediaType {
 
     public static final String APPLICATION_PKIX_CRL_VALUE = "application/pkix-crl";
     public static final MediaType APPLICATION_PKIX_CRL = MediaType.valueOf(APPLICATION_PKIX_CRL_VALUE);
+    public static final String X509_CERTIFICATE_FILE_EXTENSION = ".crt";
+    public static final String X509_CERTIFICATE_REVOCATION_LIST_FILE_EXTENSION = ".crl";
 
     private PkixMediaType() {
         // intentionally empty

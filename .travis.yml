@@ -29,6 +29,13 @@ deploy:
     on:
       tags: true
     skip_cleanup: true
+  - provider: releases
+    api_key:
+      secure: "xE2sFLUdFoga2lXPcK6tyF8HIkk0GDwbvWztgrvjco0jkAI/xWeJwh2iYplXHzZneichPQOHsYkwD7iUlnekpBi7uEG9C+uHhKYgC8GHczFjl5JtoQvDpx+EDWdZYN3qrRCB4C1yIJYhjmzryKLm/cXgJWG08fv211L9FJqf0aOd7066rWQL7iR1SVLKqdltb763RYiEWW5kScC2rHTxePLo9/LNCclVkvcUQIjvA32mYOXTwzNERlZnGR6b3pSMoX0PsHf7lwXSodCT/5ZC9T35TX4DfZUZV3tiOJQiqAcpb9v+78GFc2SZgreuybivGYn1upCz8Kg4UjtPeV/sd9cdiZMbUmS+SKVmiT7kt9uSaLCJhHo4JQpe9VeyBUeA2IBTTSsnwlGDf8VcwMwTzdK0wPLJzVTCxwsqE+hz9rNrtOLT8E3/M0jnFmI12TjsNIVHDpso+xkjOrT54vEOHsa3EQuzZaRNdsGBy78SNBDp55rbjtKaHYsYWYUNvCPl2wYCocAApvK+3LcRhqaNsa0AdDdSh4HbyIdu19iARReQWwIx8tSoW6WbYCO5OaDDhvB3nJh628bQ761VCabBKWbTS8R0ZB46pzGJ6oz4Pm6U9rabXcnMvSrti8ygBhLTJTfACJiyIPnL92Kd/mxd3CvUWXt8Wt4XH+FER3VWeeo="
+    file: "target/anath-server*.jar"
+    skip_cleanup: true
+    on:
+      tags: true
 
 cache:
   directories:
