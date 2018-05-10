@@ -58,6 +58,9 @@ public class InitialAdministratorCreator {
     private static final int ASSUMED_LINE_LENGTH = 78;
     private static final char NULL_CHARACTER = '\0';
     private static final char EYE_CATCHER_CHARACTER = '>';
+    public static final String INITIAL_USER_FIRSTNAME = "Initial";
+    public static final String INITIAL_USER_LASTNAME = "Administrator";
+    public static final String INITIAL_USER_USERNAME = "admin@localhost.localdomain";
     private final UserRepository userRepository;
     private final ApplicationContext applicationContext;
     private final PasswordEncoder passwordEncoder;
@@ -88,9 +91,9 @@ public class InitialAdministratorCreator {
     private void createInitialAdministrator() {
         final UserEntity initialAdminUser = new UserEntity();
         initialAdminUser.setAdmin(true);
-        initialAdminUser.setFirstname("Initial");
-        initialAdminUser.setLastname("Administrator");
-        initialAdminUser.setEmail("admin@localhost.localdomain");
+        initialAdminUser.setFirstname(INITIAL_USER_FIRSTNAME);
+        initialAdminUser.setLastname(INITIAL_USER_LASTNAME);
+        initialAdminUser.setEmail(INITIAL_USER_USERNAME);
 
         final String initialPassword = UUID.randomUUID().toString();
         initialAdminUser.setPassword(passwordEncoder.encode(initialPassword));
