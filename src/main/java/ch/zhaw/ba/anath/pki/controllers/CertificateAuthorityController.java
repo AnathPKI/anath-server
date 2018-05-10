@@ -34,10 +34,7 @@ import ch.zhaw.ba.anath.pki.services.RevocationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -70,8 +67,13 @@ public class CertificateAuthorityController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Get the PEM Encoded X.509 CA Certificate", authorizations = {})
     public HttpEntity<String> getCaCertificate() {
-        String caCertificateString = certificateAuthorityService.getCertificate();
-        return ResponseEntity.ok(caCertificateString);
+        final String caCertificateString = certificateAuthorityService.getCertificate();
+        final String filename = "ca" + PkixMediaType.X509_CERTIFICATE_FILE_EXTENSION;
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, PkixMediaType.APPLICATION_PKIX_CERT_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename))
+                .body(caCertificateString);
     }
 
     @GetMapping(
@@ -84,7 +86,12 @@ public class CertificateAuthorityController {
             authorizations = {}
     )
     public HttpEntity<String> getCrl() {
-        return ResponseEntity.ok().body(revocationService.getCrlPemEncoded());
+        final String filename = "crl" + PkixMediaType.X509_CERTIFICATE_REVOCATION_LIST_FILE_EXTENSION;
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_TYPE, PkixMediaType.APPLICATION_PKIX_CRL_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename))
+                .body(revocationService.getCrlPemEncoded());
     }
 
 }

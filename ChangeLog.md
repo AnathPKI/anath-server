@@ -1,6 +1,9 @@
 SNAPSHOT
 ===
 
+* Send correct `Content-Type` when clients retrieve PEM encoded certificates and CRL.
+* Send `Content-Disposition` header when  clients retrieve PEM encoded certificates and CRL.
+
 1.0.5
 ===
 
