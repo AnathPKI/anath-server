@@ -1,19 +1,43 @@
-[![Build Status](https://travis-ci.org/AnathPKI/anath-server.svg?branch=master)](https://travis-ci.org/AnathPKI/anath-server) [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=ch.zhaw.ba%3Aanath-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=ch.zhaw.ba%3Aanath-server)
+[![Build
+Status](https://travis-ci.org/AnathPKI/anath-server.svg?branch=master)](https://travis-ci.org/AnathPKI/anath-server)
+[![Quality
+Gate](https://sonarcloud.io/api/project_badges/measure?project=ch.zhaw.ba%3Aanath-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=ch.zhaw.ba%3Aanath-server)
+[![Latest Release](https://github-basic-badges.herokuapp.com/release/AnathPKI/anath-server.svg)](https://github.com/AnathPKI/anath-server/releases/latest)
 
-Anath Reference Implementation
+Bsc Thesis Reference Implementation
 ===
 
-BSc Thesis reference implementation of a self-service PKI.
+Anath is the BSc Thesis reference implementation of a self-service
+PKI.
+
+Anath features:
+
+* Import of Root CA
+* Creation of self-signed CA certificate
+* User management
+* Configuration templates
+* Certificate creation and revocation
  
+
+Images
+---
+
+JAR files can be found on the [GitHub
+Releases](https://github.com/AnathPKI/anath-server/releases)
+page. Alternatively, the [Demo
+repository](https://github.com/AnathPKI/demo) provides Docker Compose
+files to run Docker images.
+
 
 Requirements
 ---
 
 * Java 1.8
 * PostgreSQL 9 or later
-* Maven
+* Maven (build)
 * Redis (optional)
 * Docker (optional)
+
 
 Build Docker Image
 ---
