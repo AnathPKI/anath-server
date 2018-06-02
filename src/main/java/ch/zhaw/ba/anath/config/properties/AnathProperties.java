@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(AnathProperties.CONFIGURATION_PREFIX)
 @Data
 public class AnathProperties {
-    public static final String CONFIGURATION_PREFIX = "ch.zhaw.ba.anath";
+    public static final String CONFIGURATION_PREFIX = "anath";
 
     /**
      * The secret key used to encrypt data in the {@link ch.zhaw.ba.anath.pki.services.SecureStoreService}.

@@ -1,6 +1,9 @@
 SNAPSHOT
 ===
 
+* Prefix of Spring properties is `anath` instead of `ch.zhaw.ba.anath`.
+* Use Spring Boot 1.5.13.RELEASE.
+
 1.0.6
 ===
 

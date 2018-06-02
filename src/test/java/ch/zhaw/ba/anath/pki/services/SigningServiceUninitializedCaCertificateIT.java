@@ -58,7 +58,7 @@ import java.io.InputStreamReader;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("tests")
 @TestPropertySource(properties = {
-        "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
+        "anath.secret-key=abcdefghijklmnopqrst1234"
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(transactionManager = "pkiTransactionManager")

@@ -53,7 +53,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("tests")
 @TestPropertySource(properties = {
-        "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
+        "anath.secret-key=abcdefghijklmnopqrst1234"
 })
 @Transactional(transactionManager = "pkiTransactionManager")
 public class SecureStoreServiceIT {
