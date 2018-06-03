@@ -1,4 +1,4 @@
-SNAPSHOT
+1.1.0
 ===
 
 * Prefix of Spring properties is `anath` instead of `ch.zhaw.ba.anath`.
