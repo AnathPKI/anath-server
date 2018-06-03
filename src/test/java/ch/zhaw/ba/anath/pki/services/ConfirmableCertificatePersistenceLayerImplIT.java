@@ -67,7 +67,7 @@ import static org.mockito.Mockito.mock;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles({"confirm", "tests"})
 @TestPropertySource(properties = {
-        "ch.zhaw.ba.anath.secret-key=abcdefghijklmnopqrst1234"
+        "anath.secret-key=abcdefghijklmnopqrst1234"
 })
 @Transactional(transactionManager = "pkiTransactionManager")
 public class ConfirmableCertificatePersistenceLayerImplIT {

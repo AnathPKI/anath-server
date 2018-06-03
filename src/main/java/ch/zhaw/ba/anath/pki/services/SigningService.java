@@ -125,7 +125,7 @@ public class SigningService {
     /**
      * Sign a CSR.
      * <p>
-     * The CSR will be signed and tentatively added to a stoer. If the subject of the CSR already exists and the
+     * The CSR will be signed and tentatively added to a store. If the subject of the CSR already exists and the
      * certificate is non-revoked and non-expired, the signing process will be aborted and an exception thrown.
      * <p>
      * Besides exception mentioned below,  {@link ch.zhaw.ba.anath.pki.core.exceptions.PKIException} may be thrown.

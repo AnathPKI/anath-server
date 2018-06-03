@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Service testing a given {@link CertificateEntity} for uniqueness in database.
+ * Service testing a given {@link CertificateEntity} for uniqueness in the database.
  *
  * @author Rafael Ostertag
  */
